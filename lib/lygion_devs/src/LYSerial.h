@@ -1,8 +1,8 @@
-ï»¿/*
- * LYSerial.h
- * LYä¸²è¡Œé€šä¿¡ç¡¬ä»¶æ¥å£å±‚ç¨‹åº
- * æ—¥æœŸ: 2025.12.09
- * ä½œè€…: txl
+/*
+ * lyserial.h
+ * ´®ĞĞÍ¨ĞÅÓ²¼ş½Ó¿Ú²ã³ÌĞò
+ * ÈÕÆÚ: 2026.518
+ * ×÷Õß: txl
  */
 
 #ifndef _LYSERIAL_H
@@ -24,15 +24,15 @@ public:
 	LYSerial(u8 End, u8 Level);
 
 protected:
-	int writeSCS(unsigned char *nDat, int nLen);//è¾“å‡ºnLenå­—èŠ‚
-	int readSCS(unsigned char *nDat, int nLen);//è¾“å…¥nLenå­—èŠ‚
+	int writeSCS(unsigned char *nDat, int nLen);//Êä³önLen×Ö½Ú
+	int readSCS(unsigned char *nDat, int nLen);//ÊäÈënLen×Ö½Ú
 	int readSCS(unsigned char *nDat, int nLen, unsigned long TimeOut);
-	int writeSCS(unsigned char bDat);//è¾“å‡º1å­—èŠ‚
+	int writeSCS(unsigned char bDat);//Êä³ö1×Ö½Ú
 	void rFlushSCS();//
 	void wFlushSCS();//
 public:
-	unsigned long IOTimeOut;//è¾“å…¥è¾“å‡ºè¶…æ—¶
-	HardwareSerial *pSerial;//ä¸²å£æŒ‡é’ˆ
+	unsigned long IOTimeOut;//ÊäÈëÊä³ö³¬Ê±
+	HardwareSerial *pSerial;//´®¿ÚÖ¸Õë
 };
 
 #endif

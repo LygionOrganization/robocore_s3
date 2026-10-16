@@ -1,199 +1,140 @@
-![GitHub top language](https://img.shields.io/github/languages/top/effectsmachine/robot_driver_with_esp32s3_lite) ![GitHub language count](https://img.shields.io/github/languages/count/effectsmachine/robot_driver_with_esp32s3_lite)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/effectsmachine/robot_driver_with_esp32s3_lite)
-![GitHub repo size](https://img.shields.io/github/repo-size/effectsmachine/robot_driver_with_esp32s3_lite) ![GitHub](https://img.shields.io/github/license/effectsmachine/robot_driver_with_esp32s3_lite) ![GitHub last commit](https://img.shields.io/github/last-commit/effectsmachine/robot_driver_with_esp32s3_lite)
+# RoboCore S3
 
-![](./README/EN_01.jpg)
-![](./README/EN_02.jpg)
+**Open-source ESP32-S3 firmware and examples for robot control.**
 
-# Quick Start Guide
-This guide is for the **Robot Driver with ESP32S3 Lite** (referred to as **the Driver Board**).
+**English** | [简体中文](README.zh-CN.md)
 
-It is designed for first-time users and will help you get started quickly:
+[English Wiki](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/) · [中文 Wiki](https://wiki.lygion.ai/reference/bus-devices/robocore-s3/) · [JSON API](docs/ROBOCORE_API_EN.md) · [Arduino examples](arduino_example/)
 
-- Learn the basics of the built-in Web App
-- Control Feetech bus servos (STS / HLS / SMS / SCS, via TTL single-wire or RS485) using example routines
-- Extend later to LYgion hub motors and joint actuators (via CAN bus)
+## What is this project?
 
-## Product Overview
+RoboCore S3 connects your robot's bus devices to a browser or a host computer. This repository contains the complete controller firmware, a bilingual web console, independent Arduino sketches, and Python clients.
 
-- **Model Name:** Robot Driver with ESP32S3 Lite
-- **Applications:**
-    - Works as a standalone robot controller
-    - Controls bus devices such as servos, hub motors, and actuators (built-in TTL, RS485, CAN)
-    - Acts as a sub-controller for high-frequency interpolation tasks
-    - Cooperates with a Raspberry Pi, Jetson, or PC to build a layered “big brain + small brain” control system
+Use it as a standalone controller for device setup and task execution, or as the low-level controller in a PC/SBC-based robot. The host handles perception, planning and application logic; RoboCore S3 sends device commands and returns feedback through human-readable JSON.
 
----
+The [`robocore_s3`](https://github.com/LygionOrganization/robocore_s3) firmware project supports **both RoboCore S3 and Robot Driver with ESP32S3 Lite**. This guide focuses on RoboCore S3, while Lite users can use the same firmware and the examples applicable to their hardware.
 
-## Web Application
+For Lite power ratings, connectors and peripherals, follow the [Lite Wiki](https://wiki.lygion.ai/en/reference/bus-devices/robot-driver-with-esp32s3-lite/). The hardware specifications below apply to RoboCore S3; do not apply its 5–48V input range to Lite. Lite has no onboard QMI8658A, and the firmware continues running when the IMU is absent.
 
-The Driver Board comes pre-loaded with a Web App.
+## What you can do
 
-No extra software is needed—just connect with a smartphone or PC browser to access the control panel.
+| Capability | Use |
+| --- | --- |
+| Browser control | Discover bus IDs, configure devices and read feedback without writing code |
+| Bus device control | Work with SCS, HLS, STS and SMS servos, TTL Node, TTL Stepper Driver and TTL Encoder E02 |
+| Host integration | Send JSON over HTTP, WebSocket or native USB CDC |
+| Motion sensing | Read the onboard QMI8658A accelerometer and gyroscope |
+| Local interaction | Add User Interface Module (A) for buttons, buzzer alerts and OLED display |
+| Custom development | Build the complete firmware with PlatformIO or start from a focused Arduino example |
 
----
+The main web console works offline, opens in English by default and offers a **中文** button in the upper-right corner. Advanced mission and multi-axis tools remain available through the classic console at `/legacy`.
 
-## Power Supply Guide
+## Start with the web console
 
-- **Peripheral Power**
-    
-    Servos, hub motors, and actuators require power through the **DC jack or XT30 (2+2)**.
-    
-    These peripherals will only operate when the Driver Board’s **power switch is ON**.
-    
-- **Operating Voltage**
-    
-    Match the input voltage with your device (e.g., use a 12V supply for 12V servos).
-    
-    The supply rail is directly connected to control ports and supports brief high-current peaks.
-    
-- **Board Functions**
-    
-    Onboard features such as the OLED display, buzzer, joystick switch, and Wi-Fi run with **USB Type-C power only**.
-    
-- **USB Power Only**
-    
-    Plugging in Type-C automatically powers the board, regardless of the switch position
-    
-    (the switch only controls peripheral power).
-    
+With the complete firmware installed:
 
----
+1. Connect a bus device and select a power supply suitable for that device. Powered bus outputs carry the board's input voltage.
+2. Join the board's default Wi-Fi network: **`Robot`**, password **`12345678`**. If it has been configured before, use its current network settings.
+3. Open **[http://192.168.4.1](http://192.168.4.1)** in a browser. No internet connection is required.
+4. Open **Bus devices**, match the bus baud rate and scan IDs. Select the appropriate device panel and read its status before commanding motion.
 
-## Startup and Web App Access
+See the [quick-start guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/quickstart/) for the full walkthrough, or [firmware recovery](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/firmware/) to restore the complete firmware.
 
-1. **Power On**
-    - When using DC / XT30 power, flip the switch to **ON**.
-    - Indicators:
-        - Buzzer beeps once (sound may be faint if the hole is blocked).
-        - OLED shows AP/STA IP information (STA IP will be blank if Wi-Fi is not yet configured).
-2. **Connect to Hotspot (AP mode)**
-    - On startup, the Driver Board creates a Wi-Fi hotspot:
-        - SSID: `Robot`
-        - Password: `12345678`
-    - For multi-device setups, change the default SSID and password.
-    - Even if your phone/PC shows “No Internet,” stay connected.
-3. **Open the Control Page**
-    - Launch Chrome, Edge, Safari, or Firefox.
-    - Enter: `192.168.4.1`
-    - The Web control interface will appear.
-        
-        ![](./README/1.png)
-        
-4. **Connect to Existing Wi-Fi (STA mode)**
-    - Open **Wi-Fi Setting** in the Web App.
-    - Enter your router SSID and password.
-    - On success, the OLED shows the assigned IP next boot.
-    - From the same LAN, open this IP in your browser to access the Web App.
+## Control it from a PC or SBC
 
----
+The same JSON commands can be sent through HTTP, WebSocket or USB CDC. For example, this read-only command scans IDs 0–20:
 
-## Web App Components
+```json
+{"T":700,"first":0,"last":20}
+```
 
-Below are the main modules inside the Web App.
+The included Python client handles request IDs and waits for a matching result. From the repository root:
 
-### Device Info
+```sh
+python -m pip install requests websocket-client pyserial
+```
 
-![](./README/2.png)
+```python
+from python_example.robocore.client import request
 
-- Displays real-time system information.
-- Communication uses **WebSocket** (a low-latency protocol). `Uptime` increases every second if the system is running normally.
-- **Current Baud Rate** shows the communication rate between the ESP32S3 and servos/motors (default 1 Mbps).
-    - All devices on the same bus must share the same baud rate.
-    - You can switch baud rate using preset buttons or custom JSON commands.
-- **MAC** shows the unique ESP32S3 network address (used in ESP-NOW communication).
+result = request(
+    'http',
+    'http://192.168.4.1',
+    {'T': 700, 'first': 0, 'last': 20},
+)
+print(result)
+```
 
----
+Use `ws` with `ws://192.168.4.1/ws`, or `usb` with your actual serial port, to select another transport. USB CDC uses the board's native **Type-C USB** connector.
 
-### Wi-Fi Settings
- **Wi-Fi Modes of ESP32-S3**
+Python is only one option. Use the [JSON command reference](docs/ROBOCORE_API_EN.md) to write clients in C++, C#, JavaScript or another language, including with AI-assisted development.
 
-- **AP Mode (Access Point)** – The board acts as a Wi-Fi hotspot (default SSID `Robot`). Devices connect directly, and the board is accessed at `192.168.4.1`.
-- **STA Mode (Station)** – The board joins your existing Wi-Fi, and you access it via the router-assigned IP.
-- **Mixed Mode** – Both AP + STA run at the same time (default firmware behavior).
+**Command behavior:** only the latest pending command is retained. HTTP `202` means accepted, not executed. Wait for the matching result when changing settings, and read device state before retrying a timed-out write. **Stop loop (`T=0`) exits a mission loop; it is not a motor emergency stop.**
 
-In the Web App:
+## Windows firmware download tool
 
-![](./README/3.png)
+The [download tool folder](download_tool/RoboCore_S3_Download_Tool/) includes matching firmware images and bilingual instructions for RoboCore S3 and Lite. Extract the complete package and run `Start_Download_Tool.bat`; choose the board’s COM port before starting. Maintainers can rebuild the package with `python tools/package_download_tool.py`.
 
-- **AP_SSID / AP_PWD** – Configure the hotspot name & password (defaults: `Robot` / `12345678`).
-- **STA_STATUS** – Shows the connected Wi-Fi SSID and IP (blank if not connected).
-- **STA_SSID / STA_PWD** – Enter your router Wi-Fi credentials, then press **SET WIFI**.
+## Build your own firmware
 
----
+### Complete firmware — PlatformIO
 
-### Servo Control
+Open this repository in VS Code with PlatformIO. Keep the supplied `platformio.ini`, `src/`, `include/`, `lib/` and `tools/` together; the project pins its platform and library versions.
 
-![](./README/4.png)
+```sh
+pio run
+```
 
-Supports Feetech servos (STS, SMS, HLS, SCS).
+To change the web console, edit `web/index.html`, regenerate the embedded page, then rebuild:
 
-- **ID** – Target servo ID. `254` is the broadcast ID (affects all connected servos—recommended only when configuring a single servo).
-- **Pos** – Target position (absolute steps).
-- **Spd** – Speed (steps/s, `0` = max).
-- **Acc** – Acceleration (steps/s², `0` = max).
-- **Release** – Disable torque, allowing free manual movement.
-- **Torque** – Enable torque, holding the servo at its target.
-- **Feedback** – Reads current servo position into the Pos box.
-- **Calibration** – Sets current position as servo midpoint.
-- **Add / Action** – Build or send commands (automatically generates JSON for scripts).
-- **Change ID** – Assigns a new ID.
-- **Delay(ms)** – Insert time gaps between commands (important for scripted actions).
+```sh
+python tools/embed_web.py
+pio run
+```
 
-![](./README/5.png)
+Build output is under `.pio/build/esp32-s3-devkitc-1-n8r8/`. For toolchain details and verification scope, see [validation notes](docs/ROBOCORE_VALIDATION.md).
 
-![](./README/6.png)
+### Focused examples — Arduino IDE
 
-HLS and SCS servo panels provide similar controls, with model-specific features such as **Current Limit** (HLS) and **Time (ms)** (SCS).
+The [`arduino_example/`](arduino_example/) directory contains 18 standalone sketches covering bus devices, CAN, external RS485, the IMU, User Interface Module (A), and JSON transports.
 
----
+Start with the [English Arduino guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/arduino/) or the [local setup and dependency list](arduino_example/README.md). The checked configuration uses **ESP32S3 Dev Module**, **8 MB flash**, **OPI PSRAM**, **USB-OTG (TinyUSB)** and **USB CDC On Boot enabled**.
 
-### Automation Scripts
+**Uploading a standalone sketch replaces the complete firmware and its web console.** The HTTP/WebSocket/USB teaching sketches use their own minimal protocol; they do not implement the full controller's JSON command set.
 
-![](./README/7.png)
+## Hardware at a glance
 
-Enables multi-servo choreography.
+| Resource | RoboCore S3 |
+| --- | --- |
+| Controller | ESP32-S3-WROOM-1U-MCR8N8; 8 MB flash, 8 MB PSRAM |
+| Power input | 5–48V through the XT30 power contacts of CAN 2+2 |
+| Servo/device bus | 5264-3P single-wire TTL and XH2.54-4P RS485 share IO4 TX / IO5 RX |
+| External communication | CAN/RS485 switch selects CAN 2+2 or GH1.25-5P; both use IO13 RX / IO14 TX |
+| Board interconnect | GH1.25-3P for board-to-board TTL communication and power decoupling |
+| USB | Type-C UART for serial download/debugging; Type-C USB for native USB communication |
+| IMU | Onboard QMI8658A on IO6 SDA / IO7 SCL |
+| Expansion | PH1.25-10P for User Interface Module (A); OLED, buttons and buzzer are on the external module |
+| Dimensions | 47 × 52 mm; four Ø3 mm mounting holes, 40 × 45 mm center spacing |
 
-- Use **Add** buttons in Servo Control to insert JSON commands and delays into the script editor.
-- Scripts can be bound to the onboard joystick:
-    - `Up`, `Down`, `Left`, `Right` → saved as `up.mission`, `down.mission`, etc.
-    - Triggered when the joystick is pressed in those directions.
-- **On Boot** – Saves as `boot_user.mission`, auto-runs on every boot in a loop (multithreaded, does not block other functions).
-- **STOP MISSION** – Stops the currently running mission.
-- **Delete Mission** – Removes stored tasks.
+**Match the supply voltage to every powered bus device.** A 48V-capable controller does not make a low-voltage servo compatible with 48V. USB alone does not provide actuator power.
 
-![](./README/8.png)
+External RS485 on IO13/IO14 is independent of the servo bus on IO4/IO5. Servo RS485 and TTL share one UART. The CAN/RS485 switch selects the hardware path; your firmware must use the matching protocol. See the [hardware guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/hardware/) before wiring.
 
-Example: Script four servos with sequential moves by inserting JSON lines separated by line breaks.
+## Repository guide
 
----
+| Path | Contents |
+| --- | --- |
+| [`src/`](src/) | Complete firmware and generated web page |
+| [`web/`](web/) | Editable bilingual console |
+| [`arduino_example/`](arduino_example/) | Standalone Arduino sketches |
+| [`python_example/robocore/`](python_example/robocore/) | HTTP, WebSocket and USB CDC client |
+| [`lib/`](lib/) | Local device libraries and support code |
+| [`docs/`](docs/) | JSON references, development guidance and Wiki sources |
+| [`tools/`](tools/) | Web embedding, example checks and packaging |
+| [`test/`](test/) | Host regression checks and web-console checks |
 
-### JSON Command Interface
+For AI-assisted projects, provide the [development guide](docs/ROBOCORE_AI_AGENTS.md), JSON reference, device models, IDs, baud rate and intended behavior. Begin with a read-only feedback test.
 
-![](./README/9.png)
+## License
 
-JSON is the universal control method of the Driver Board.
-
-Every Web App action translates into JSON commands, making it easy to debug, extend, and integrate with external programs.
-
-- Use the **JSON Interface** text box to enter custom JSON commands.
-- Press **SEND** to execute immediately (no upload needed).
-- A command library is provided—clicking an entry auto-fills the text box for quick editing.
-
-With JSON, you can:
-
-- Control servos and motors
-- Configure Wi-Fi or ESP-NOW
-- Manage the OLED display and buzzer
-- Interact with the file system
-- Customize board settings
-
-Because JSON is both machine-friendly and human-readable, it’s ideal for scripting and automation.
-
----
-
-## Summary
-
-The **Robot Driver with ESP32S3 Lite** is a versatile controller for robotics projects—from beginner experimentation to advanced multi-actuator systems. Its browser-based Web App provides immediate access without extra software, while JSON commands and automation scripts unlock deep customization.
-
-Start simple with Wi-Fi setup and servo tests, then expand into complex robot control using JSON scripting and integration with your own software.
+This project is licensed under [GNU AGPL v3](LICENSE). Bundled third-party components retain their respective licenses.

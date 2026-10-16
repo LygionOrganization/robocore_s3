@@ -34,6 +34,7 @@ class Wireless{
         int getRSSI_STA();
         String getAPIP();
         String getSTAIP();
+        String getSTAState();
 
         void printKnownMacs();
         bool isKnownMac(const uint8_t *mac);
@@ -54,6 +55,8 @@ class Wireless{
         void addMacToPeerString(String macInput);
         void addMacToPeer(uint8_t mac[6]);
     private:
+        bool staConfigured = false;
+        unsigned long staStarted = 0;
         std::vector<MacAddress> knownMacs;
 };
 

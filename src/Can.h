@@ -1,3 +1,4 @@
+#include "UsbOutput.h"
 #include <SPI.h>
 #include <ESP32-TWAI-CAN.hpp>
 
@@ -28,7 +29,7 @@ bool sendJsonAsCAN(const JsonDocument &docData) {
     frame.extd = isExtended;
     frame.data_length_code = dataArray.size();
     if (frame.data_length_code > 8) {
-        Serial.println("[ERROR] data over 8");
+        usbOutput.println("[ERROR] data over 8");
         return false;
     }
 
@@ -39,24 +40,24 @@ bool sendJsonAsCAN(const JsonDocument &docData) {
     // ESP-IDF API send
     esp_err_t result = twai_transmit(&frame, pdMS_TO_TICKS(100)); // overtime 100ms
     if (result != ESP_OK) {
-        Serial.printf("[ERROR] CAN send failed, code: %d\n", result);
+        usbOutput.printf("[ERROR] CAN send failed, code: %d\n", result);
         return false;
     }
 
-    Serial.print("[SEND] ID: 0x");
-    Serial.print(canId, HEX);
-    Serial.print(" Data: ");
+    usbOutput.print("[SEND] ID: 0x");
+    usbOutput.print(canId, HEX);
+    usbOutput.print(" Data: ");
     for (uint8_t i = 0; i < frame.data_length_code; i++) {
-        Serial.print(frame.data[i], HEX);
-        Serial.print(" ");
+        usbOutput.print(frame.data[i], HEX);
+        usbOutput.print(" ");
     }
-    Serial.println();
+    usbOutput.println();
     return true;
 }
 
 bool sendCANFrame(uint32_t canId, bool isExtended, const uint8_t *data, uint8_t len) {
     if (len > 8) {
-        Serial.println("[ERROR] data length > 8");
+        usbOutput.println("[ERROR] data length > 8");
         return false;
     }
 
@@ -71,17 +72,17 @@ bool sendCANFrame(uint32_t canId, bool isExtended, const uint8_t *data, uint8_t 
 
     esp_err_t result = twai_transmit(&frame, pdMS_TO_TICKS(100));
     if (result != ESP_OK) {
-        Serial.printf("[ERROR] CAN send failed, code: %d\n", result);
+        usbOutput.printf("[ERROR] CAN send failed, code: %d\n", result);
         return false;
     }
 
-    Serial.print("[SEND] ID: 0x");
-    Serial.print(canId, HEX);
-    Serial.print(" Data: ");
+    usbOutput.print("[SEND] ID: 0x");
+    usbOutput.print(canId, HEX);
+    usbOutput.print(" Data: ");
     for (uint8_t i = 0; i < len; i++) {
-        Serial.printf("%02X ", frame.data[i]);
+        usbOutput.printf("%02X ", frame.data[i]);
     }
-    Serial.println();
+    usbOutput.println();
 
     return true;
 }
@@ -123,7 +124,7 @@ void canTestMachine() {
   // twai_message_t rxFrame;
   if (twai_receive(&rxFrame, pdMS_TO_TICKS(500)) == ESP_OK) {
       if (rxFrame.identifier == RESP_ID && rxFrame.data[0] == 0xAA) {
-          Serial.println("[A] Got response 0xAA, buzzing!");
+          usbOutput.println("[A] Got response 0xAA, buzzing!");
           buttonBuzzer();
       }
   }

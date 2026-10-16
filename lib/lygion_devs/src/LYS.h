@@ -1,7 +1,7 @@
 ﻿/*
- * LYS.h
- * LYS串行通信层协议程序
- * 日期: 2025.12.09
+ * lys.h
+ * 串行通信层协议程序
+ * 日期: 2026.5.18
  * 作者: txl
  */
 
@@ -38,8 +38,9 @@ public:
 	int syncReadRxPacketToWrod(u8 negBit=0);//解码两个字节，negBit为方向为，negBit=0表示无方向
 	void syncReadBegin(u8 IDN, u8 rxLen, u32 TimeOut);//同步读开始
 	void syncReadEnd();//同步读结束
-	int Reset(u8 ID);//重置舵机状态
-	int Recal(u8 ID);//重置舵机中位
+	int Reset(u8 ID);//重置状态
+	int Recal(u8 ID);//重置中位
+	int Recal(u8 ID, u16 ofs);//重置任意位置
 	u8 getState() { return u8Status; }
 	u8 getLastError() { return u8Error; }
 public:

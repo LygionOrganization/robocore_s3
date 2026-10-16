@@ -1,7 +1,9 @@
 #include "Config.h"
 #include "jointsCtrl.h"
+#include "BusGuard.h"
 
 void JointsCtrl::init(int baud) {
+    BusGuard busGuard;
     baudrate = baud;
 #ifndef TTL_ADAPTER_MACHINE
     Serial1.begin(baud, SERIAL_8N1, BUS_SERVO_RX, BUS_SERVO_TX);
@@ -26,12 +28,14 @@ void JointsCtrl::init(int baud) {
 }
 
 void JointsCtrl::setBaudRate(int baud) {
+    BusGuard busGuard;
     baudrate = baud;
     Serial1.updateBaudRate(baud);
 
 }
 
 bool JointsCtrl::setJointType(u_int8_t type) {
+    BusGuard busGuard;
     switch (type) {
         case JOINT_TYPE_SC:
             jointType = type;
@@ -50,6 +54,7 @@ bool JointsCtrl::setJointType(u_int8_t type) {
 }
 
 bool JointsCtrl::setEncoderStepRange(u_int16_t steps, double angle) {
+    BusGuard busGuard;
     if (steps < 512) {
         return false;
     }
@@ -72,6 +77,7 @@ bool JointsCtrl::setEncoderStepRange(u_int16_t steps, double angle) {
 }
 
 int* JointsCtrl::singleFeedBack(u_int8_t id) {
+    BusGuard busGuard;
     // Get feedback from servo
     // [0]ping status
     // [1]position
@@ -135,6 +141,7 @@ int* JointsCtrl::singleFeedBack(u_int8_t id) {
 }
 
 int* JointsCtrl::feedbackSTSM(u_int8_t id) {
+    BusGuard busGuard;
     // Get feedback from servo
     // [0]ping status
     // [1]position
@@ -164,6 +171,7 @@ int* JointsCtrl::feedbackSTSM(u_int8_t id) {
 }
 
 int* JointsCtrl::feedbackHL(u_int8_t id) {
+    BusGuard busGuard;
     // Get feedback from servo
     // [0]ping status
     // [1]position
@@ -193,6 +201,7 @@ int* JointsCtrl::feedbackHL(u_int8_t id) {
 }
 
 int* JointsCtrl::feedbackSC(u_int8_t id) {
+    BusGuard busGuard;
     // Get feedback from servo
     // [0]ping status
     // [1]position
@@ -223,6 +232,7 @@ int* JointsCtrl::feedbackSC(u_int8_t id) {
 
 
 bool JointsCtrl::pingSTSM(u_int8_t id) {
+    BusGuard busGuard;
     smst.Ping(id);
     if (smst.getLastError()) {
         return false;
@@ -232,6 +242,7 @@ bool JointsCtrl::pingSTSM(u_int8_t id) {
 }
 
 bool JointsCtrl::pingHL(u_int8_t id) {
+    BusGuard busGuard;
     hl.Ping(id);
     if (hl.getLastError()) {
         return false;
@@ -241,6 +252,7 @@ bool JointsCtrl::pingHL(u_int8_t id) {
 }
 
 bool JointsCtrl::pingSC(u_int8_t id) {
+    BusGuard busGuard;
     sc.Ping(id);
     if (sc.getLastError()) {
         return false;
@@ -250,6 +262,7 @@ bool JointsCtrl::pingSC(u_int8_t id) {
 }
 
 bool JointsCtrl::ping(u_int8_t id) {
+    BusGuard busGuard;
     switch (jointType) {
         case JOINT_TYPE_SC:
             pingSC(id);
@@ -266,39 +279,37 @@ bool JointsCtrl::ping(u_int8_t id) {
 
 
 bool JointsCtrl::changeIDSTSM(u_int8_t old_id, u_int8_t new_id) {
-    if (!pingSTSM(old_id)) {
-        return false;
-    } else {
-        smst.unLockEprom(old_id);
-        smst.writeByte(old_id, SMS_STS_ID, new_id);
-        smst.LockEprom(new_id);
-        return true;
-    }
+    BusGuard busGuard;
+    if (old_id > 253 || new_id > 253 || old_id == new_id) return false;
+    if (smst.Ping(new_id) == new_id || smst.Ping(old_id) != old_id) return false;
+    if (smst.unLockEprom(old_id) != 1 || smst.getState() != 0) return false;
+    smst.writeByte(old_id, SMS_STS_ID, new_id);
+    if (smst.Ping(new_id) != new_id) { smst.LockEprom(old_id); return false; }
+    return smst.LockEprom(new_id) == 1 && smst.getState() == 0;
 }
 
 bool JointsCtrl::changeIDHL(u_int8_t old_id, u_int8_t new_id) {
-    if (!pingHL(old_id)) {
-        return false;
-    } else {
-        hl.unLockEprom(old_id);
-        hl.writeByte(old_id, SMS_STS_ID, new_id); // change address
-        hl.LockEprom(new_id);
-        return true;
-    }
+    BusGuard busGuard;
+    if (old_id > 253 || new_id > 253 || old_id == new_id) return false;
+    if (hl.Ping(new_id) == new_id || hl.Ping(old_id) != old_id) return false;
+    if (hl.unLockEprom(old_id) != 1 || hl.getState() != 0) return false;
+    hl.writeByte(old_id, SMS_STS_ID, new_id);
+    if (hl.Ping(new_id) != new_id) { hl.LockEprom(old_id); return false; }
+    return hl.LockEprom(new_id) == 1 && hl.getState() == 0;
 }
 
 bool JointsCtrl::changeIDSC(u_int8_t old_id, u_int8_t new_id) {
-    if (!pingSC(old_id)) {
-        return false;
-    } else {
-        sc.unLockEprom(old_id);
-        sc.writeByte(old_id, SCSCL_ID, new_id);  // change address
-        sc.LockEprom(new_id);
-        return true;
-    }
+    BusGuard busGuard;
+    if (old_id > 253 || new_id > 253 || old_id == new_id) return false;
+    if (sc.Ping(new_id) == new_id || sc.Ping(old_id) != old_id) return false;
+    if (sc.unLockEprom(old_id) != 1 || sc.getState() != 0) return false;
+    sc.writeByte(old_id, SCSCL_ID, new_id);
+    if (sc.Ping(new_id) != new_id) { sc.LockEprom(old_id); return false; }
+    return sc.LockEprom(new_id) == 1 && sc.getState() == 0;
 }
 
 bool JointsCtrl::changeID(u_int8_t old_id, u_int8_t new_id) {
+    BusGuard busGuard;
     switch (jointType) {
         case JOINT_TYPE_SC:
             if (!pingSC(old_id)) {
@@ -330,6 +341,7 @@ bool JointsCtrl::changeID(u_int8_t old_id, u_int8_t new_id) {
 
 
 bool JointsCtrl::setMiddleSTSM(u_int8_t id) {
+    BusGuard busGuard;
     if (!pingSTSM(id)) {
         return false;
     } else {
@@ -339,6 +351,7 @@ bool JointsCtrl::setMiddleSTSM(u_int8_t id) {
 }
 
 bool JointsCtrl::setMiddleHL(u_int8_t id) {
+    BusGuard busGuard;
     if (!ping(id)) {
         return false;
     } else {
@@ -348,6 +361,7 @@ bool JointsCtrl::setMiddleHL(u_int8_t id) {
 }
 
 bool JointsCtrl::setMiddle(u_int8_t id) {
+    BusGuard busGuard;
     switch (jointType) {
         case JOINT_TYPE_SC:
             return false;
@@ -364,6 +378,7 @@ bool JointsCtrl::setMiddle(u_int8_t id) {
 
 
 void JointsCtrl::moveMiddle(u_int8_t id) {
+    BusGuard busGuard;
     switch (jointType) {
         case JOINT_TYPE_SC:
             sc.WritePos(id, middleSteps, 0, 300);
@@ -379,6 +394,7 @@ void JointsCtrl::moveMiddle(u_int8_t id) {
 
 
 void JointsCtrl::torqueLockSTSM(u_int8_t id, bool state) {
+    BusGuard busGuard;
     if (state) {
         smst.EnableTorque(id, 1);
     } else {
@@ -387,6 +403,7 @@ void JointsCtrl::torqueLockSTSM(u_int8_t id, bool state) {
 }
 
 void JointsCtrl::torqueLockHL(u_int8_t id, bool state) {
+    BusGuard busGuard;
     if (state) {
         hl.EnableTorque(id, 1);
     } else {
@@ -395,6 +412,7 @@ void JointsCtrl::torqueLockHL(u_int8_t id, bool state) {
 }
 
 void JointsCtrl::torqueLockSC(u_int8_t id, bool state) {
+    BusGuard busGuard;
     if (state) {
         sc.EnableTorque(id, 1);
     } else {
@@ -403,6 +421,7 @@ void JointsCtrl::torqueLockSC(u_int8_t id, bool state) {
 }
 
 void JointsCtrl::torqueLock(u_int8_t id, bool state) {
+    BusGuard busGuard;
     switch (jointType) {
         case JOINT_TYPE_SC:
             torqueLockSC(id, state);
@@ -417,6 +436,7 @@ void JointsCtrl::torqueLock(u_int8_t id, bool state) {
 }
 
 void JointsCtrl::stepsCtrlSC(u_int8_t id, int pos, int time, int speed, bool move_trigger) {
+    BusGuard busGuard;
     if (move_trigger) {
         sc.WritePos(id, pos, time, speed);
     } else {
@@ -425,6 +445,7 @@ void JointsCtrl::stepsCtrlSC(u_int8_t id, int pos, int time, int speed, bool mov
 }
 
 void JointsCtrl::stepsCtrlSMST(u_int8_t id, int pos, int speed, int acc, bool move_trigger) {
+    BusGuard busGuard;
     if (move_trigger) {
         smst.WritePosEx(id, pos, speed, acc);
     } else {
@@ -433,6 +454,7 @@ void JointsCtrl::stepsCtrlSMST(u_int8_t id, int pos, int speed, int acc, bool mo
 }
 
 void JointsCtrl::stepsCtrlHL(u_int8_t id, int pos, int speed, int acc, int currt_limit, bool move_trigger) {
+    BusGuard busGuard;
     if (move_trigger) {
         hl.WritePosEx(id, pos, speed, acc, currt_limit);
     } else {
@@ -441,6 +463,7 @@ void JointsCtrl::stepsCtrlHL(u_int8_t id, int pos, int speed, int acc, int currt
 }
 
 void JointsCtrl::jsonSyncCtrlSMST(JsonArrayConst id, int idn, JsonArrayConst pos, JsonArrayConst spd, JsonArrayConst acc) {
+    BusGuard busGuard;
     uint8_t  id_arr[idn];
     int16_t  pos_arr[idn];
     uint16_t spd_arr[idn];
@@ -455,6 +478,7 @@ void JointsCtrl::jsonSyncCtrlSMST(JsonArrayConst id, int idn, JsonArrayConst pos
 }
 
 void JointsCtrl::jsonSyncSimpleCtrlSMST(JsonArrayConst id, int idn, JsonArrayConst pos) {
+    BusGuard busGuard;
     uint8_t  id_arr[idn];
     int16_t  pos_arr[idn];
     uint16_t spd_arr[idn];
@@ -469,6 +493,7 @@ void JointsCtrl::jsonSyncSimpleCtrlSMST(JsonArrayConst id, int idn, JsonArrayCon
 }
 
 void JointsCtrl::jsonSyncCtrlHL(JsonArrayConst id, int idn, JsonArrayConst pos, JsonArrayConst spd, JsonArrayConst acc, JsonArrayConst tor) {
+    BusGuard busGuard;
     uint8_t  id_arr[idn];
     int16_t  pos_arr[idn];
     uint16_t spd_arr[idn];
@@ -485,6 +510,7 @@ void JointsCtrl::jsonSyncCtrlHL(JsonArrayConst id, int idn, JsonArrayConst pos, 
 }
 
 void JointsCtrl::jsonSyncSimpleCtrlHL(JsonArrayConst id, int idn, JsonArrayConst pos, JsonArrayConst tor) {
+    BusGuard busGuard;
     uint8_t  id_arr[idn];
     int16_t  pos_arr[idn];
     uint16_t spd_arr[idn];
@@ -495,12 +521,13 @@ void JointsCtrl::jsonSyncSimpleCtrlHL(JsonArrayConst id, int idn, JsonArrayConst
         pos_arr[i] = pos[i].as<int16_t>();
         spd_arr[i] = 60;
         acc_arr[i] = 50;
-        tor_arr[i] = 300;
+        tor_arr[i] = tor[i].as<uint16_t>();
     }
     hl.SyncWritePosEx(id_arr, idn, pos_arr, spd_arr, acc_arr, tor_arr);
 }
 
 void JointsCtrl::jsonSyncCtrlSC(JsonArrayConst id, int idn, JsonArrayConst pos, JsonArrayConst spd) {
+    BusGuard busGuard;
     uint8_t  id_arr[idn];
     uint16_t  pos_arr[idn];
     uint16_t spd_arr[idn];
@@ -513,6 +540,7 @@ void JointsCtrl::jsonSyncCtrlSC(JsonArrayConst id, int idn, JsonArrayConst pos, 
 }
 
 void JointsCtrl::jsonSyncSimpleCtrlSC(JsonArrayConst id, int idn, JsonArrayConst pos) {
+    BusGuard busGuard;
     uint8_t  id_arr[idn];
     uint16_t  pos_arr[idn];
     uint16_t spd_arr[idn];
@@ -525,10 +553,12 @@ void JointsCtrl::jsonSyncSimpleCtrlSC(JsonArrayConst id, int idn, JsonArrayConst
 }
 
 double JointsCtrl::mapDouble(double x, double in_min, double in_max, double out_min, double out_max) {
+    BusGuard busGuard;
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 int JointsCtrl::angleCtrlSC(u_int8_t id, int mid_pos, double angle, double speed, bool move_trigger) {
+    BusGuard busGuard;
     int goal_pos = mid_pos + round(mapDouble(angle, 0, jointRangeAngle, 0, jointSteps));
     int goal_spd = round(mapDouble(speed, 0, jointRangeAngle, 0, jointSteps));
     if (move_trigger) {
@@ -540,6 +570,7 @@ int JointsCtrl::angleCtrlSC(u_int8_t id, int mid_pos, double angle, double speed
 }
 
 int JointsCtrl::angleCtrlSMST(u_int8_t id, double angle, double speed, double acc, bool move_trigger) {
+    BusGuard busGuard;
     int goal_pos = middleSteps + round(mapDouble(angle, 0, jointRangeAngle, 0, jointSteps));
     int goal_spd = round(mapDouble(speed, 0, jointRangeAngle, 0, jointSteps));
     int goal_acc = round(mapDouble(acc, 0, jointRangeAngle, 0, jointSteps));
@@ -552,6 +583,7 @@ int JointsCtrl::angleCtrlSMST(u_int8_t id, double angle, double speed, double ac
 }
 
 int JointsCtrl::angleCtrlHL(u_int8_t id, double angle, double speed, double acc, int currt_limit, bool move_trigger) {
+    BusGuard busGuard;
     int goal_pos = middleSteps + round(mapDouble(angle, 0, jointRangeAngle, 0, jointSteps));
     int goal_spd = round(mapDouble(speed, 0, jointRangeAngle, 0, jointSteps));
     int goal_acc = round(mapDouble(acc, 0, jointRangeAngle, 0, jointSteps));
@@ -564,6 +596,7 @@ int JointsCtrl::angleCtrlHL(u_int8_t id, double angle, double speed, double acc,
 }
 
 int JointsCtrl::radCtrlSC(u_int8_t id, int mid_pos, double rad, double speed, bool move_trigger) {
+    BusGuard busGuard;
     int goal_pos = mid_pos + round(mapDouble(rad, 0, jointRangeRad, 0, jointSteps));
     int goal_spd = round(mapDouble(speed, 0, jointRangeRad, 0, jointSteps));
     if (move_trigger) {
@@ -575,6 +608,7 @@ int JointsCtrl::radCtrlSC(u_int8_t id, int mid_pos, double rad, double speed, bo
 }
 
 int JointsCtrl::radCtrlSMST(u_int8_t id, double rad, double speed, double acc, bool move_trigger) {
+    BusGuard busGuard;
     int goal_pos = middleSteps + round(mapDouble(rad, 0, jointRangeRad, 0, jointSteps));
     int goal_spd = round(mapDouble(speed, 0, jointRangeRad, 0, jointSteps));
     int goal_acc = round(mapDouble(acc, 0, jointRangeRad, 0, jointSteps));
@@ -587,6 +621,7 @@ int JointsCtrl::radCtrlSMST(u_int8_t id, double rad, double speed, double acc, b
 }
 
 int JointsCtrl::radCtrlHL(u_int8_t id, double rad, double speed, double acc, int currt_limit, bool move_trigger) {
+    BusGuard busGuard;
     int goal_pos = middleSteps + round(mapDouble(rad, 0, jointRangeRad, 0, jointSteps));
     int goal_spd = round(mapDouble(speed, 0, jointRangeRad, 0, jointSteps));
     int goal_acc = round(mapDouble(acc, 0, jointRangeRad, 0, jointSteps));
@@ -599,6 +634,7 @@ int JointsCtrl::radCtrlHL(u_int8_t id, double rad, double speed, double acc, int
 }
 
 void JointsCtrl::moveTrigger() {
+    BusGuard busGuard;
     switch (jointType) {
         case JOINT_TYPE_SC:
             sc.RegWriteAction();
@@ -614,6 +650,7 @@ void JointsCtrl::moveTrigger() {
 
 // hub motor ctrl
 void JointsCtrl::hubMotorCtrl(int spd_1, int spd_2, int spd_3, int spd_4) {
+    BusGuard busGuard;
 #ifdef USE_HUB_MOTORS
     gqdmd.SpeedCtl(1, spd_1, 500, 600, 0, 0x10);
     gqdmd.SpeedCtl(2, spd_2, 500, 600, 0, 0x10);
@@ -625,16 +662,19 @@ void JointsCtrl::hubMotorCtrl(int spd_1, int spd_2, int spd_3, int spd_4) {
 
 // for applications: LyLinkArm
 int* JointsCtrl::getJointsZeroPosArray() {
+    BusGuard busGuard;
     return jointsZeroPos;
 }
 
 void JointsCtrl::setJointsZeroPosArray(int values[]) {
+    BusGuard busGuard;
     for (int i = 0; i < JOINTS_NUM; i++) {
         jointsZeroPos[i] = values[i];
     }
 }
 
 int* JointsCtrl::getLinkArmPosSC() {
+    BusGuard busGuard;
     for (int i = 0; i < JOINTS_NUM; i++) {
         jointsFeedbackPos[i] = sc.ReadPos(jointID[i]);
     }
@@ -642,6 +682,7 @@ int* JointsCtrl::getLinkArmPosSC() {
 }
 
 void JointsCtrl::relativeStepsCtrl(int j0, int j1, int j2, int j3) {
+    BusGuard busGuard;
     int j[JOINTS_NUM] = {j0, j1, j2, j3};
     for (int i = 0; i < JOINTS_NUM; i++) {
         stepsCtrlSC(jointID[i], jointsZeroPos[i] + j[i], 0, 0, false);
@@ -650,6 +691,7 @@ void JointsCtrl::relativeStepsCtrl(int j0, int j1, int j2, int j3) {
 }
 
 int* JointsCtrl::getRelativeSteps() {
+    BusGuard busGuard;
     for (int i = 0; i < JOINTS_NUM; i++) {
         jointsRelativeSteps[i] = sc.ReadPos(jointID[i]) - jointsZeroPos[i];
     }
@@ -657,6 +699,7 @@ int* JointsCtrl::getRelativeSteps() {
 }
 
 bool JointsCtrl::checkStatus() {
+    BusGuard busGuard;
     for (int i = 0; i < JOINTS_NUM; i++) {
         jointsFeedbackPos[i] = sc.ReadPos(jointID[i]);
         if (jointsFeedbackPos[i] == -1) {
@@ -667,6 +710,7 @@ bool JointsCtrl::checkStatus() {
 }
 
 int* JointsCtrl::getLinkArmTorqueSC() {
+    BusGuard busGuard;
     for (int i = 0; i < JOINTS_NUM; i++) {
         int load = sc.ReadLoad(jointID[i]);
         jointsFeedbackTorque[i] = (abs(load) < 1e-3) ? 0 : load;
@@ -675,6 +719,7 @@ int* JointsCtrl::getLinkArmTorqueSC() {
 }
 
 void JointsCtrl::setCurrentSCPosMiddle() {
+    BusGuard busGuard;
     for (int i = 0; i < JOINTS_NUM; i++) {
         jointsFeedbackPos[i] = sc.ReadPos(jointID[i]);
         jointsZeroPos[i] = jointsFeedbackPos[i];
@@ -682,6 +727,7 @@ void JointsCtrl::setCurrentSCPosMiddle() {
 }
 
 void JointsCtrl::setTorqueLimitSC(u_int8_t id, int limit) {
+    BusGuard busGuard;
     limit = (limit < 0) ? 0 : (limit > 1000) ? 1000 : limit;
     sc.unLockEprom(id);
     sc.writeByte(id, 16, limit);
@@ -699,6 +745,7 @@ void JointsCtrl::setTorqueLimitSC(u_int8_t id, int limit) {
 //       1-S E-2
 //          B-0
 void JointsCtrl::linkArmSCJointsCtrlAngle(double angles[]) {
+    BusGuard busGuard;
     for (int i = 0; i < JOINTS_NUM; i++) {
         jointsCurrentPos[i] = angleCtrlSC(jointID[i], jointsZeroPos[i], angles[i], jointsMaxSpeed, false);
     }
@@ -706,6 +753,7 @@ void JointsCtrl::linkArmSCJointsCtrlAngle(double angles[]) {
 }
 
 void JointsCtrl::linkArmSCJointsCtrlRad(double rads[]) {
+    BusGuard busGuard;
     for (int i = 0; i < JOINTS_NUM; i++) {
         jointsCurrentPos[i] = radCtrlSC(jointID[i], jointsZeroPos[i], rads[i], jointsMaxSpeed, false);
     }
@@ -713,6 +761,7 @@ void JointsCtrl::linkArmSCJointsCtrlRad(double rads[]) {
 }
 
 bool JointsCtrl::linkArmPlaneIK(double x, double z) {
+    BusGuard busGuard;
     // Calculate the angles for the joints based on the x and z coordinates
     double l_af = sqrt(pow(x, 2) + pow(z, 2));
     double theta = acos(- (pow(l_ab, 2) - pow(l_af, 2) - pow(l_bf, 2))/(2 * l_af * l_bf));
@@ -758,6 +807,7 @@ bool JointsCtrl::linkArmPlaneIK(double x, double z) {
 
 // use the xyzgIK to calculate the rbzgIK.
 void JointsCtrl::spaceIK2FPVIK() {
+    BusGuard busGuard;
     rbzgIK[0] = xyzgIK[0];
     rbzgIK[4] = xyzgIK[4];
     rbzgIK[2] = armIKRad[0];
@@ -767,6 +817,7 @@ void JointsCtrl::spaceIK2FPVIK() {
 
 // use the rbzgIK to calculate the xyzgIK.
 void JointsCtrl::FPVIK2spaceIK() {
+    BusGuard busGuard;
     xyzgIK[1] = rbzgIK[1] * cos(rbzgIK[2]) - (l_ef / 2);
     xyzgIK[2] = - rbzgIK[1] * sin(rbzgIK[2]);
     xyzgIK[3] = rbzgIK[3];
@@ -775,6 +826,7 @@ void JointsCtrl::FPVIK2spaceIK() {
 }
 
 double* JointsCtrl::linkArmSpaceIK(double x, double y, double z, double g) {
+    BusGuard busGuard;
     g = (g < GRIPPER_CLOSE) ? GRIPPER_CLOSE : (g > GRIPPER_OPEN) ? GRIPPER_OPEN : g;
     double armIKRad_0 = atan2(-y, x);
     if (armIKRad_0 >= jointMaxRads[1] || armIKRad_0 <= jointMinRads[1]) {
@@ -806,6 +858,7 @@ double* JointsCtrl::linkArmSpaceIK(double x, double y, double z, double g) {
 }
 
 double* JointsCtrl::linkArmFPVIK(double r, double b, double z, double g) {
+    BusGuard busGuard;
     g = (g < GRIPPER_CLOSE) ? GRIPPER_CLOSE : (g > GRIPPER_OPEN) ? GRIPPER_OPEN : g;
     if (b >= jointMaxRads[1] || b <= jointMinRads[1]) {
         rbzgIK[0] = -1;
@@ -846,12 +899,14 @@ double* JointsCtrl::linkArmFPVIK(double r, double b, double z, double g) {
 // ----------------------
 // 0                  1 rate
 double JointsCtrl::smoothCtrl(double start, double end, double rate) {
+    BusGuard busGuard;
     double out;
     out = (end - start)*((cos(rate*M_PI+M_PI)+1)/2) + start;
     return out;
 }
 
 double JointsCtrl::getSmoothStepsXYZ(double x, double y, double z) {
+    BusGuard busGuard;
     double deltaPos[3] = {abs(x - xyzgIK_last[1]),
                           abs(y - xyzgIK_last[2]),
                           abs(z - xyzgIK_last[3])};
@@ -863,6 +918,7 @@ double JointsCtrl::getSmoothStepsXYZ(double x, double y, double z) {
 }
 
 double* JointsCtrl::smoothXYZGCtrl(double x, double y, double z, double g, double spd) {
+    BusGuard busGuard;
     memcpy(xyzgIK_last, xyzgIK, sizeof(xyzgIK));
     for (double i=0; i<=1; i+=(spd/getSmoothStepsXYZ(x, y, z))) {
         linkArmSpaceIK(smoothCtrl(xyzgIK_last[1], x, i), 
@@ -880,6 +936,7 @@ double* JointsCtrl::smoothXYZGCtrl(double x, double y, double z, double g, doubl
 }
 
 double JointsCtrl::getSmoothStepsFPV(double r, double b, double z, double baseRate) {
+    BusGuard busGuard;
     double deltaPos[3] = {abs(r - rbzgIK_last[1]),
                           abs(b - rbzgIK_last[2]) * baseRate,
                           abs(z - rbzgIK_last[3])};
@@ -891,6 +948,7 @@ double JointsCtrl::getSmoothStepsFPV(double r, double b, double z, double baseRa
 }
 
 double* JointsCtrl::smoothFPVAbsCtrl(double r, double b, double z, double g, double spd, double baseRate) {
+    BusGuard busGuard;
     memcpy(rbzgIK_last, rbzgIK, sizeof(rbzgIK));
     for (double i=0; i<=1; i+=(spd/getSmoothStepsFPV(r, b, z, baseRate))) {
         linkArmFPVIK(smoothCtrl(rbzgIK_last[1], r, i), 
@@ -908,12 +966,14 @@ double* JointsCtrl::smoothFPVAbsCtrl(double r, double b, double z, double g, dou
 }
 
 void JointsCtrl::setMaxJointsSpeed(double speed) {
+    BusGuard busGuard;
     if (speed >= 0) {
         jointsMaxSpeed = speed;
     }
 }
 
 double* JointsCtrl::getJointFBRads() {
+    BusGuard busGuard;
     static double jointRads[JOINTS_NUM];
     getLinkArmPosSC();
     for (int i = 0; i < JOINTS_NUM; i++) {
@@ -923,23 +983,28 @@ double* JointsCtrl::getJointFBRads() {
 }
 
 double* JointsCtrl::getJointGoalRads() {
+    BusGuard busGuard;
     return armIKRad;
 }
 
 double* JointsCtrl::getXYZGIK() {
+    BusGuard busGuard;
     return xyzgIK;
 }
 
 double* JointsCtrl::getRBZGIK() {
+    BusGuard busGuard;
     return rbzgIK;
 }
 
 void JointsCtrl::setLinkArmFeedbackFlag(bool flag, int hz) {
+    BusGuard busGuard;
     linkArmFeedbackFlag = flag;
     linkArmFeedbackHz = hz;
 }
 
 bool JointsCtrl::linkArmPlaneFK(double alpha, double beta, double& x, double& z) {
+    BusGuard busGuard;
     // Calculate the forward kinematics based on the joint angles alpha and beta
     double theta = 1.570796326794897 - alpha; // Recover theta from alpha
     double lambda = 1.570796326794897 - beta; // Recover lambda from beta
@@ -965,6 +1030,7 @@ bool JointsCtrl::linkArmPlaneFK(double alpha, double beta, double& x, double& z)
 }
 
 bool JointsCtrl::constantCtrl(bool flag, int axis, double delta) {
+    BusGuard busGuard;
     constantCtrlFlag = flag;
     constantCtrlAxis = axis;
     constantCtrldDelta = delta;
@@ -972,6 +1038,7 @@ bool JointsCtrl::constantCtrl(bool flag, int axis, double delta) {
 }
 
 void JointsCtrl::constantCtrlLoop() {
+    BusGuard busGuard;
     if (!constantCtrlFlag) {
         return;
     } else if (constantCtrlFlag) {
@@ -1017,6 +1084,7 @@ void JointsCtrl::constantCtrlLoop() {
 }
 
 void JointsCtrl::ttlTestMachine() {
+    BusGuard busGuard;
     while (true)
     {
         stepsCtrlSC(254, 200, 0, 0, 1);
@@ -1029,10 +1097,12 @@ void JointsCtrl::ttlTestMachine() {
 
 // TTL Node
 int JointsCtrl::writeByte(u_int8_t id, u_int8_t addr, u8 data) {
+    BusGuard busGuard;
     return smst.writeByte(id, addr, data);
 }
 
 void JointsCtrl::singleLedCtrl(u_int8_t id, u_int8_t num, u_int8_t r, u_int8_t g, u_int8_t b) {
+    BusGuard busGuard;
     uint8_t r2 = (r * 4) / 256;
     uint8_t g3 = (g * 8) / 256;
     uint8_t b2 = (b * 4) / 256;
@@ -1049,6 +1119,7 @@ void JointsCtrl::singleLedCtrl(u_int8_t id, u_int8_t num, u_int8_t r, u_int8_t g
 }
 
 void JointsCtrl::allLedCtrl(u_int8_t id, u_int8_t r, u_int8_t g, u_int8_t b) {
+    BusGuard busGuard;
     uint8_t r2 = (r * 4) / 256;
     uint8_t g3 = (g * 8) / 256;
     uint8_t b2 = (b * 4) / 256;
@@ -1061,6 +1132,7 @@ void JointsCtrl::allLedCtrl(u_int8_t id, u_int8_t r, u_int8_t g, u_int8_t b) {
 }
 
 int JointsCtrl::readSBUS() {
+    BusGuard busGuard;
     if(node.sbusFlush(0)){
         sbus[0] = node.sbusStatus();//subs status
         for(int ch=1; ch<=node.subsGetNum(); ch++){
@@ -1073,23 +1145,28 @@ int JointsCtrl::readSBUS() {
 }
 
 void JointsCtrl::ttlnChangeID(u_int8_t old_id, u_int8_t new_id) {
+    BusGuard busGuard;
     node.unLockEprom(old_id);
     node.writeByte(old_id, LY_NODE_ID, new_id);
     node.LockEprom(new_id);
 }
 
 void JointsCtrl::ttlnCtrlPWM(u_int8_t node_id, int pwm_ch, int pwm_val) {
+    BusGuard busGuard;
     node.pwmCtl(node_id, pwm_ch, pwm_val);
 }
 
 void JointsCtrl::ttlnCtrlSingleLed(u_int8_t node_id, int rgb_ch, int r, int g, int b) {
+    BusGuard busGuard;
     node.ledSingleCtrl(node_id, rgb_ch, g, r, b);//node_id, rgb_ch, r, g, b
 }
 
 void JointsCtrl::ttlnLedFlush(u_int8_t node_id, int led_num) {
+    BusGuard busGuard;
     node.ledFlush(node_id, led_num);
 }
 
 void JointsCtrl::ttlnCtrlAllLed(u_int8_t node_id, int led_num, int r, int g, int b) {
+    BusGuard busGuard;
     node.ledAllCtrl(node_id, led_num, g, r, b);
 }

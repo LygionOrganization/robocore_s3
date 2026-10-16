@@ -421,6 +421,9 @@ static int timeOffset = 50;
 // delete mission
 // {"T":309,"name":"boot"}
 #define CMD_DELETE_MISSION 309
+// Atomically publish a validated draft mission.
+// {"T":310,"source":"draft_upload","name":"demo","overwrite":false}
+#define CMD_COMMIT_MISSION 310
 
 // run default mission
 // {"T":308,"name":"up","interval":0,"loop":1}

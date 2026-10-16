@@ -76,6 +76,8 @@ void menuDefault() {
 
 void runMission(String missionName, int intervalTime, int loopTimes);
 void buttonEventHandler(event_t e, const EventMsg* m){
+    JsonDocument jsonFeedback;
+    String outputString;
 #ifdef USE_ROBOTIC_ARM
     switch(e){
         case event_t::longPress :

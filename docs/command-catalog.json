@@ -1,0 +1,2334 @@
+[
+  {
+    "T": 0,
+    "title": {
+      "zh": "停止任务循环",
+      "en": "Stop mission loop"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "请求退出任务循环、清空待执行指令；不会关闭电机输出。",
+      "en": "Requests loop exit and clears pending commands; does not disable motors."
+    },
+    "sample": {
+      "T": 0
+    }
+  },
+  {
+    "T": 10,
+    "title": {
+      "zh": "设置主控总线波特率",
+      "en": "Set controller bus baud rate"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 10,
+      "baud": 1000000
+    }
+  },
+  {
+    "T": 11,
+    "title": {
+      "zh": "STS/SMS 位置控制",
+      "en": "STS/SMS position"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 11,
+      "id": 1,
+      "pos": 2047,
+      "spd": 100,
+      "acc": 0
+    }
+  },
+  {
+    "T": 12,
+    "title": {
+      "zh": "STS/SMS 设置中位",
+      "en": "STS/SMS calibrate midpoint"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 12,
+      "id": 1
+    }
+  },
+  {
+    "T": 13,
+    "title": {
+      "zh": "STS/SMS 修改 ID",
+      "en": "STS/SMS change ID"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "old_id / new_id 为不同的 0–253 整数。逐个接入设备，拒绝已占用的新 ID，并在写入后验证新 ID。",
+      "en": "Distinct integer old_id / new_id in 0–253. Connect one device at a time. Rejects occupied IDs and verifies the new ID after writing."
+    },
+    "sample": {
+      "T": 13,
+      "old_id": 1,
+      "new_id": 2
+    }
+  },
+  {
+    "T": 14,
+    "title": {
+      "zh": "STS/SMS 扭矩开关",
+      "en": "STS/SMS torque enable"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 14,
+      "id": 1,
+      "state": 1
+    }
+  },
+  {
+    "T": 15,
+    "title": {
+      "zh": "STS/SMS 状态反馈",
+      "en": "STS/SMS feedback"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 15,
+      "id": 1
+    }
+  },
+  {
+    "T": 16,
+    "title": {
+      "zh": "STS/SMS 同步控制",
+      "en": "STS/SMS synchronized targets"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 16,
+      "id": [
+        1,
+        2
+      ],
+      "idn": 2,
+      "pos": [
+        2047,
+        2047
+      ],
+      "spd": [
+        100,
+        100
+      ],
+      "acc": [
+        0,
+        0
+      ]
+    }
+  },
+  {
+    "T": 17,
+    "title": {
+      "zh": "STS/SMS 简化同步控制",
+      "en": "STS/SMS simple synchronized targets"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "速度与加速度固定为0，0的含义按舵机型号；需要限速时用T=16。",
+      "en": "Speed and acceleration are fixed at0; zero semantics depend on the servo. Use T=16 for explicit speed limits."
+    },
+    "sample": {
+      "T": 17,
+      "id": [
+        1,
+        2
+      ],
+      "idn": 2,
+      "pos": [
+        2047,
+        2047
+      ]
+    }
+  },
+  {
+    "T": 21,
+    "title": {
+      "zh": "HLS 位置控制",
+      "en": "HLS position"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 21,
+      "id": 1,
+      "pos": 2047,
+      "spd": 100,
+      "acc": 0,
+      "cl": 500
+    }
+  },
+  {
+    "T": 22,
+    "title": {
+      "zh": "HLS 设置中位",
+      "en": "HLS calibrate midpoint"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 22,
+      "id": 1
+    }
+  },
+  {
+    "T": 23,
+    "title": {
+      "zh": "HLS 修改 ID",
+      "en": "HLS change ID"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "old_id / new_id 为不同的 0–253 整数。逐个接入设备，拒绝已占用的新 ID，并在写入后验证新 ID。",
+      "en": "Distinct integer old_id / new_id in 0–253. Connect one device at a time. Rejects occupied IDs and verifies the new ID after writing."
+    },
+    "sample": {
+      "T": 23,
+      "old_id": 1,
+      "new_id": 2
+    }
+  },
+  {
+    "T": 24,
+    "title": {
+      "zh": "HLS 扭矩开关",
+      "en": "HLS torque enable"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 24,
+      "id": 1,
+      "state": 1
+    }
+  },
+  {
+    "T": 25,
+    "title": {
+      "zh": "HLS 状态反馈",
+      "en": "HLS feedback"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 25,
+      "id": 1
+    }
+  },
+  {
+    "T": 26,
+    "title": {
+      "zh": "HLS 同步控制",
+      "en": "HLS synchronized targets"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 26,
+      "id": [
+        1,
+        2
+      ],
+      "idn": 2,
+      "pos": [
+        2047,
+        2047
+      ],
+      "spd": [
+        100,
+        100
+      ],
+      "acc": [
+        0,
+        0
+      ],
+      "tor": [
+        500,
+        500
+      ]
+    }
+  },
+  {
+    "T": 27,
+    "title": {
+      "zh": "HLS 简化同步控制",
+      "en": "HLS simple synchronized targets"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "固定速度60、加速度50；tor 数组指定各轴电流限制。需要完整参数时用T=26。",
+      "en": "Fixed speed60 and acceleration50; tor sets each axis current limit. Use T=26 for full parameters."
+    },
+    "sample": {
+      "T": 27,
+      "id": [
+        1,
+        2
+      ],
+      "idn": 2,
+      "pos": [
+        2047,
+        2047
+      ],
+      "tor": [
+        500,
+        500
+      ]
+    }
+  },
+  {
+    "T": 31,
+    "title": {
+      "zh": "SCS 位置控制",
+      "en": "SCS position"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 31,
+      "id": 1,
+      "pos": 511,
+      "time": 0,
+      "spd": 100
+    }
+  },
+  {
+    "T": 33,
+    "title": {
+      "zh": "SCS 修改 ID",
+      "en": "SCS change ID"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "old_id / new_id 为不同的 0–253 整数。逐个接入设备，拒绝已占用的新 ID，并在写入后验证新 ID。",
+      "en": "Distinct integer old_id / new_id in 0–253. Connect one device at a time. Rejects occupied IDs and verifies the new ID after writing."
+    },
+    "sample": {
+      "T": 33,
+      "old_id": 1,
+      "new_id": 2
+    }
+  },
+  {
+    "T": 34,
+    "title": {
+      "zh": "SCS 扭矩开关",
+      "en": "SCS torque enable"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 34,
+      "id": 1,
+      "state": 1
+    }
+  },
+  {
+    "T": 35,
+    "title": {
+      "zh": "SCS 状态反馈",
+      "en": "SCS feedback"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 35,
+      "id": 1
+    }
+  },
+  {
+    "T": 36,
+    "title": {
+      "zh": "SCS 同步控制",
+      "en": "SCS synchronized targets"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 36,
+      "id": [
+        1,
+        2
+      ],
+      "idn": 2,
+      "pos": [
+        511,
+        511
+      ],
+      "spd": [
+        100,
+        100
+      ]
+    }
+  },
+  {
+    "T": 37,
+    "title": {
+      "zh": "SCS 简化同步控制",
+      "en": "SCS simple synchronized targets"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "速度固定为0，可能代表最高速度；需要限速时用T=36。",
+      "en": "Speed is fixed at0, which may mean maximum speed. Use T=36 for explicit speed limits."
+    },
+    "sample": {
+      "T": 37,
+      "id": [
+        1,
+        2
+      ],
+      "idn": 2,
+      "pos": [
+        511,
+        511
+      ]
+    }
+  },
+  {
+    "T": 51,
+    "title": {
+      "zh": "等待毫秒数",
+      "en": "Wait milliseconds"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "delay：等待时间，毫秒；任务中使用可控制步骤节奏。",
+      "en": "delay: milliseconds to wait; useful between mission steps."
+    },
+    "sample": {
+      "T": 51,
+      "delay": 1000
+    }
+  },
+  {
+    "T": 100,
+    "title": {
+      "zh": "设置主控总线波特率",
+      "en": "Set controller bus baud rate"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 100,
+      "baud": 1000000
+    }
+  },
+  {
+    "T": 101,
+    "title": {
+      "zh": "选择通用舵机类型",
+      "en": "Select generic servo type"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "type=0 SCS、1 STS/SMS、2 HLS；优先使用明确区分型号的指令。",
+      "en": "type=0 SCS, 1 STS/SMS, 2 HLS; prefer the model-specific commands."
+    },
+    "sample": {
+      "T": 101,
+      "type": 1
+    }
+  },
+  {
+    "T": 102,
+    "title": {
+      "zh": "设置舵机坐标换算",
+      "en": "Set servo coordinate conversion"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "steps 为舵机每圈计数，angle 为行程角度；这是舵机坐标换算，与外接编码器无关。",
+      "en": "steps is servo counts per turn; angle is travel in degrees. This changes servo conversion, not an external encoder."
+    },
+    "sample": {
+      "T": 102,
+      "steps": 4096,
+      "angle": 360
+    }
+  },
+  {
+    "T": 103,
+    "title": {
+      "zh": "通用舵机反馈",
+      "en": "Generic servo feedback"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 103,
+      "id": 1
+    }
+  },
+  {
+    "T": 104,
+    "title": {
+      "zh": "通用舵机 Ping",
+      "en": "Generic servo ping"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 104,
+      "id": 1
+    }
+  },
+  {
+    "T": 105,
+    "title": {
+      "zh": "通用舵机修改 ID",
+      "en": "Generic servo change ID"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 105,
+      "old_id": 1,
+      "new_id": 2
+    }
+  },
+  {
+    "T": 106,
+    "title": {
+      "zh": "通用舵机设置中位",
+      "en": "Generic servo calibrate midpoint"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 106,
+      "id": 1
+    }
+  },
+  {
+    "T": 107,
+    "title": {
+      "zh": "通用舵机移动至中位",
+      "en": "Generic servo move to midpoint"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 107,
+      "id": 1
+    }
+  },
+  {
+    "T": 108,
+    "title": {
+      "zh": "通用舵机扭矩开关",
+      "en": "Generic servo torque enable"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 108,
+      "id": 1,
+      "state": 1
+    }
+  },
+  {
+    "T": 109,
+    "title": {
+      "zh": "SCS 步数控制",
+      "en": "SCS step position"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 109,
+      "id": 1,
+      "pos": 512,
+      "time": 0,
+      "spd": 100,
+      "move": 1
+    }
+  },
+  {
+    "T": 112,
+    "title": {
+      "zh": "SCS 角度控制",
+      "en": "SCS degree target"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 112,
+      "id": 1,
+      "mid": 512,
+      "ang": 10,
+      "spd": 10,
+      "move": 1
+    }
+  },
+  {
+    "T": 115,
+    "title": {
+      "zh": "SCS 弧度控制",
+      "en": "SCS radian target"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 115,
+      "id": 1,
+      "mid": 512,
+      "rad": 0.785,
+      "spd": 0.2,
+      "move": 1
+    }
+  },
+  {
+    "T": 118,
+    "title": {
+      "zh": "执行预置舵机动作",
+      "en": "Trigger deferred servo moves"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 118
+    }
+  },
+  {
+    "T": 119,
+    "title": {
+      "zh": "SCS 扭矩限制",
+      "en": "SCS torque limit"
+    },
+    "group": {
+      "zh": "舵机",
+      "en": "Servos"
+    },
+    "note": {
+      "zh": "兼容高级接口；请使用对应型号驱动库配置扭矩限制。",
+      "en": "Legacy advanced interface; use the model-specific driver library for torque-limit configuration."
+    },
+    "sample": {
+      "T": 119,
+      "id": 1,
+      "limit": 500
+    }
+  },
+  {
+    "T": 130,
+    "title": {
+      "zh": "读取机械臂零位",
+      "en": "Read arm zero positions"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 130
+    }
+  },
+  {
+    "T": 131,
+    "title": {
+      "zh": "设置机械臂零位",
+      "en": "Set arm zero positions"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 131,
+      "pos": [
+        512,
+        512,
+        512,
+        512
+      ]
+    }
+  },
+  {
+    "T": 132,
+    "title": {
+      "zh": "读取机械臂位置",
+      "en": "Read arm positions"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 132
+    }
+  },
+  {
+    "T": 133,
+    "title": {
+      "zh": "以当前位置标定机械臂零位",
+      "en": "Calibrate arm zeros at current pose"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 133
+    }
+  },
+  {
+    "T": 134,
+    "title": {
+      "zh": "机械臂关节角度",
+      "en": "Arm joint angles"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 134,
+      "ang": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  {
+    "T": 135,
+    "title": {
+      "zh": "机械臂关节弧度",
+      "en": "Arm joint radians"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 135,
+      "rad": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  {
+    "T": 136,
+    "title": {
+      "zh": "机械臂 XYZG 目标",
+      "en": "Arm XYZG target"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 136,
+      "xyzg": [
+        260.5,
+        0,
+        122.38,
+        50
+      ]
+    }
+  },
+  {
+    "T": 137,
+    "title": {
+      "zh": "机械臂 RBZG 目标",
+      "en": "Arm RBZG target"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 137,
+      "rbzg": [
+        260.5,
+        0,
+        122.38,
+        50
+      ]
+    }
+  },
+  {
+    "T": 138,
+    "title": {
+      "zh": "机械臂平滑 XYZG 运动",
+      "en": "Arm smooth XYZG move"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 138,
+      "xyzg": [
+        236.5,
+        0,
+        122.38,
+        0
+      ],
+      "spd": 0.4
+    }
+  },
+  {
+    "T": 139,
+    "title": {
+      "zh": "机械臂平滑 RBZG 运动",
+      "en": "Arm smooth RBZG move"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 139,
+      "rbzg": [
+        236.5,
+        0,
+        122.38,
+        0
+      ],
+      "spd": 0.4,
+      "br": 200
+    }
+  },
+  {
+    "T": 140,
+    "title": {
+      "zh": "机械臂最大关节速度",
+      "en": "Arm maximum joint speed"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 140,
+      "spd": 1.2
+    }
+  },
+  {
+    "T": 141,
+    "title": {
+      "zh": "读取机械臂反馈弧度",
+      "en": "Read arm feedback radians"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 141
+    }
+  },
+  {
+    "T": 142,
+    "title": {
+      "zh": "读取机械臂目标弧度",
+      "en": "Read arm target radians"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 142
+    }
+  },
+  {
+    "T": 143,
+    "title": {
+      "zh": "读取 XYZG 解算状态",
+      "en": "Read XYZG IK state"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 143
+    }
+  },
+  {
+    "T": 144,
+    "title": {
+      "zh": "读取 RBZG 解算状态",
+      "en": "Read RBZG IK state"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 144
+    }
+  },
+  {
+    "T": 145,
+    "title": {
+      "zh": "机械臂周期反馈",
+      "en": "Arm periodic feedback"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 145,
+      "flag": 0,
+      "hz": 10
+    }
+  },
+  {
+    "T": 146,
+    "title": {
+      "zh": "机械臂连续运动",
+      "en": "Arm continuous motion"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 146,
+      "flag": 0,
+      "axis": 0,
+      "delta": 0.01
+    }
+  },
+  {
+    "T": 147,
+    "title": {
+      "zh": "机械臂手动标定模式",
+      "en": "Arm manual calibration mode"
+    },
+    "group": {
+      "zh": "机械臂预设",
+      "en": "Arm presets"
+    },
+    "note": {
+      "zh": "仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。",
+      "en": "Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."
+    },
+    "sample": {
+      "T": 147
+    }
+  },
+  {
+    "T": 180,
+    "title": {
+      "zh": "四路轮毂电机速度",
+      "en": "Four hub motor speeds"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "A/B/C/D 为匹配的四路轮毂电机速度，寄存器值 × 0.06 = rpm；不是通用步进控制。",
+      "en": "A/B/C/D control four compatible hub motors; register value × 0.06 = rpm. Not a generic stepper command."
+    },
+    "sample": {
+      "T": 180,
+      "A": 0,
+      "B": 0,
+      "C": 0,
+      "D": 0
+    }
+  },
+  {
+    "T": 200,
+    "title": {
+      "zh": "兼容 LED 单灯颜色",
+      "en": "Legacy LED single color"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 200,
+      "id": 40,
+      "set": [
+        1,
+        255,
+        0,
+        0
+      ]
+    }
+  },
+  {
+    "T": 201,
+    "title": {
+      "zh": "兼容 LED 全部颜色",
+      "en": "Legacy LED all colors"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 201,
+      "id": 40,
+      "set": [
+        9,
+        0,
+        0
+      ]
+    }
+  },
+  {
+    "T": 202,
+    "title": {
+      "zh": "OLED 单行文字",
+      "en": "OLED single line"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "需要外接 UI Module (A) 的 SSD1306 OLED；line 为 1–4，update=1 立即刷新。默认字体使用 ASCII。",
+      "en": "Requires the external UI Module (A) SSD1306 OLED; line is 1–4, update=1 refreshes immediately. Default font uses ASCII."
+    },
+    "sample": {
+      "T": 202,
+      "line": 1,
+      "text": "Hello, world!",
+      "update": 1
+    }
+  },
+  {
+    "T": 203,
+    "title": {
+      "zh": "OLED 刷新",
+      "en": "OLED refresh"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "需要外接 UI Module (A) 的 SSD1306 OLED；line 为 1–4，update=1 立即刷新。默认字体使用 ASCII。",
+      "en": "Requires the external UI Module (A) SSD1306 OLED; line is 1–4, update=1 refreshes immediately. Default font uses ASCII."
+    },
+    "sample": {
+      "T": 203
+    }
+  },
+  {
+    "T": 204,
+    "title": {
+      "zh": "OLED 四行文字",
+      "en": "OLED four lines"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "需要外接 UI Module (A) 的 SSD1306 OLED；line 为 1–4，update=1 立即刷新。默认字体使用 ASCII。",
+      "en": "Requires the external UI Module (A) SSD1306 OLED; line is 1–4, update=1 refreshes immediately. Default font uses ASCII."
+    },
+    "sample": {
+      "T": 204,
+      "l1": "Hello, world!",
+      "l2": "Hello, world!",
+      "l3": "Hello, world!",
+      "l4": "Hello, world!"
+    }
+  },
+  {
+    "T": 205,
+    "title": {
+      "zh": "OLED 清屏",
+      "en": "OLED clear"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "需要外接 UI Module (A) 的 SSD1306 OLED；line 为 1–4，update=1 立即刷新。默认字体使用 ASCII。",
+      "en": "Requires the external UI Module (A) SSD1306 OLED; line is 1–4, update=1 refreshes immediately. Default font uses ASCII."
+    },
+    "sample": {
+      "T": 205
+    }
+  },
+  {
+    "T": 206,
+    "title": {
+      "zh": "外接模块蜂鸣器",
+      "en": "External module buzzer"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "freq：Hz；duration：毫秒。蜂鸣器位于外接 UI Module (A)，GPIO21。",
+      "en": "freq: Hz; duration: milliseconds. Buzzer is on the external UI Module (A), GPIO21."
+    },
+    "sample": {
+      "T": 206,
+      "freq": 1000,
+      "duration": 1000
+    }
+  },
+  {
+    "T": 208,
+    "title": {
+      "zh": "兼容 Node 修改 ID",
+      "en": "Legacy Node change ID"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。",
+      "en": "Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."
+    },
+    "sample": {
+      "T": 208,
+      "old": 0,
+      "new": 1
+    }
+  },
+  {
+    "T": 209,
+    "title": {
+      "zh": "兼容 Node PWM",
+      "en": "Legacy Node PWM"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。",
+      "en": "Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."
+    },
+    "sample": {
+      "T": 209,
+      "id": 0,
+      "ch": 0,
+      "pwm": 1000
+    }
+  },
+  {
+    "T": 210,
+    "title": {
+      "zh": "兼容 Node 单灯颜色",
+      "en": "Legacy Node single LED"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。",
+      "en": "Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."
+    },
+    "sample": {
+      "T": 210,
+      "id": 0,
+      "ch": 0,
+      "r": 7,
+      "g": 7,
+      "b": 7
+    }
+  },
+  {
+    "T": 211,
+    "title": {
+      "zh": "兼容 Node 刷新",
+      "en": "Legacy Node flush"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。",
+      "en": "Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."
+    },
+    "sample": {
+      "T": 211,
+      "id": 0,
+      "num": 2
+    }
+  },
+  {
+    "T": 212,
+    "title": {
+      "zh": "兼容 Node 全灯颜色",
+      "en": "Legacy Node all LEDs"
+    },
+    "group": {
+      "zh": "外接模块",
+      "en": "External modules"
+    },
+    "note": {
+      "zh": "保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。",
+      "en": "Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."
+    },
+    "sample": {
+      "T": 212,
+      "id": 0,
+      "num": 2,
+      "r": 7,
+      "g": 7,
+      "b": 7
+    }
+  },
+  {
+    "T": 300,
+    "title": {
+      "zh": "列出任务",
+      "en": "List missions"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "offset 默认为 0；每页 16 个名称，next=-1 表示结束；包含未完成草稿。",
+      "en": "offset defaults to 0; 16 names per page, next=-1 ends pagination. Includes unfinished drafts."
+    },
+    "sample": {
+      "T": 300
+    }
+  },
+  {
+    "T": 301,
+    "title": {
+      "zh": "创建任务",
+      "en": "Create mission"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "name：1–32 位英文字母、数字、下划线或连字符；intro 最多 96 UTF-8 字节；不能覆盖已有任务。",
+      "en": "name: 1–32 ASCII letters, digits, underscores or hyphens. intro: at most 96 UTF-8 bytes. Existing missions are not overwritten."
+    },
+    "sample": {
+      "T": 301,
+      "name": "demo",
+      "intro": "introduction for this mission file."
+    }
+  },
+  {
+    "T": 302,
+    "title": {
+      "zh": "读取任务",
+      "en": "Read mission"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "offset 为从 0 开始的步骤偏移；每页最多 8 步，返回 intro/steps/total/next。",
+      "en": "offset is a zero-based step offset; up to 8 steps per page, returns intro/steps/total/next."
+    },
+    "sample": {
+      "T": 302,
+      "name": "demo"
+    }
+  },
+  {
+    "T": 303,
+    "title": {
+      "zh": "追加任务步骤",
+      "en": "Append mission step"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "json 为转义后的 JSON 字符串；最多 64 步、文件最多 16 KB；步骤不能含 rid 或 T=300…399。",
+      "en": "json is an escaped JSON string. Maximum 64 steps and 16 KB per file; no rid or T=300…399 inside a step."
+    },
+    "sample": {
+      "T": 303,
+      "name": "demo",
+      "json": "{\"T\":51,\"delay\":500}"
+    }
+  },
+  {
+    "T": 304,
+    "title": {
+      "zh": "插入任务步骤",
+      "en": "Insert mission step"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "step 从 1 开始，插入到指定步骤之前；json 为转义后的 JSON 字符串。",
+      "en": "step is 1-based; insert before that step. json is an escaped JSON string."
+    },
+    "sample": {
+      "T": 304,
+      "name": "demo",
+      "step": 1,
+      "json": "{\"T\":51,\"delay\":500}"
+    }
+  },
+  {
+    "T": 305,
+    "title": {
+      "zh": "替换任务步骤",
+      "en": "Replace mission step"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "step 从 1 开始，替换现有步骤；json 为转义后的 JSON 字符串。",
+      "en": "step is 1-based; replaces an existing step. json is an escaped JSON string."
+    },
+    "sample": {
+      "T": 305,
+      "name": "demo",
+      "step": 1,
+      "json": "{\"T\":51,\"delay\":500}"
+    }
+  },
+  {
+    "T": 306,
+    "title": {
+      "zh": "删除任务步骤",
+      "en": "Delete mission step"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "step 从 1 开始，删除指定步骤。",
+      "en": "step is 1-based; deletes the specified step."
+    },
+    "sample": {
+      "T": 306,
+      "name": "demo",
+      "step": 1
+    }
+  },
+  {
+    "T": 307,
+    "title": {
+      "zh": "执行一个任务步骤",
+      "en": "Run one mission step"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "step 从 1 开始；执行已保存的单步，可能产生运动。",
+      "en": "step is 1-based; executes one saved step and may cause motion."
+    },
+    "sample": {
+      "T": 307,
+      "name": "demo",
+      "step": 1
+    }
+  },
+  {
+    "T": 308,
+    "title": {
+      "zh": "运行任务",
+      "en": "Run mission"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "interval 为每步后额外等待的毫秒数，0–60000；loop 为 1–10000 或 -1 无限循环。用 T=0 退出循环。",
+      "en": "interval: extra delay after each step, 0–60000 ms. loop: 1–10000 or -1 for infinite. T=0 exits the loop."
+    },
+    "sample": {
+      "T": 308,
+      "name": "demo",
+      "interval": 1000,
+      "loop": 1
+    }
+  },
+  {
+    "T": 309,
+    "title": {
+      "zh": "删除任务",
+      "en": "Delete mission"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "删除已保存任务，无法撤销。",
+      "en": "Deletes a saved mission; cannot be undone."
+    },
+    "sample": {
+      "T": 309,
+      "name": "demo"
+    }
+  },
+  {
+    "T": 310,
+    "title": {
+      "zh": "保存已验证的草稿",
+      "en": "Commit verified draft"
+    },
+    "group": {
+      "zh": "任务脚本",
+      "en": "Missions"
+    },
+    "note": {
+      "zh": "source 必须以 draft_ 开头；name 为目标名称。覆盖已有目标必须显式传 overwrite:true。",
+      "en": "source must start with draft_; name is the destination. Overwriting requires explicit overwrite:true."
+    },
+    "sample": {
+      "T": 310,
+      "source": "draft_upload",
+      "name": "demo",
+      "overwrite": false
+    }
+  },
+  {
+    "T": 399,
+    "title": {
+      "zh": "清空文件系统",
+      "en": "Erase filesystem"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "清空全部任务及文件系统内配置；不自动重启，无法撤销。",
+      "en": "Erases all missions and filesystem configuration; does not restart automatically. Irreversible."
+    },
+    "sample": {
+      "T": 399
+    }
+  },
+  {
+    "T": 400,
+    "title": {
+      "zh": "设置 Wi-Fi",
+      "en": "Configure Wi-Fi"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "mode=0 关闭 Wi-Fi，1 开启 AP+STA。STA 后台连接，失败仍保留配置；GET /api/info 查询状态和 IP。路由器须支持 2.4 GHz。",
+      "en": "mode=0 disables Wi-Fi, 1 enables AP+STA. STA connects asynchronously; failed connections retain settings. GET /api/info reports state and IP. Use a 2.4 GHz router network."
+    },
+    "sample": {
+      "T": 400,
+      "mode": 1,
+      "ap_ssid": "LYgion",
+      "ap_password": "12345678",
+      "channel": 1,
+      "sta_ssid": "ssid",
+      "sta_password": "password"
+    }
+  },
+  {
+    "T": 401,
+    "title": {
+      "zh": "读取 Wi-Fi 配置",
+      "en": "Read Wi-Fi configuration"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 401
+    }
+  },
+  {
+    "T": 402,
+    "title": {
+      "zh": "读取热点 IP",
+      "en": "Read AP IP"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 402
+    }
+  },
+  {
+    "T": 403,
+    "title": {
+      "zh": "读取路由器分配的 IP",
+      "en": "Read station IP"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 403
+    }
+  },
+  {
+    "T": 410,
+    "title": {
+      "zh": "初始化 ESP-NOW",
+      "en": "Initialize ESP-NOW"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "longrange：0 普通模式，1 长距离模式；双方需支持并使用兼容模式、同一信道。",
+      "en": "longrange: 0 normal, 1 long range. Both peers need compatible mode and the same channel."
+    },
+    "sample": {
+      "T": 410,
+      "longrange": 0
+    }
+  },
+  {
+    "T": 411,
+    "title": {
+      "zh": "设置 ESP-NOW 接收模式",
+      "en": "Set ESP-NOW receive mode"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "mode：0 关闭接收，1 接收可信 MAC，2 接收广播。",
+      "en": "mode: 0 receive off, 1 trusted MAC reception, 2 broadcast reception."
+    },
+    "sample": {
+      "T": 411,
+      "mode": 1
+    }
+  },
+  {
+    "T": 412,
+    "title": {
+      "zh": "读取 MAC 地址",
+      "en": "Read MAC address"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 412
+    }
+  },
+  {
+    "T": 413,
+    "title": {
+      "zh": "发送 ESP-NOW JSON",
+      "en": "Send ESP-NOW JSON"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "mac 为冒号分隔的 MAC；data 为转义的 JSON 字符串。使用 250 字节补零帧，不能任意发送大对象。",
+      "en": "mac is colon-separated; data is an escaped JSON string. Uses a zero-padded 250-byte frame, not arbitrary large objects."
+    },
+    "sample": {
+      "T": 413,
+      "mac": "FF:FF:FF:FF:FF:FF",
+      "data": "{\"T\":205}"
+    }
+  },
+  {
+    "T": 414,
+    "title": {
+      "zh": "添加 ESP-NOW 对端",
+      "en": "Add ESP-NOW peer"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "mac 为对端 MAC 地址；先确认双方 Wi-Fi 信道相同。",
+      "en": "mac is the peer MAC; both devices must use the same Wi-Fi channel."
+    },
+    "sample": {
+      "T": 414,
+      "mac": "FF:FF:FF:FF:FF:FF"
+    }
+  },
+  {
+    "T": 415,
+    "title": {
+      "zh": "ESP-NOW 模拟 MAC 开关",
+      "en": "ESP-NOW synthetic MAC option"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "fake 为兼容应用的模拟 MAC 开关；常规通信保持 0。",
+      "en": "fake is a synthetic MAC option for legacy applications; keep 0 for normal communication."
+    },
+    "sample": {
+      "T": 415,
+      "fake": 0
+    }
+  },
+  {
+    "T": 501,
+    "title": {
+      "zh": "发送 CAN 帧",
+      "en": "Send CAN frame"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "CAN 档；id 为标识符，ext=0 标准帧/1 扩展帧，data 最多 8 个 0–255 字节；默认 500 kbps。",
+      "en": "CAN switch position; id is identifier, ext=0 standard/1 extended, data at most eight bytes 0–255; default 500 kbps."
+    },
+    "sample": {
+      "T": 501,
+      "id": 291,
+      "ext": 0,
+      "data": [
+        17,
+        34,
+        51
+      ]
+    }
+  },
+  {
+    "T": 600,
+    "title": {
+      "zh": "重启主控",
+      "en": "Restart controller"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "立即重启，连接中断；可能无法收到执行回复。",
+      "en": "Restarts immediately and disconnects; an execution reply may not arrive."
+    },
+    "sample": {
+      "T": 600
+    }
+  },
+  {
+    "T": 601,
+    "title": {
+      "zh": "清空 NVS",
+      "en": "Erase NVS"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "清空 NVS 设置；与任务文件系统不同。此操作不可撤销。",
+      "en": "Erases NVS settings, separate from mission storage. Irreversible."
+    },
+    "sample": {
+      "T": 601
+    }
+  },
+  {
+    "T": 602,
+    "title": {
+      "zh": "清空文件系统",
+      "en": "Erase filesystem"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "清空全部任务及文件系统内配置；不自动重启，无法撤销。",
+      "en": "Erases all missions and filesystem configuration; does not restart automatically. Irreversible."
+    },
+    "sample": {
+      "T": 602
+    }
+  },
+  {
+    "T": 603,
+    "title": {
+      "zh": "读取消息输出设置",
+      "en": "Read message output settings"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 603
+    }
+  },
+  {
+    "T": 604,
+    "title": {
+      "zh": "设置消息输出",
+      "en": "Set message outputs"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "echo/uart/usb 为 0 或 1；关闭 usb 后 USB 不再输出结果。",
+      "en": "echo/uart/usb are 0 or 1; disabling usb suppresses USB result output."
+    },
+    "sample": {
+      "T": 604,
+      "echo": 1,
+      "uart": 0,
+      "usb": 1
+    }
+  },
+  {
+    "T": 605,
+    "title": {
+      "zh": "UART0 转发模式",
+      "en": "UART0 forwarding mode"
+    },
+    "group": {
+      "zh": "通信与系统",
+      "en": "Communication and system"
+    },
+    "note": {
+      "zh": "sf=1 转发 UART0 字节到舵机总线（默认）；sf=0 将 UART0 输入按 JSON 解析。",
+      "en": "sf=1 forwards UART0 bytes to the servo bus (default); sf=0 parses UART0 input as JSON."
+    },
+    "sample": {
+      "T": 605,
+      "sf": 1
+    }
+  },
+  {
+    "T": 700,
+    "title": {
+      "zh": "扫描总线 ID",
+      "en": "Scan bus IDs"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 700,
+      "first": 0,
+      "last": 20
+    }
+  },
+  {
+    "T": 710,
+    "title": {
+      "zh": "TTL Node 修改 ID",
+      "en": "TTL Node change ID"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 710,
+      "id": 1,
+      "new_id": 2
+    }
+  },
+  {
+    "T": 711,
+    "title": {
+      "zh": "TTL Node PWM",
+      "en": "TTL Node PWM"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 711,
+      "id": 1,
+      "ch": 1,
+      "pwm": 0
+    }
+  },
+  {
+    "T": 712,
+    "title": {
+      "zh": "TTL Node RGB",
+      "en": "TTL Node RGB"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 712,
+      "id": 1,
+      "ch": 0,
+      "r": 1,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "T": 713,
+    "title": {
+      "zh": "TTL Node 读取 S.BUS",
+      "en": "TTL Node read S.BUS"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 713,
+      "id": 1
+    }
+  },
+  {
+    "T": 720,
+    "title": {
+      "zh": "步进驱动 / 编码器修改 ID",
+      "en": "Stepper / encoder change ID"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "id/new_id 为不同的 0–253 整数；逐个接入设备，写入后验证新 ID。编码器与步进驱动共用此接口。",
+      "en": "Distinct id/new_id integers in 0–253; connect devices individually. Verifies the new ID. Shared by encoders and steppers."
+    },
+    "sample": {
+      "T": 720,
+      "id": 1,
+      "new_id": 2
+    }
+  },
+  {
+    "T": 721,
+    "title": {
+      "zh": "步进驱动模式",
+      "en": "Stepper mode"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "mode=0 位置、1 连续转动、2 从动。mode=2 必须提供 leader_id（从 ID，0–253，与本机主 ID 不同），其值与被跟随设备 ID 相同。模式写入关闭输出；0/1 切换无需重启。",
+      "en": "mode=0 position, 1 velocity, 2 follower. Mode 2 requires leader_id (secondary ID, 0–253, distinct from own primary ID) matching the leader. Mode writes disable output; switching 0/1 needs no restart."
+    },
+    "sample": {
+      "T": 721,
+      "id": 1,
+      "mode": 0
+    }
+  },
+  {
+    "T": 722,
+    "title": {
+      "zh": "步进驱动位置基准",
+      "en": "Stepper position reference"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 722,
+      "id": 1,
+      "pos": 0
+    }
+  },
+  {
+    "T": 723,
+    "title": {
+      "zh": "步进驱动反馈",
+      "en": "Stepper feedback"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 723,
+      "id": 1
+    }
+  },
+  {
+    "T": 724,
+    "title": {
+      "zh": "步进驱动位置目标",
+      "en": "Stepper position target"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "pos=0–65534，speed=1–32767，acc=0–254，current=0–1000。原始寄存器单位，current 不是安培。需先设位置模式并使能。",
+      "en": "pos=0–65534, speed=1–32767, acc=0–254, current=0–1000. Register units; current is not amperes. Set position mode and enable first."
+    },
+    "sample": {
+      "T": 724,
+      "id": 1,
+      "pos": 3200,
+      "speed": 100,
+      "acc": 10,
+      "current": 150
+    }
+  },
+  {
+    "T": 725,
+    "title": {
+      "zh": "步进驱动连续速度",
+      "en": "Stepper continuous speed"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "speed=-32767–32767，0 停止；acc=0–254，current=0–1000。先设连续模式并使能。",
+      "en": "speed=-32767–32767, 0 stops; acc=0–254, current=0–1000. Set velocity mode and enable first."
+    },
+    "sample": {
+      "T": 725,
+      "id": 1,
+      "speed": 0,
+      "acc": 10,
+      "current": 150
+    }
+  },
+  {
+    "T": 726,
+    "title": {
+      "zh": "步进驱动输出开关",
+      "en": "Stepper output enable"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "enable=0 失能，1 使能。",
+      "en": "enable=0 disables output, 1 enables it."
+    },
+    "sample": {
+      "T": 726,
+      "id": 1,
+      "enable": 0
+    }
+  },
+  {
+    "T": 730,
+    "title": {
+      "zh": "编码器位置基准",
+      "en": "Encoder position reference"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "pos=0–65534；当前位置基准写入设备，不产生运动。",
+      "en": "pos=0–65534; saves current position reference without motion."
+    },
+    "sample": {
+      "T": 730,
+      "id": 1,
+      "pos": 0
+    }
+  },
+  {
+    "T": 732,
+    "title": {
+      "zh": "编码器位置与速度",
+      "en": "Encoder position and speed"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "返回 pos/speed；每圈 4096 计数，多圈位置 0–65534，掉电不保留累计圈数。",
+      "en": "Returns pos/speed; 4096 counts/turn, multi-turn position 0–65534. Accumulated turns do not survive power loss."
+    },
+    "sample": {
+      "T": 732,
+      "id": 1
+    }
+  },
+  {
+    "T": 740,
+    "title": {
+      "zh": "读取板载惯性传感器",
+      "en": "Read onboard IMU"
+    },
+    "group": {
+      "zh": "板载惯性传感器",
+      "en": "Onboard IMU"
+    },
+    "note": {
+      "zh": "按示例字段设置参数；执行前确认目标设备和供电。",
+      "en": "Set fields as shown; verify target hardware and power before execution."
+    },
+    "sample": {
+      "T": 740
+    }
+  }
+]

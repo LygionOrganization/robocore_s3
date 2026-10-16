@@ -16,7 +16,7 @@ ScreenCtrl::ScreenCtrl() {
 }
 
 void ScreenCtrl::init() {
-    if (!display.begin(0x3C, 0x3C)) { // Default I2C address is 0x3C
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C, true, false)) { // Default I2C address is 0x3C
         // Initialization failed, handle error here (e.g., log or retry)
         return;
     }

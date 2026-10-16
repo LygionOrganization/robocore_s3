@@ -1,3 +1,4 @@
+#include "UsbOutput.h"
 #include "FilesCtrl.h"
 #include <nvs_flash.h>
 #include <esp_system.h>
@@ -10,32 +11,32 @@ JsonDocument cmdJson;
 void FilesCtrl::init() {
     if (!flashStatus) {
         if (nvs_flash_init() == ESP_OK) {
-            Serial.println("nvs_flash_init() success");
+            usbOutput.println("nvs_flash_init() success");
             Serial0.println("nvs_flash_init() success");
         } else {
-            Serial.println("nvs_flash_init() failed");
+            usbOutput.println("nvs_flash_init() failed");
             Serial0.println("nvs_flash_init() failed");
         }
         if (LittleFS.begin()) {
-            Serial.println("LittleFS.begin() success");
+            usbOutput.println("LittleFS.begin() success");
             Serial0.println("LittleFS.begin() success");
         } else {
-            Serial.println("LittleFS.begin() failed");
+            usbOutput.println("LittleFS.begin() failed");
             Serial0.println("LittleFS.begin() failed");
-            Serial.println("LittleFS.begin() failed. Formatting...");
+            usbOutput.println("LittleFS.begin() failed. Formatting...");
             Serial0.println("LittleFS.begin() failed. Formatting...");
             if (LittleFS.format()) {
-                Serial.println("Flash formatted successfully.");
+                usbOutput.println("Flash formatted successfully.");
                 Serial0.println("Flash formatted successfully.");
                 if (LittleFS.begin()) {
-                  Serial.println("LittleFS initialized successfully after formatting.");
+                  usbOutput.println("LittleFS initialized successfully after formatting.");
                   Serial0.println("LittleFS initialized successfully after formatting.");
                 } else {
-                  Serial.println("LittleFS initialization failed after formatting.");
+                  usbOutput.println("LittleFS initialization failed after formatting.");
                   Serial0.println("LittleFS initialization failed after formatting.");
                 }
             } else {
-                Serial.println("Flash formatting failed.");
+                usbOutput.println("Flash formatting failed.");
                 Serial0.println("Flash formatting failed.");
             }
         }
@@ -46,7 +47,7 @@ void FilesCtrl::init() {
 void FilesCtrl::flash() {
     if (flashStatus) {
         LittleFS.format();
-        Serial.println("=== LittleFS formatted ===");
+        usbOutput.println("=== LittleFS formatted ===");
         Serial0.println("=== LittleFS formatted ===");
     }
 }
@@ -55,13 +56,13 @@ void FilesCtrl::scan() {
     if (flashStatus) {
         File root = LittleFS.open("/");
         File file = root.openNextFile();
-        Serial.println("=== Scaning Files ===");
+        usbOutput.println("=== Scaning Files ===");
         Serial0.println("=== Scaning Files ===");
         while (file) {
-            Serial.print("file name: ");
-            Serial.print(file.name());
-            Serial.print(" file size: ");
-            Serial.println(file.size());
+            usbOutput.print("file name: ");
+            usbOutput.print(file.name());
+            usbOutput.print(" file size: ");
+            usbOutput.println(file.size());
             Serial0.print("file name: ");
             Serial0.print(file.name());
             Serial0.print(" file size: ");
@@ -74,7 +75,7 @@ void FilesCtrl::scan() {
 void FilesCtrl::createMission(String missionName, String contentInput) {
     if (flashStatus) {
         if (LittleFS.exists("/" + missionName + ".mission")) {
-            Serial.println("file already exists");
+            usbOutput.println("file already exists");
             Serial0.println("file already exists");
             return;
         }
@@ -83,17 +84,17 @@ void FilesCtrl::createMission(String missionName, String contentInput) {
         File file = LittleFS.open("/" + missionName + ".mission", FILE_APPEND);
         if (file) {
             if(file.println(contentInput) == 0){
-                Serial.println("file write failed");
+                usbOutput.println("file write failed");
                 Serial0.println("file write failed");
             } else {
-                Serial.println("file write succeed");
+                usbOutput.println("file write succeed");
                 Serial0.println("file write succeed");
             }
             file.close();
-            Serial.println("file created");
+            usbOutput.println("file created");
             Serial0.println("file created");
         } else {
-            Serial.println("file creation failed");
+            usbOutput.println("file creation failed");
             Serial0.println("file creation failed");
         }
     }
@@ -102,16 +103,16 @@ void FilesCtrl::createMission(String missionName, String contentInput) {
 void FilesCtrl::missionContent(String missionName) {
     File file = LittleFS.open("/" + missionName + ".mission", "r");
     if (!file) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return;
     }
     String firstLine = file.readStringUntil('\n');
-    Serial.println("=== File Content ===");
-    Serial.print("File Name: ");
-    Serial.println(missionName);
-    Serial.print("Intro: ");
-    Serial.println(firstLine);
+    usbOutput.println("=== File Content ===");
+    usbOutput.print("File Name: ");
+    usbOutput.println(missionName);
+    usbOutput.print("Intro: ");
+    usbOutput.println(firstLine);
     Serial0.println("=== File Content ===");
     Serial0.print("File Name: ");
     Serial0.println(missionName);
@@ -121,8 +122,8 @@ void FilesCtrl::missionContent(String missionName) {
     while (file.available()) {
 		_lineNum++;
 		String line = file.readStringUntil('\n');
-		Serial.print("[StepNum: ");Serial.print(_lineNum);Serial.print(" ] - ");
-		Serial.println(line);
+		usbOutput.print("[StepNum: ");usbOutput.print(_lineNum);usbOutput.print(" ] - ");
+		usbOutput.println(line);
         Serial0.print("[StepNum: ");Serial0.print(_lineNum);Serial0.print(" ] - ");
 		Serial0.println(line);
     }
@@ -131,46 +132,46 @@ void FilesCtrl::missionContent(String missionName) {
 
 void FilesCtrl::appendStep(String missionName, String jsonCmd) {
     if (!LittleFS.exists("/" + missionName + ".mission")) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return;
     }
     DeserializationError err = deserializeJson(cmdJson, jsonCmd);
 	if (err == DeserializationError::Ok) {
-		Serial.println("json parsing succeed.");
+		usbOutput.println("json parsing succeed.");
         Serial0.println("json parsing succeed.");
         File file = LittleFS.open("/" + missionName + ".mission", "a");
         if(!file){
-            Serial.println("Error opening file for appending.");
+            usbOutput.println("Error opening file for appending.");
             Serial0.println("Error opening file for appending.");
             return;
         }
         file.println(jsonCmd);
         file.close();
-        Serial.println("=== Edited File ===");
+        usbOutput.println("=== Edited File ===");
         Serial0.println("=== Edited File ===");
         FilesCtrl::missionContent(missionName);
 		cmdJson.clear();
 	} else {
 		cmdJson.clear();
-		Serial.println("[deserializeJson err]");
+		usbOutput.println("[deserializeJson err]");
         Serial0.println("[deserializeJson err]");
 	}
 }
 
 void FilesCtrl::insertStep(String missionName, int stepNum, String jsonCmd) {
     if (!LittleFS.exists("/" + missionName + ".mission")) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return;
     }
     DeserializationError err = deserializeJson(cmdJson, jsonCmd);
     if (err == DeserializationError::Ok) {
-        Serial.println("json parsing succeed.");
+        usbOutput.println("json parsing succeed.");
         Serial0.println("json parsing succeed.");
         File file = LittleFS.open("/" + missionName + ".mission", "r");
         if(!file){
-        Serial.println("Error opening file for inserting.");
+        usbOutput.println("Error opening file for inserting.");
         Serial0.println("Error opening file for inserting.");
         return;
         }
@@ -186,41 +187,41 @@ void FilesCtrl::insertStep(String missionName, int stepNum, String jsonCmd) {
         file.close();
         file = LittleFS.open("/" + missionName + ".mission", "w");
         if(!file){
-        Serial.println("Error opening file for inserting.");
+        usbOutput.println("Error opening file for inserting.");
         Serial0.println("Error opening file for inserting.");
         return;
         }
         file.print(_content);
         file.close();
-        Serial.println("=== Edited File ===");
+        usbOutput.println("=== Edited File ===");
         Serial0.println("=== Edited File ===");
         FilesCtrl::missionContent(missionName);
         cmdJson.clear();
     } else {
         cmdJson.clear();
-        Serial.println("[deserializeJson err]");
+        usbOutput.println("[deserializeJson err]");
         Serial0.println("[deserializeJson err]");
     }
 }
 
 void FilesCtrl::replaceStep(String missionName, int stepNum, String jsonCmd) {
     if (!LittleFS.exists("/" + missionName + ".mission")) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return;
     }
     if (stepNum < 1) {
-        Serial.println("stepNum should be greater than 0.");
+        usbOutput.println("stepNum should be greater than 0.");
         Serial0.println("stepNum should be greater than 0.");
         return;
     }
     DeserializationError err = deserializeJson(cmdJson, jsonCmd);
     if (err == DeserializationError::Ok) {
-        Serial.println("json parsing succeed.");
+        usbOutput.println("json parsing succeed.");
         Serial0.println("json parsing succeed.");
         File file = LittleFS.open("/" + missionName + ".mission", "r");
         if(!file){
-        Serial.println("Error opening file for replacing.");
+        usbOutput.println("Error opening file for replacing.");
         Serial0.println("Error opening file for replacing.");
         return;
         }
@@ -237,37 +238,37 @@ void FilesCtrl::replaceStep(String missionName, int stepNum, String jsonCmd) {
         file.close();
         file = LittleFS.open("/" + missionName + ".mission", "w");
         if(!file){
-        Serial.println("Error opening file for replacing.");
+        usbOutput.println("Error opening file for replacing.");
         Serial0.println("Error opening file for replacing.");
         return;
         }
         file.print(_content);
         file.close();
-        Serial.println("=== Edited File ===");
+        usbOutput.println("=== Edited File ===");
         Serial0.println("=== Edited File ===");
         FilesCtrl::missionContent(missionName);
         cmdJson.clear();
     } else {
         cmdJson.clear();
-        Serial.println("[deserializeJson err]");
+        usbOutput.println("[deserializeJson err]");
         Serial0.println("[deserializeJson err]");
     }
 }
 
 void FilesCtrl::deleteStep(String missionName, int stepNum) {
     if (!LittleFS.exists("/" + missionName + ".mission")) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return;
     }
     if (stepNum < 1) {
-        Serial.println("stepNum should be greater than 0.");
+        usbOutput.println("stepNum should be greater than 0.");
         Serial0.println("stepNum should be greater than 0.");
         return;
     }
     File file = LittleFS.open("/" + missionName + ".mission", "r");
     if(!file){
-        Serial.println("Error opening file for deleting.");
+        usbOutput.println("Error opening file for deleting.");
         Serial0.println("Error opening file for deleting.");
         return;
     }
@@ -283,31 +284,31 @@ void FilesCtrl::deleteStep(String missionName, int stepNum) {
     file.close();
     file = LittleFS.open("/" + missionName + ".mission", "w");
     if(!file){
-        Serial.println("Error opening file for deleting.");
+        usbOutput.println("Error opening file for deleting.");
         Serial0.println("Error opening file for deleting.");
         return;
     }
     file.print(_content);
     file.close();
-    Serial.println("=== Edited File ===");
+    usbOutput.println("=== Edited File ===");
     Serial0.println("=== Edited File ===");
     FilesCtrl::missionContent(missionName);
 }
 
 String FilesCtrl::readStep(String missionName, int stepNum) {
     if (!LittleFS.exists("/" + missionName + ".mission")) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return "";
     }
     if (stepNum < 1) {
-        Serial.println("stepNum should be greater than 0.");
+        usbOutput.println("stepNum should be greater than 0.");
         Serial0.println("stepNum should be greater than 0.");
         return "";
     }
     File file = LittleFS.open("/" + missionName + ".mission", "r");
     if(!file){
-        Serial.println("Error opening file for reading.");
+        usbOutput.println("Error opening file for reading.");
         Serial0.println("Error opening file for reading.");
         return "";
     }
@@ -323,12 +324,12 @@ String FilesCtrl::readStep(String missionName, int stepNum) {
 
 void FilesCtrl::deleteMission(String missionName) {
     if (!LittleFS.exists("/" + missionName + ".mission")) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return;
     }
     LittleFS.remove("/" + missionName + ".mission");
-    Serial.println("file deleted.");
+    usbOutput.println("file deleted.");
     Serial0.println("file deleted.");
 }
 
@@ -345,7 +346,7 @@ bool FilesCtrl::checkStepByType(String missionName, int cmdType) {
     }
     File file = LittleFS.open("/" + missionName + ".mission", "r");
     if(!file){
-        Serial.println("Error opening file for reading.");
+        usbOutput.println("Error opening file for reading.");
         return false;
     }
     file.readStringUntil('\n');
@@ -365,7 +366,7 @@ bool FilesCtrl::checkStepByType(String missionName, int cmdType) {
 
 bool FilesCtrl::checkReplaceStep(String missionName, String jsonCmd) {
     if (!LittleFS.exists("/" + missionName + ".mission")) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return false;
     }
@@ -373,13 +374,13 @@ bool FilesCtrl::checkReplaceStep(String missionName, String jsonCmd) {
     cmdJson.clear();
     DeserializationError err = deserializeJson(cmdJson, jsonCmd);
     if (err != DeserializationError::Ok) {
-        Serial.println("[deserializeJson err]");
+        usbOutput.println("[deserializeJson err]");
         Serial0.println("[deserializeJson err]");
         return false;
     }
 
     if (!cmdJson["T"].is<int>()) {
-        Serial.println("Invalid jsonCmd: missing 'T' field.");
+        usbOutput.println("Invalid jsonCmd: missing 'T' field.");
         Serial0.println("Invalid jsonCmd: missing 'T' field.");
         return false;
     }
@@ -387,7 +388,7 @@ bool FilesCtrl::checkReplaceStep(String missionName, String jsonCmd) {
 
     File file = LittleFS.open("/" + missionName + ".mission", "r");
     if (!file) {
-        Serial.println("Error opening file for reading.");
+        usbOutput.println("Error opening file for reading.");
         Serial0.println("Error opening file for reading.");
         return false;
     }
@@ -407,10 +408,10 @@ bool FilesCtrl::checkReplaceStep(String missionName, String jsonCmd) {
             replaced = true; // Mark as replaced for each matching line
         } else {
             _content += line + "\n"; // Keep the line if not matching
-            Serial.print("read: ");
-            Serial.println(cmdJson["T"].as<int>());
-            Serial.print("target: ");
-            Serial.println(targetT);
+            usbOutput.print("read: ");
+            usbOutput.println(cmdJson["T"].as<int>());
+            usbOutput.print("target: ");
+            usbOutput.println(targetT);
             Serial0.print("read: ");
             Serial0.println(cmdJson["T"].as<int>());
             Serial0.print("target: ");
@@ -422,7 +423,7 @@ bool FilesCtrl::checkReplaceStep(String missionName, String jsonCmd) {
     // Write the updated content back to the file
     file = LittleFS.open("/" + missionName + ".mission", "w");
     if (!file) {
-        Serial.println("Error opening file for writing.");
+        usbOutput.println("Error opening file for writing.");
         Serial0.println("Error opening file for writing.");
         return false;
     }
@@ -432,12 +433,12 @@ bool FilesCtrl::checkReplaceStep(String missionName, String jsonCmd) {
     // Append the new jsonCmd if replacement occurred
     if (replaced) {
         appendStep(missionName, jsonCmd);
-        Serial.println("Step replaced successfully.");
+        usbOutput.println("Step replaced successfully.");
         Serial0.println("Step replaced successfully.");
         return true;
     } else {
         appendStep(missionName, jsonCmd);
-        Serial.println("No matching step found to replace. Appended instead.");
+        usbOutput.println("No matching step found to replace. Appended instead.");
         Serial0.println("No matching step found to replace. Appended instead.");
         return true;
     }
@@ -445,14 +446,14 @@ bool FilesCtrl::checkReplaceStep(String missionName, String jsonCmd) {
 
 String FilesCtrl::findCmdByType(String missionName, int cmdType) {
     if (!LittleFS.exists("/" + missionName + ".mission")) {
-        Serial.println("file not found.");
+        usbOutput.println("file not found.");
         Serial0.println("file not found.");
         return "";
     }
 
     File file = LittleFS.open("/" + missionName + ".mission", "r");
     if (!file) {
-        Serial.println("Error opening file for reading.");
+        usbOutput.println("Error opening file for reading.");
         Serial0.println("Error opening file for reading.");
         return "";
     }

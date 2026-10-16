@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>RoboCore · Console</title>
+<style>
+:root{--bg:#f4f7fb;--ink:#182640;--muted:#64748b;--blue:#245ddd;--line:#dce4ef;--teal:#087c70;--red:#b53342;--white:#fff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}button{cursor:pointer;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:9px 16px;background:white;color:var(--ink);font-weight:600}button:hover{border-color:var(--blue);background:#f0f5ff}button:disabled{opacity:.5;cursor:wait}button.primary{background:var(--blue);border-color:var(--blue);color:white}button.danger{color:var(--red);background:#fff1f2;border-color:#f1c7cd}a{color:var(--blue)}:focus-visible{outline:3px solid #8cb7ff;outline-offset:3px}.layout{display:grid;grid-template-columns:224px 1fr;min-height:100vh}.sidebar{background:white;border-right:1px solid var(--line);padding:28px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}.brand{display:flex;align-items:center;gap:10px;padding:0 10px 24px;font-size:21px;font-weight:750;letter-spacing:-.7px}.mark{display:grid;place-items:center;background:var(--blue);color:white;width:36px;height:36px;border-radius:12px;font-size:22px}.subbrand{font-size:11px;letter-spacing:2px;color:var(--muted);margin:-20px 0 30px 57px}.nav{display:grid;gap:6px}.nav button{display:flex;gap:12px;text-align:left;border-color:transparent;font-weight:500;color:var(--muted)}.nav button[aria-current=page]{background:#eaf0ff;color:var(--blue);font-weight:700}.nav span{width:6px;height:6px;background:var(--blue);border-radius:50%;flex-shrink:0;align-self:center}.sidebar-foot{margin-top:auto;padding:20px 10px 0;font-size:12px;color:var(--muted)}main{padding:0 40px 40px;max-width:1500px;width:100%;margin:auto}.topbar{height:88px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}.crumb{font-size:13px;color:var(--muted)}.connection{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap}.dot{width:8px;height:8px;background:#b8c2d1;border-radius:50%}.online .dot{background:#12a386;box-shadow:0 0 0 4px #e4f6f0}.heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:24px}.eyebrow{color:var(--blue);font-size:11px;font-weight:750;letter-spacing:2px;margin:0 0 6px}h1{font-size:30px;line-height:1.25;letter-spacing:-1px;margin:0 0 9px}h2{font-size:18px;letter-spacing:-.3px;margin:0 0 8px}h3{font-size:15px;margin:0 0 6px}p{margin:0 0 14px}.muted{color:var(--muted)}.small{font-size:12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.card{background:white;border:1px solid var(--line);border-radius:16px;padding:24px;min-width:0;box-shadow:0 3px 12px #1f345405}.card.full{grid-column:1/-1}.hero{background:linear-gradient(120deg,#eaf2ff,#f2faff);border:1px solid #ccddf6;display:flex;justify-content:space-between;gap:28px;margin-bottom:22px;padding:30px;border-radius:18px}.hero h2{font-size:25px}.hero p{max-width:560px}.board-art{width:155px;height:132px;flex-shrink:0;border:2px solid #87a7d3;background:#dae8fc;border-radius:15px;display:grid;place-items:center;position:relative;transform:rotate(-6deg)}.chip{border:8px solid #89a8d0;background:#315779;color:#fff;padding:10px;font:12px/1.4 monospace;text-align:center}.board-art:before,.board-art:after{content:"";position:absolute;left:10px;right:10px;height:9px;border-top:4px dotted #7198c9}.board-art:before{top:10px}.board-art:after{bottom:6px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}.stat{padding:18px 20px;background:#fff;border:1px solid var(--line);border-radius:14px}.stat strong{display:block;font-size:21px;font-weight:650;margin-top:5px}.stat small{color:var(--muted)}.badge{display:inline-block;background:#e8f7f2;color:var(--teal);font-size:12px;padding:3px 9px;border-radius:6px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}.fields label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#4d607c}.fields input,.fields select,textarea{width:100%;border:1px solid #cdd7e5;border-radius:9px;background:#fcfdff;color:var(--ink);padding:10px 12px;min-height:44px}.fields .wide{grid-column:1/-1}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.note{background:#f4f7fc;border-left:3px solid #8aa9dd;padding:12px 15px;font-size:13px;color:#536783;border-radius:0 8px 8px 0;margin:15px 0}.note.warning{background:#fff8e9;border-color:#e5b957;color:#856526}.ids{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px;min-height:44px}.ids button{background:#edf4ff;color:var(--blue);border-color:#ccdbf5;font:600 15px monospace;min-width:57px}.result{background:#f5f8fc;border:1px solid #e4ebf4;border-radius:10px;padding:14px;font:12px/1.6 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto;margin:16px 0 0}.empty{color:var(--muted);font-size:13px}.page[hidden]{display:none}textarea{min-height:160px;font:14px/1.6 ui-monospace,Consolas,monospace;resize:vertical}.steps{counter-reset:steps;padding:0;list-style:none;display:grid;gap:18px;margin:22px 0 0}.steps li{counter-increment:steps;display:flex;gap:13px}.steps li:before{content:counter(steps);width:26px;height:26px;flex-shrink:0;border-radius:8px;background:#eaf0ff;color:var(--blue);text-align:center;font-weight:700}.toast{position:fixed;bottom:22px;right:24px;left:248px;max-width:700px;margin:auto;background:#203958;color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 8px 30px #142c5430;z-index:5}.toast[hidden]{display:none}.telemetry{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.telemetry div{background:#f1f6fd;border-radius:10px;padding:12px}.telemetry strong{display:block;font-size:19px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}footer{font-size:12px;color:var(--muted);padding:30px 0 0}.tagline{display:flex;align-items:center;gap:10px}.divider{margin:24px 0;border:0;border-top:1px solid var(--line)}
+@media(min-width:1250px){main{padding-left:50px;padding-right:50px}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1000px){.layout{grid-template-columns:190px 1fr}.sidebar{padding:24px 10px}main{padding:0 24px 30px}.grid.three{grid-template-columns:1fr}.toast{left:210px}.board-art{display:none}.fields{gap:10px}.card{padding:20px}}
+@media(max-width:720px){.layout{display:block}.sidebar{height:auto;position:static;padding:18px 16px 0;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:0 0 14px}.subbrand,.sidebar-foot{display:none}.nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:12px}.nav button{flex-shrink:0;padding:8px 12px;min-height:42px}.nav span{display:none}main{padding:0 16px 28px}.topbar{height:66px;margin-bottom:22px}.crumb{font-size:12px}.grid{grid-template-columns:1fr;gap:16px}.heading{align-items:flex-start}h1{font-size:26px}.heading p{font-size:13px}.hero{padding:23px}.hero h2{font-size:23px}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:16px}.stat small{font-size:11px}.toast{left:16px;right:16px;bottom:16px}.card{padding:20px}.heading>.badge{display:none}.topbar .danger{padding:7px 10px;font-size:12px}.connection{font-size:12px}.fields{gap:12px}.hero .eyebrow{font-size:10px}.result{max-height:220px}}
+#languageToggle{font-size:13px;flex-shrink:0}@media(max-width:480px){.topbar{height:auto;min-height:76px;flex-wrap:wrap;padding:12px 0;gap:8px}.topbar .actions{margin-left:auto;gap:7px}}
+.command-entry{border-top:1px solid var(--line);padding:12px 0}.command-entry summary{cursor:pointer;font-weight:600;min-height:36px}.command-entry p{margin-top:12px}.command-entry .actions{margin-top:12px}#commandList{max-height:520px;overflow:auto}.file-label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.file-label input{max-width:100%;min-width:0}#missionSteps{min-height:220px}@media(max-width:480px){#json .fields{grid-template-columns:1fr}}
+.password-field{position:relative;display:block}.password-field input{padding-right:44px}.password-field button{position:absolute;right:1px;top:1px;min-height:42px;height:42px;width:42px;padding:8px;border:0;background:transparent;display:grid;place-items:center}
+.servo-group{margin-bottom:32px;padding-top:8px}.servo-group>h2{font-size:22px;border-bottom:2px solid var(--line);padding-bottom:12px;margin-bottom:18px}.servo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:1100px){.servo-grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="layout"><aside class="sidebar"><div class="brand"><span class="mark">R</span>RoboCore</div><div class="subbrand">LYGION ROBOTICS</div>
+<nav class="nav" aria-label="Main navigation">
+<button data-page="overview" aria-current="page"><span></span>Dashboard</button><button data-page="devices"><span></span>Bus devices</button><button data-page="node"><span></span>TTL Node</button><button data-page="stepper"><span></span>Stepper driver</button><button data-page="encoder"><span></span>Encoder</button><button data-page="servo"><span></span>Bus servos</button><button data-page="imu"><span></span>Onboard IMU</button><button data-page="json"><span></span>JSON tools</button><button data-page="settings"><span></span>Settings</button>
+</nav><div class="sidebar-foot">One workspace for your robot.<br>RoboCore S3<br><a href="#json">JSON tools</a></div></aside>
+<main><header class="topbar"><div class="crumb">LYGION / <span id="crumb">Dashboard</span></div><div class="actions"><button id="languageToggle" type="button" aria-label="Switch to Chinese" lang="zh-CN">中文</button><div class="connection" id="connection"><span class="dot"></span><span id="connectionText">Connecting</span></div></div></header>
+<section class="page" id="overview"><div class="heading"><div><h1>Simple connections. Build quickly.</h1><p class="muted">Scan bus devices and run your first command.</p></div><span class="badge">Local console · Works offline</span></div>
+<div class="hero"><div><p class="eyebrow">YOUR ROBOT STARTS HERE</p><h2>Small controller. More possibilities.</h2><p class="muted">Configure servos, steppers, encoders and I/O in one console. Scan device IDs, then choose a device panel.</p><button class="primary" data-goto="devices">Scan bus devices →</button></div><div class="board-art" aria-hidden="true"><div class="chip">LYGION<br>ESP32-S3</div></div></div>
+<div class="stats"><div class="stat"><small>Bus baud rate</small><strong id="baudStat">—</strong></div><div class="stat"><small>Devices found</small><strong id="deviceStat">Not scanned</strong></div><div class="stat"><small>QMI8658A</small><strong id="imuStat">Detecting</strong></div></div>
+<div class="grid"><article class="card"><h2>Get started in three steps</h2><ol class="steps"><li><div><h3>Connect and power up</h3><span class="muted small">Match the supply voltage and wiring to every connected bus device.</span></div></li><li><div><h3>Scan device IDs</h3><span class="muted small">Use one baud rate and a unique ID for each device on the bus.</span></div></li><li><div><h3>Choose a device panel</h3><span class="muted small">Read status first, then configure parameters or try low-speed motion.</span></div></li></ol></article><article class="card"><h2>Connection notes</h2><div class="note warning">RoboCore S3 accepts 5–48V. Powered bus outputs carry the input voltage. Never apply 48V to low-voltage servos.</div><p class="muted small">GH1.25-3P provides board-to-board TTL communication and power decoupling.</p><p class="muted small">Stop loop exits a mission loop; it does not disable all motors. Use the device stop or disable control to stop motion.</p></article></div></section>
+<section class="page" id="devices" hidden><div class="heading"><div><h1>Scan bus devices</h1><p class="muted">Make sure connected bus devices have unique IDs.</p></div></div><div class="grid"><article class="card"><h2>Scan range</h2><p class="muted small">Scan IDs 0–253 at the current baud rate. A full scan can take several seconds.</p><form id="scanForm"><div class="fields"><label>First ID<input name="first" type="number" min="0" max="253" value="0" required></label><label>Last ID<input name="last" type="number" min="0" max="253" value="253" required></label></div><button class="primary" type="submit">Start scan</button></form><div id="ids" class="ids"><span class="empty">Scan results will appear here.</span></div><p class="small muted" id="scanInfo"></p></article><article class="card"><h2>No devices found?</h2><ol class="steps"><li><div>Check external motor power. A USB connection does not power the bus devices.</div></li><li><div>Check signal wiring, common ground and device baud rate.</div></li><li><div>Connect devices with duplicate IDs one at a time to change their IDs. A scan cannot detect ID conflicts.</div></li></ol><div class="note">Select a result ID to fill the device panels. Choose the correct device type yourself.</div><button data-goto="settings">Change bus baud rate →</button></article></div></section>
+<section class="page" id="node" hidden><div class="heading"><div><p class="eyebrow">TTL NODE (A)</p><h1>Connect peripherals to the bus</h1><p class="muted">PWM outputs, RGB indicators and 16-channel S.BUS.</p></div></div><div class="grid" id="nodeForms"></div></section>
+<section class="page" id="stepper" hidden><div class="heading"><div><p class="eyebrow">TTL STEPPER DRIVER</p><h1>Position and continuous motion</h1><p class="muted">Set the operating mode before enabling output and sending a target.</p></div></div><div class="note warning">Modes 0 / 1 switch without restarting; only phase configuration changes require a restart. For follower mode, set the secondary ID to the leader ID and follow the device guide for EDS wiring. Current parameters are register values, not amperes.</div><div class="grid" id="stepperForms"></div></section>
+<section class="page" id="encoder" hidden><div class="heading"><div><p class="eyebrow">TTL ENCODER</p><h1>Precise joint feedback over the bus</h1><p class="muted">Read position and speed, and set a mechanical reference point.</p></div></div><div class="note">4096 counts per turn; multi-turn position 0–65534. The calibrated reference is saved, but accumulated turn counts do not survive power loss.</div><div class="grid" id="encoderForms"></div></section>
+<section class="page" id="servo" hidden><div class="heading"><div><p class="eyebrow">BUS SERVOS</p><h1>Bus servo control</h1><p class="muted">Confirm the model and travel limits. Start at low speed.</p></div></div><div id="servoForms"></div><p class="note">STS / SMS share a protocol. Use JSON tools for synchronized commands and mission scripts.</p></section>
+<section class="page" id="imu" hidden><div class="heading"><div><p class="eyebrow">ON-BOARD SENSING</p><h1>Onboard IMU</h1><p class="muted">Six-axis QMI8658A data, sharing I²C with the OLED.</p></div></div><div class="grid"><article class="card"><h2>Read sensor</h2><p class="muted">If the IMU is not detected, check the sensor and shared I²C wiring. Other functions remain available.</p><button class="primary" id="readImu">Read once</button><pre class="result" id="imuResult">Waiting to read</pre></article><article class="card"><h2>About the data</h2><p>Acceleration: g<br>Angular velocity: °/s<br>Temperature: °C</p><p class="muted small">Configured range: ±8g / ±512°/s. These are physical sensor measurements, not fused Euler angles. Axes depend on the mounting orientation.</p></article></div></section>
+<section class="page" id="json" hidden><div class="heading"><div><p class="eyebrow">DEVELOPER TOOLS</p><h1>JSON console</h1><p class="muted">Send the same command over HTTP, WebSocket or USB CDC.</p></div></div><div class="grid"><article class="card"><h2>Send command</h2><div class="tabs"><button data-json='{"T":700,"first":0,"last":20}'>Scan</button><button data-json='{"T":713,"id":1}'>S.BUS</button><button data-json='{"T":732,"id":1}'>Encoder</button><button data-json='{"T":740}'>Onboard IMU</button></div><div class="tabs"><button data-json='{"T":204,"l1":"Hello, world!","l2":"Hello, world!","l3":"Hello, world!","l4":"Hello, world!"}'>OLED four lines</button><button data-json='{"T":206,"freq":1000,"duration":1000}'>External module buzzer</button><button data-json='{"T":410,"longrange":0}'>Initialize ESP-NOW</button><button data-json='{"T":411,"mode":1}'>Set ESP-NOW receive mode</button><button data-json='{"T":412}'>Read MAC address</button><button data-json='{"T":413,"mac":"FF:FF:FF:FF:FF:FF","data":"{\"T\":205}"}'>Send ESP-NOW JSON</button><button data-json='{"T":414,"mac":"FF:FF:FF:FF:FF:FF"}'>Add ESP-NOW peer</button></div><label for="jsonInput" class="small muted">One JSON object</label><textarea id="jsonInput" spellcheck="false">{"T":700,"first":0,"last":20}</textarea><div class="actions" style="margin-top:14px"><button id="sendJson" class="primary">Send command</button><button class="danger" id="stop">Stop loop</button><button id="clearLog">Clear log</button></div><div class="note">Only the latest pending command is kept. HTTP 202 means accepted, not executed. Results are matched by rid; timed-out commands are not retried automatically.</div></article><article class="card"><h2>Activity log</h2><pre id="log" class="result" style="max-height:460px;min-height:280px">Waiting for commands…</pre></article></div><div class="grid" style="margin-top:20px"><article class="card full"><h2>指令参考</h2><p class="small muted">选择示例只会填入编辑器，不会发送。请检查参数后再执行。</p><div class="fields"><label>搜索指令<input id="commandSearch" type="search"></label><label>指令分类<select id="commandGroup"><option value="">全部指令</option></select></label></div><p class="small muted"><span id="commandCount"></span> <span>条指令</span></p><div id="commandList"></div></article><article class="card full" id="missionEditor"><h2>自动化任务脚本</h2><p class="muted small">每行一个 JSON 对象，按顺序执行。保存不等于运行；运行按钮执行主板中已保存的版本。</p><div class="fields"><label>已保存任务<select id="savedMissions"><option value="">选择已保存任务</option></select></label><div class="actions"><button id="refreshMissions">刷新列表</button><button id="loadMission">读取任务</button><button id="deleteMission" class="danger">删除任务</button></div><label>任务名称<input id="missionName" value="demo" maxlength="32"></label><label>任务说明<input id="missionIntro" value="My first mission"></label></div><label for="missionSteps">任务步骤（JSON Lines）</label><textarea id="missionSteps" spellcheck="false" rows="8">{"T":740}
+{"T":51,"delay":500}
+{"T":740}</textarea><div class="note">最多 64 步。任务步骤不含 rid，也不能调用或编辑其它任务。boot_user 会在开机时自动循环执行，boot 为系统保留名称。</div><div class="actions"><button id="saveMission" class="primary">校验并保存到主板</button><button id="exportMission">导出文件</button><button id="openImportMission" type="button">导入文件</button><input type="file" id="importMission" accept="application/json,.json" hidden></div><div class="fields"><label>每步额外间隔（ms）<input id="missionInterval" type="number" min="0" max="60000" value="0"></label><label>循环次数（-1 为无限）<input id="missionLoops" type="number" min="-1" max="10000" value="1"></label></div><button id="runMission">运行已保存任务</button><p class="note warning">停止循环不会关闭电机输出。任务执行期间请先停止循环，再编辑或发送其它指令。上传中断后可从列表读取 draft_ 草稿恢复。</p><pre class="result" id="missionStatus" role="status">尚未执行</pre></article></div></section>
+<section class="page" id="settings" hidden><div class="heading"><div><p class="eyebrow">SETTINGS</p><h1>Connection and device settings</h1><p class="muted">Manage network and bus settings.</p></div></div><div class="grid"><article class="card"><h2>Wi-Fi settings</h2><p class="muted small">Changing settings may disconnect you. Reconnect to the new AP or router-assigned address.</p><p class="note" id="wifiStatus" role="status" aria-live="polite">Loading…</p><form id="wifiForm"><div class="fields"><label>AP name<input name="ap_ssid" value="Robot" maxlength="32" required></label><label>AP password<input name="ap_password" type="password" value="12345678" minlength="8" maxlength="63" required autocomplete="new-password"></label><label>Router SSID (optional)<input name="sta_ssid" maxlength="32" autocomplete="off"></label><label>Router password<input name="sta_password" type="password" maxlength="63" autocomplete="new-password"></label><label>AP channel<input name="channel" type="number" min="1" max="13" value="1" required></label></div><button class="primary" type="submit">Apply Wi-Fi settings</button></form></article><article class="card"><h2>Bus baud rate</h2><p class="muted small">Changes the controller baud rate only, not the baud rate stored in each device.</p><form id="baudForm"><div class="fields"><label class="wide">Baud rate<select name="baud"><option>1000000</option><option>500000</option><option>250000</option><option>115200</option><option>57600</option><option>38400</option><option>19200</option><option>9600</option></select></label></div><button type="submit">Apply to controller</button></form><hr class="divider"><h2>Controller info</h2><pre class="result" id="infoResult">Loading…</pre><a href="#json">JSON tools</a></article></div></section>
+<footer>LYGION ROBOTICS · Local device control · Firmware and guides: LygionOrganization</footer>
+</main></div><div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script>
+
+const translations = {
+"指令参考":"Command reference",
+"选择示例只会填入编辑器，不会发送。请检查参数后再执行。":"Loading an example only fills the editor. Check its parameters before sending.",
+"搜索指令":"Search commands",
+"指令分类":"Command category",
+"全部指令":"All commands",
+"条指令":"commands",
+"自动化任务脚本":"Mission scripts",
+"每行一个 JSON 对象，按顺序执行。保存不等于运行；运行按钮执行主板中已保存的版本。":"One JSON object per line, executed in order. Saving does not run a mission; Run uses the version saved on the board.",
+"已保存任务":"Saved missions",
+"选择已保存任务":"Choose a saved mission",
+"刷新列表":"Refresh list",
+"读取任务":"Load mission",
+"删除任务":"Delete mission",
+"任务名称":"Mission name",
+"任务说明":"Description",
+"任务步骤（JSON Lines）":"Mission steps (JSON Lines)",
+"最多 64 步。任务步骤不含 rid，也不能调用或编辑其它任务。boot_user 会在开机时自动循环执行，boot 为系统保留名称。":"Up to 64 steps. Steps cannot contain rid or invoke/edit other missions. boot_user loops at startup; boot is reserved for the system.",
+"校验并保存到主板":"Verify and save to board",
+"导出文件":"Export file",
+"导入文件":"Import file",
+"每步额外间隔（ms）":"Extra delay per step (ms)",
+"循环次数（-1 为无限）":"Repeat count (-1 for infinite)",
+"运行已保存任务":"Run saved mission",
+"停止循环不会关闭电机输出。任务执行期间请先停止循环，再编辑或发送其它指令。上传中断后可从列表读取 draft_ 草稿恢复。":"Stop loop does not disable motors. Stop a running mission before editing or sending other commands. Recover interrupted uploads by loading a draft_ entry.",
+"填入指令":"Load command",
+"加入脚本":"Add to script",
+"任务名称需为 1–32 位字母、数字、下划线或连字符；不能使用 boot 或 draft_ 前缀":"Use 1–32 ASCII letters, digits, underscores or hyphens; boot and draft_ prefixes are reserved",
+"任务读取结果不完整":"Incomplete mission response",
+"请先选择已保存任务":"Choose a saved mission first",
+"替换编辑器中的内容？未保存的修改将丢失。":"Replace the editor contents? Unsaved changes will be lost.",
+"已读取任务；运行前请确认步骤。":"Mission loaded; review the steps before running.",
+"任务说明最多 96 UTF-8 字节":"Description exceeds 96 UTF-8 bytes",
+"脚本需要 1–64 行 JSON 指令":"A script needs 1–64 JSON command lines",
+"JSON 解析失败，行号：":"Invalid JSON on line: ",
+"无效任务步骤，行号：":"Invalid mission step on line: ",
+"步骤过长：请缩短 JSON，使上传指令不超过 255 字节":"Step too long: shorten the JSON so the upload command fits in 255 bytes",
+"保存 boot_user 后，主板下次启动会自动循环执行这些步骤。继续？":"Saving boot_user makes these steps loop automatically at the next startup. Continue?",
+"覆盖已保存的同名任务？":"Overwrite the existing mission?",
+"正在保存草稿：":"Saving draft: ",
+"草稿校验失败；原任务未替换":"Draft verification failed; original mission was not replaced",
+"任务保存并校验成功。":"Mission saved and verified.",
+"运行参数无效":"Invalid run parameters",
+"运行主板中已保存的任务？编辑器中未保存的修改不会执行。任务可能使电机运动。":"Run the mission saved on the board? Unsaved editor changes will not run. This may move motors.",
+"任务已启动；可使用JSON 调试中的停止循环按钮退出。":"Mission started; use Stop loop in JSON tools to exit.",
+"永久删除所选任务？":"Permanently delete the selected mission?",
+"任务已删除。":"Mission deleted.",
+"导入文件过大":"Import file is too large",
+"导入文件格式无效":"Invalid import file format",
+"已导入编辑器，尚未保存到主板":"Imported into editor; not yet saved to board",
+"舵机":"Servos",
+"机械臂预设":"Arm presets",
+"外接模块":"External modules",
+"通信与系统":"Communication and system",
+"任务脚本":"Missions",
+"STS / SMS 使用同一协议。同步控制和自动化任务请使用 JSON 调试。":"STS / SMS share a protocol. Use JSON tools for synchronized commands and mission scripts.",
+
+  "RoboCore · 控制台": "RoboCore · Console",
+  "工作台": "Dashboard",
+  "总线设备": "Bus devices",
+  "步进驱动": "Stepper driver",
+  "编码器": "Encoder",
+  "设置设备 ID": "Set device ID",
+  "正在应用配置；连接路由器可能需要 30 秒。": "Applying settings; router connection can take 30 seconds.",
+  "连接中断，请重新连接热点后查看状态。": "Connection lost. Reconnect to the AP to check status.",
+  "已连接": "Connected",
+  "正在连接": "Connecting",
+  "连接未成功，请检查 2.4 GHz 网络、SSID 和密码；配置已保留，可重新应用。": "Connection unsuccessful. Check the 2.4 GHz network, SSID and password. Settings are retained; apply again to retry.",
+  "未设置路由器": "Router not configured",
+"OLED 四行文字":"OLED four lines",
+"外接模块蜂鸣器":"External module buzzer",
+"初始化 ESP-NOW":"Initialize ESP-NOW",
+"设置 ESP-NOW 接收模式":"Set ESP-NOW receive mode",
+"读取 MAC 地址":"Read MAC address",
+"发送 ESP-NOW JSON":"Send ESP-NOW JSON",
+"添加 ESP-NOW 对端":"Add ESP-NOW peer",
+  "总线舵机": "Bus servos",
+  "板载惯性传感器": "Onboard IMU",
+  "JSON 调试": "JSON tools",
+  "设置": "Settings",
+  "一个工作台，连接机器人。": "One workspace for your robot.",
+  "正在连接": "Connecting",
+  "停止循环": "Stop loop",
+  "简单连接 快速构建": "Simple connections. Build quickly.",
+  "从扫描总线设备，到完成第一次控制。": "Scan bus devices and run your first command.",
+  "本地控制台 · 无需联网": "Local console · Works offline",
+  "小巧主控，连接更多可能。": "Small controller. More possibilities.",
+  "舵机、步进电机、编码器与 I/O，在同一个控制台里设置。先扫描设备 ID，再选择对应组件开始调试。": "Configure servos, steppers, encoders and I/O in one console. Scan device IDs, then choose a device panel.",
+  "扫描总线设备 →": "Scan bus devices →",
+  "总线波特率": "Bus baud rate",
+  "已发现设备": "Devices found",
+  "未扫描": "Not scanned",
+  "检测中": "Detecting",
+  "三步开始": "Get started in three steps",
+  "连接并供电": "Connect and power up",
+  "确认总线设备的额定电压、线序与主控输入一致。": "Match the supply voltage and wiring to every connected bus device.",
+  "扫描设备 ID": "Scan device IDs",
+  "同一条总线使用相同波特率，每个设备使用独立 ID。": "Use one baud rate and a unique ID for each device on the bus.",
+  "选择设备组件": "Choose a device panel",
+  "先读取状态，再设置参数或执行低速运动。": "Read status first, then configure parameters or try low-speed motion.",
+  "连接说明": "Connection notes",
+  "RoboCore S3 支持 5–48V 输入，总线动力输出等于输入电压。48V 不能直接用于低压舵机。": "RoboCore S3 accepts 5–48V. Powered bus outputs carry the input voltage. Never apply 48V to low-voltage servos.",
+  "GH1.25-3P 用于板间 TTL 通信、供电解耦。": "GH1.25-3P provides board-to-board TTL communication and power decoupling.",
+  "“停止循环”用于退出任务循环，不等于关闭所有电机输出。电机停止请使用对应设备的停止/失能控制。": "Stop loop exits a mission loop; it does not disable all motors. Use the device stop or disable control to stop motion.",
+  "扫描总线设备": "Scan bus devices",
+  "请确保当前已连接的总线设备没有重复 ID。": "Make sure connected bus devices have unique IDs.",
+  "扫描范围": "Scan range",
+  "当前波特率下扫描 0–253。全范围可能需要数秒。": "Scan IDs 0–253 at the current baud rate. A full scan can take several seconds.",
+  "起始 ID": "First ID",
+  "结束 ID": "Last ID",
+  "开始扫描": "Start scan",
+  "扫描结果会显示在这里。": "Scan results will appear here.",
+  "没有发现设备？": "No devices found?",
+  "检查外部动力供电，USB 连接不等于总线设备已供电。": "Check external motor power. A USB connection does not power the bus devices.",
+  "核对信号和地线，以及设备波特率。": "Check signal wiring, common ground and device baud rate.",
+  "多个同 ID 设备请逐个接入并修改 ID，扫描不能识别同 ID 冲突。": "Connect devices with duplicate IDs one at a time to change their IDs. A scan cannot detect ID conflicts.",
+  "点击结果中的 ID，会填入各控制组件。设备类型请自行选择。": "Select a result ID to fill the device panels. Choose the correct device type yourself.",
+  "修改总线波特率 →": "Change bus baud rate →",
+  "将多种外设并入总线": "Connect peripherals to the bus",
+  "PWM 输出、RGB 状态灯与 16 通道 S.BUS。": "PWM outputs, RGB indicators and 16-channel S.BUS.",
+  "精准定位，连续运动": "Position and continuous motion",
+  "设置工作模式后，再启用输出与发送目标。": "Set the operating mode before enabling output and sending a target.",
+  "模式 0 / 1 可直接切换，无需重启；只有更改相位配置才需要重启。配置从动同步前请按教程处理 EDS 接线。从动模式还需把从 ID 设为被跟随设备的主 ID，再按产品教程连接 EDS。电流参数是寄存器值，不是安培。": "Modes 0 / 1 switch without restarting; only phase configuration changes require a restart. For follower mode, set the secondary ID to the leader ID and follow the device guide for EDS wiring. Current parameters are register values, not amperes.",
+  "通过总线精准反馈关节动作": "Precise joint feedback over the bus",
+  "读取当前位置与速度，设置机械参考点。": "Read position and speed, and set a mechanical reference point.",
+  "单圈 4096 计数，多圈位置 0–65534。位置基准校准会保存，多圈累计圈数不掉电保存。": "4096 counts per turn; multi-turn position 0–65534. The calibrated reference is saved, but accumulated turn counts do not survive power loss.",
+  "总线舵机控制": "Bus servo control",
+  "先确认型号与机械行程，使用低速开始。": "Confirm the model and travel limits. Start at low speed.",
+  "STS / SMS 共用控制协议。多轴同步、任务脚本与其他高级操作可使用 ": "STS / SMS share a protocol. For multi-axis synchronization, missions and other advanced operations, use the ",
+  "感知姿态与运动": "Sense motion",
+  "QMI8658A 六轴数据，与 OLED 共用 I²C。": "Six-axis QMI8658A data, sharing I²C with the OLED.",
+  "读取传感器": "Read sensor",
+  "未检测到 IMU 时，请检查传感器与共享 I²C 接线；其他功能可继续使用。": "If the IMU is not detected, check the sensor and shared I²C wiring. Other functions remain available.",
+  "读取一次": "Read once",
+  "等待读取": "Waiting to read",
+  "数据说明": "About the data",
+  "加速度：g": "Acceleration: g",
+  "角速度：°/s": "Angular velocity: °/s",
+  "温度：°C": "Temperature: °C",
+  "当前配置为 ±8g / ±512°/s。显示的是原始物理量，不是经过融合计算的欧拉角。坐标方向以实际安装姿态为准。": "Configured range: ±8g / ±512°/s. These are physical sensor measurements, not fused Euler angles. Axes depend on the mounting orientation.",
+  "JSON 调试台": "JSON console",
+  "相同的命令，可通过 HTTP、WebSocket 或 USB CDC 发送。": "Send the same command over HTTP, WebSocket or USB CDC.",
+  "发送指令": "Send command",
+  "扫描": "Scan",
+  "单条 JSON 对象": "One JSON object",
+  "清空记录": "Clear log",
+  "待执行命令只保留最新一条。HTTP 202 表示接收，不表示设备执行成功。界面通过 rid 匹配结果，超时不会自动重发。": "Only the latest pending command is kept. HTTP 202 means accepted, not executed. Results are matched by rid; timed-out commands are not retried automatically.",
+  "交互记录": "Activity log",
+  "等待指令…": "Waiting for commands…",
+  "连接与设备设置": "Connection and device settings",
+  "网络配置与总线配置集中管理。": "Manage network and bus settings.",
+  "Wi-Fi 配置": "Wi-Fi settings",
+  "修改后连接可能中断，请连接新热点或路由器分配的新地址。": "Changing settings may disconnect you. Reconnect to the new AP or router-assigned address.",
+  "热点名称": "AP name",
+  "热点密码": "AP password",
+  "路由器 SSID（可选）": "Router SSID (optional)",
+  "路由器密码": "Router password",
+  "热点信道": "AP channel",
+  "应用 Wi-Fi 配置": "Apply Wi-Fi settings",
+  "只改变主控通信速率，不会修改总线设备内部的波特率。": "Changes the controller baud rate only, not the baud rate stored in each device.",
+  "波特率": "Baud rate",
+  "应用到主控": "Apply to controller",
+  "主控信息": "Controller info",
+  "正在获取…": "Loading…",
+  "LYGION ROBOTICS · 本地设备控制 · 固件与教程：LygionOrganization": "LYGION ROBOTICS · Local device control · Firmware and guides: LygionOrganization",
+  "设备已连接": "Device connected",
+  "重连中 · HTTP 可用": "Reconnecting · HTTP available",
+  "正在等待上一条指令，请稍候": "Waiting for the previous command; please wait",
+  "JSON 必须是包含整数 T 的对象": "JSON must be an object containing an integer T",
+  "指令超过 255 字节，请缩短内容": "Command exceeds 255 bytes; shorten it",
+  "已请求停止循环；不是电机急停": "Loop stop requested; this is not a motor emergency stop",
+  "已发送，等待执行结果…": "Sent; waiting for execution result…",
+  "设备执行失败": "Device execution failed",
+  "结果超时：指令可能被覆盖、任务仍在执行或连接已中断，请先读取状态确认。": "Result timed out: the command may have been replaced, still be running, or the connection may be lost. Read status before retrying.",
+  "设备 ID": "Device ID",
+  "发送": "Send",
+  "尚未执行": "Not run yet",
+  "指令结果已更新": "Command result updated",
+  "PWM 输出": "PWM output",
+  "通道 1 / 2，占空比 0–1000（0–100%）。": "Channels 1 / 2; duty cycle 0–1000 (0–100%).",
+  "通道": "Channel",
+  "PWM 值": "PWM value",
+  "设置 PWM": "Set PWM",
+  "RGB 状态灯": "RGB indicators",
+  "0 为两组灯，1 / 2 为单组。颜色使用 SDK 原始量化值。": "0 selects both groups; 1 / 2 selects one group. Colors use raw SDK quantized values.",
+  "灯通道（0=全部）": "LED group (0=all)",
+  "红色": "Red",
+  "绿色": "Green",
+  "蓝色": "Blue",
+  "更新颜色": "Update color",
+  "读取 S.BUS": "Read S.BUS",
+  "一次读取 16 通道与接收状态字节。": "Read all 16 channels and the receiver status byte.",
+  "读取通道": "Read channels",
+  "设置设备 ID": "Set device ID",
+  "请逐个接入设备设置 ID，主 ID 不可重复。": "Connect one device at a time. Primary IDs must be unique.",
+  "新 ID": "New ID",
+  "保存新 ID": "Save new ID",
+  "确认修改设备 ID？该设置会写入设备。": "Change this device ID? The setting will be written to the device.",
+  "工作模式": "Operating mode",
+  "修改会关闭输出；模式 0 / 1 可直接切换，无需重启。": "Changing mode disables output. Modes 0 / 1 switch without restarting.",
+  "模式": "Mode",
+  "位置模式": "Position mode",
+  "连续转动": "Continuous rotation",
+  "从动同步": "Follower synchronization",
+  "从 ID（仅从动模式）": "Secondary ID (follower mode only)",
+  "保存模式": "Save mode",
+  "确认更改工作模式？修改会关闭输出，请按需要重新使能。": "Change operating mode? Output will be disabled; enable it again when needed.",
+  "输出开关": "Output control",
+  "模式配置不会自动开启电机输出。": "Configuring a mode does not automatically enable motor output.",
+  "输出状态": "Output state",
+  "失能 / 关闭输出": "Disabled / output off",
+  "使能 / 开启输出": "Enabled / output on",
+  "设置输出": "Set output",
+  "位置控制": "Position control",
+  "当前必须处于位置模式。参数均为驱动器寄存器单位。": "Requires position mode. Parameters use driver register units.",
+  "目标位置": "Target position",
+  "速度": "Speed",
+  "加速度": "Acceleration",
+  "相电流参数": "Phase current parameter",
+  "移动到目标": "Move to target",
+  "连续转动 / 停止": "Continuous rotation / stop",
+  "当前必须处于连续转动模式。速度正负控制方向，0 停止。": "Requires continuous-rotation mode. Speed sign selects direction; 0 stops.",
+  "速度（0=停止）": "Speed (0=stop)",
+  "设置速度": "Set speed",
+  "读取位置与速度": "Read position and speed",
+  "读取驱动器反馈。": "Read driver feedback.",
+  "读取状态": "Read status",
+  "设置当前位置": "Set current position",
+  "更改当前机械位置对应的坐标，不是运动指令。": "Change the coordinate of the current mechanical position; this does not command motion.",
+  "当前位置值": "Current position value",
+  "设置基准": "Set reference",
+  "确认把当前机械位置设为指定坐标？": "Set the current mechanical position to this coordinate?",
+  "原始计数返回；每圈 4096 计数。": "Returns raw counts; 4096 counts per turn.",
+  "读取编码器": "Read encoder",
+  "校准值写入设备，请避免在高频循环中重复校准。": "Calibration is written to the device. Avoid repeated calibration in high-frequency loops.",
+  "位置基准": "Position reference",
+  "保存位置基准": "Save position reference",
+  "确认修改编码器当前位置基准？": "Change the encoder position reference?",
+  "电流限制": "Current limit",
+  "时间（ms）": "Time (ms)",
+  " 位置控制": " position control",
+  "传统协议命令；返回 dispatched 仅表示完成分发。": "Legacy protocol command; dispatched only confirms dispatch.",
+  "发送目标": "Send target",
+  " 状态反馈": " status feedback",
+  "检查位置、速度与通信状态。": "Check position, speed and communication status.",
+  "起始 ID 不能大于结束 ID": "First ID must not exceed last ID",
+  "正在扫描，请稍候…": "Scanning; please wait…",
+  "已选择 ID ": "Selected ID ",
+  "，请选择对应设备组件": "; choose the matching device panel",
+  " 个": " devices",
+  "扫描完成 · 点击 ID 填入控制组件": "Scan complete · Select an ID to fill device panels",
+  "未发现设备，请检查供电、接线和波特率": "No devices found. Check power, wiring and baud rate.",
+  "记录已清空": "Log cleared",
+  "停止请求未接收": "Stop request was not accepted",
+  "已请求退出循环；电机输出请使用设备停止/失能控制": "Loop exit requested; use the device stop or disable control for motor output",
+  "主控波特率已更新，请重新扫描": "Controller baud rate updated; scan again",
+  "应用网络设置可能会断开当前连接，是否继续？": "Applying network settings may disconnect you. Continue?",
+  "Wi-Fi 配置已提交，请确认连接地址": "Wi-Fi settings submitted; check the connection address",
+  "已检测到": "Detected",
+  "未检测到": "Not detected",
+  "暂时无法获取设备信息": "Controller information is temporarily unavailable",
+  "未知": "Unknown",
+  "主导航": "Main navigation",
+  "机器人，互联互通": "ROBOTICS, CONNECTED",
+  "从这里开始构建机器人": "YOUR ROBOT STARTS HERE",
+  "总线设备发现": "BUS EXPLORER",
+  "舵机控制": "BUS SERVOS",
+  "板载感知": "ON-BOARD SENSING",
+  "开发工具": "DEVELOPER TOOLS",
+  "连接设置": "SETTINGS"
+};
+let language='en';
+try { if(localStorage.getItem('robocore-language')==='zh') language='zh'; } catch {}
+const originalText=new WeakMap();
+const reverseTranslations=new Map(Object.entries(translations).map(([zh,en])=>[en,zh]));
+function sourceText(value){
+  if(translations[value])return value;
+  if(reverseTranslations.has(value))return reverseTranslations.get(value);
+  let m;
+  if((m=value.match(/^Selected ID (\d+); choose the matching device panel$/)))return '已选择 ID '+m[1]+'，请选择对应设备组件';
+  if((m=value.match(/^(\d+) devices$/)))return m[1]+' 个';
+  for(const name of ['STS / SMS','HLS','SCS']){
+    if(value===name+' Set device ID')return name+' 设置设备 ID';
+    if(value===name+' position control')return name+' 位置控制';
+    if(value===name+' status feedback')return name+' 状态反馈';
+  }
+  return value;
+}
+function t(value){
+  const source=sourceText(value);
+  if(language==='zh')return source;
+  if(translations[source])return translations[source];
+  let m;
+  if((m=source.match(/^已选择 ID (\d+)，请选择对应设备组件$/)))return 'Selected ID '+m[1]+'; choose the matching device panel';
+  if((m=source.match(/^(\d+) 个$/)))return m[1]+' devices';
+  for(const name of ['STS / SMS','HLS','SCS']){
+    if(source===name+' 设置设备 ID')return name+' Set device ID';
+    if(source===name+' 位置控制')return name+' position control';
+    if(source===name+' 状态反馈')return name+' status feedback';
+  }
+  return source;
+}
+function translateNode(node){
+  if(node.nodeType!==Node.TEXT_NODE)return;
+  if(node.parentElement?.closest('script,style,textarea,#languageToggle'))return;
+  const previous=originalText.get(node);
+  const source=previous&&previous.rendered===node.data?previous.source:sourceText(node.data);
+  const rendered=t(source);
+  originalText.set(node,{source,rendered});
+  if(node.data!==rendered)node.data=rendered;
+}
+function translateTree(root){
+  if(root.nodeType===Node.TEXT_NODE){translateNode(root);return;}
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  while(walker.nextNode())translateNode(walker.currentNode);
+}
+function applyLanguage(){
+  document.documentElement.lang=language==='en'?'en':'zh-CN';
+  translateTree(document.documentElement);
+  if(typeof commandCatalog!=='undefined')renderCatalog();
+  document.querySelector('nav').setAttribute('aria-label',t('主导航'));
+  const toggle=document.getElementById('languageToggle');
+  toggle.textContent=language==='en'?'中文':'English';
+  toggle.setAttribute('aria-label',language==='en'?'Switch to Chinese':'切换为英文');
+  toggle.lang=language==='en'?'zh-CN':'en';
+}
+// Observe only UI text updates. Switching language never rebuilds forms or sends commands.
+const languageObserver=new MutationObserver(records=>{
+  for(const record of records){
+    if(record.type==='characterData')translateNode(record.target);
+    else for(const node of record.addedNodes)translateTree(node);
+  }
+});
+languageObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
+document.getElementById('languageToggle').onclick=()=>{
+  language=language==='en'?'zh':'en';
+  try{localStorage.setItem('robocore-language',language)}catch{}
+  applyLanguage();
+};
+
+'use strict';
+const $=id=>document.getElementById(id); let socket, active=null, rid=Math.floor(Math.random()*100000000), toastTimer; const logs=[];
+function toast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,6000)}
+function navigate(id){document.querySelectorAll('.page').forEach(p=>p.hidden=p.id!==id);document.querySelectorAll('[data-page]').forEach(b=>{if(b.dataset.page===id){b.setAttribute('aria-current','page');$('crumb').textContent=b.lastChild.textContent.trim()}else b.removeAttribute('aria-current')});location.hash=id;window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.onclick=()=>navigate(b.dataset.page||b.dataset.goto));
+function log(direction,value){value={...value};for(const k of ['ap_password','sta_password'])if(k in value)value[k]='***';logs.unshift(new Date().toLocaleTimeString()+' '+direction+' '+JSON.stringify(value));if(logs.length>50)logs.pop();$('log').textContent=logs.join('\n\n')}
+function received(value){if(value.T===50&&value.rid===undefined){if(value.baud)$('baudStat').textContent=value.baud.toLocaleString();return} if(value.rid!==undefined)log('←',value);if(active&&value.rid===active.id)active.finish(value)}
+function connect(){socket=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');socket.onopen=()=>{$('connection').classList.add('online');$('connectionText').textContent='设备已连接'};socket.onmessage=e=>{try{received(JSON.parse(e.data))}catch{}};socket.onclose=()=>{$('connection').classList.remove('online');$('connectionText').textContent='重连中 · HTTP 可用';setTimeout(connect,2000)};socket.onerror=()=>socket.close()}
+async function send(command,output){if(active)throw Error('正在等待上一条指令，请稍候');if(!command||Array.isArray(command)||!Number.isInteger(command.T))throw Error('JSON 必须是包含整数 T 的对象');const id=++rid;command={...command,rid:id};const data=JSON.stringify(command);if(new TextEncoder().encode(data).length>255)throw Error('指令超过 255 字节，请缩短内容');if(command.T===0){await fetch('/api/cmd',{method:'POST',body:data,headers:{'Content-Type':'application/json'}});toast('已请求停止循环；不是电机急停');return}log('→',command);if(output)output.textContent='已发送，等待执行结果…';document.querySelectorAll('form button[type=submit],#sendJson,#readImu').forEach(b=>b.disabled=true);
+try{return await new Promise((resolve,reject)=>{let timer,poll;const cleanup=()=>{clearTimeout(timer);clearInterval(poll);active=null};active={id,finish:value=>{cleanup();if(output)output.textContent=JSON.stringify(value,null,2);value.ok===false?reject(Error(value.error||'设备执行失败')):resolve(value)}};timer=setTimeout(()=>{cleanup();reject(Error('结果超时：指令可能被覆盖、任务仍在执行或连接已中断，请先读取状态确认。'))},20000);let polling=false;poll=setInterval(async()=>{if(polling)return;polling=true;try{const r=await fetch('/api/result',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok)received(await r.json())}catch{}finally{polling=false}},250);if(socket?.readyState===WebSocket.OPEN)socket.send(data);else fetch('/api/cmd',{method:'POST',headers:{'Content-Type':'application/json'},body:data}).then(r=>{if(!r.ok)throw Error('HTTP '+r.status)}).catch(e=>{cleanup();reject(e)})})}finally{document.querySelectorAll('form button[type=submit],#sendJson,#readImu').forEach(b=>b.disabled=false)}}
+function report(e){toast(e.message||String(e))}
+function number(key,label,value,min,max){return {key,label,value,min,max}}
+const idField=()=>number('id','设备 ID',1,0,253);
+function form(parent,title,description,T,fields,button='发送',warning=''){const card=document.createElement('article');card.className='card';const h=document.createElement('h2');h.textContent=title;card.append(h);const p=document.createElement('p');p.className='muted small';p.textContent=description;card.append(p);const f=document.createElement('form'),grid=document.createElement('div');grid.className='fields';fields.forEach(spec=>{const label=document.createElement('label');label.textContent=spec.label;const input=document.createElement(spec.options?'select':'input');input.name=spec.key;if(spec.options){spec.options.forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;input.append(o)})}else{input.type='number';input.min=spec.min;input.max=spec.max;input.value=spec.value;input.required=true;input.step=1}label.append(input);grid.append(label)});f.append(grid);const b=document.createElement('button');b.type='submit';b.className='primary';b.textContent=button;f.append(b);card.append(f);const out=document.createElement('pre');out.className='result';out.textContent='尚未执行';card.append(out);f.onsubmit=async e=>{e.preventDefault();if(warning&&!confirm(t(warning)))return;const command={T};new FormData(f).forEach((v,k)=>command[k]=Number(v));try{await send(command,out);toast('指令结果已更新')}catch(err){report(err);out.textContent=err.message}};$(parent).append(card);return f}
+form('nodeForms','PWM 输出','通道 1 / 2，占空比 0–1000（0–100%）。',711,[idField(),number('ch','通道',1,1,2),number('pwm','PWM 值',0,0,1000)],'设置 PWM');
+form('nodeForms','RGB 状态灯','0 为两组灯，1 / 2 为单组。颜色使用 SDK 原始量化值。',712,[idField(),number('ch','灯通道（0=全部）',0,0,2),number('r','红色',0,0,7),number('g','绿色',0,0,3),number('b','蓝色',0,0,3)],'更新颜色');
+form('nodeForms','读取 S.BUS','一次读取 16 通道与接收状态字节。',713,[idField()],'读取通道');
+const changeId=(parent,T)=>form(parent,'设置设备 ID','请逐个接入设备设置 ID，主 ID 不可重复。',T,[idField(),number('new_id','新 ID',2,0,253)],'保存新 ID','确认修改设备 ID？该设置会写入设备。');changeId('nodeForms',710);
+form('stepperForms','工作模式','修改会关闭输出；模式 0 / 1 可直接切换，无需重启。',721,[idField(),{key:'mode',label:'模式',options:[[0,'位置模式'],[1,'连续转动'],[2,'从动同步']]},number('leader_id','从 ID（仅从动模式）',1,0,253)],'保存模式','确认更改工作模式？修改会关闭输出，请按需要重新使能。');
+form('stepperForms','输出开关','模式配置不会自动开启电机输出。',726,[idField(),{key:'enable',label:'输出状态',options:[[0,'失能 / 关闭输出'],[1,'使能 / 开启输出']]}],'设置输出');
+form('stepperForms','位置控制','当前必须处于位置模式。参数均为驱动器寄存器单位。',724,[idField(),number('pos','目标位置',3200,0,65534),number('speed','速度',100,1,32767),number('acc','加速度',10,0,254),number('current','相电流参数',150,0,1000)],'移动到目标');
+form('stepperForms','连续转动 / 停止','当前必须处于连续转动模式。速度正负控制方向，0 停止。',725,[idField(),number('speed','速度（0=停止）',0,-32767,32767),number('acc','加速度',10,0,254),number('current','相电流参数',150,0,1000)],'设置速度');
+form('stepperForms','读取位置与速度','读取驱动器反馈。',723,[idField()],'读取状态');
+form('stepperForms','设置当前位置','更改当前机械位置对应的坐标，不是运动指令。',722,[idField(),number('pos','当前位置值',0,0,65534)],'设置基准','确认把当前机械位置设为指定坐标？');changeId('stepperForms',720);
+form('encoderForms','读取位置与速度','原始计数返回；每圈 4096 计数。',732,[idField()],'读取编码器');form('encoderForms','设置当前位置','校准值写入设备，请避免在高频循环中重复校准。',730,[idField(),number('pos','位置基准',0,0,65534)],'保存位置基准','确认修改编码器当前位置基准？');
+changeId('encoderForms',720);
+for(const [name,T,max] of [['STS / SMS',11,4095],['HLS',21,4095],['SCS',31,1023]]){const group=document.createElement('section');group.className='servo-group';const title=document.createElement('h2');title.textContent=name;group.append(title);const grid=document.createElement('div');grid.className='grid servo-grid';grid.id='servoFamily'+T;group.append(grid);$('servoForms').append(group);form(grid.id,name+' 设置设备 ID','请逐个接入设备设置 ID，主 ID 不可重复。',T+2,[number('old_id','设备 ID',1,0,253),number('new_id','新 ID',2,0,253)],'保存新 ID','确认修改设备 ID？该设置会写入设备。');const fields=[idField(),number('pos','目标位置',Math.floor(max/2),0,max),number('spd','速度',100,1,32767)];if(T!==31)fields.push(number('acc','加速度',10,0,254));if(T===21)fields.push(number('cl','电流限制',150,0,1000));if(T===31)fields.push(number('time','时间（ms）',1000,0,65535));form(grid.id,name+' 位置控制','传统协议命令；返回 dispatched 仅表示完成分发。',T,fields,'发送目标');form(grid.id,name+' 状态反馈','检查位置、速度与通信状态。',T===31?35:T+4,[idField()],'读取状态')}
+$('scanForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),first=Number(f.get('first')),last=Number(f.get('last'));if(first>last)return toast('起始 ID 不能大于结束 ID');$('scanInfo').textContent='正在扫描，请稍候…';try{const r=await send({T:700,first,last});$('ids').replaceChildren();for(const id of r.ids){const b=document.createElement('button');b.textContent='ID '+id;b.onclick=()=>{document.querySelectorAll('input[name=id]').forEach(i=>i.value=id);toast('已选择 ID '+id+'，请选择对应设备组件')};$('ids').append(b)}$('deviceStat').textContent=r.ids.length+' 个';$('scanInfo').textContent=r.ids.length?'扫描完成 · 点击 ID 填入控制组件':'未发现设备，请检查供电、接线和波特率'}catch(e){$('scanInfo').textContent=e.message;report(e)}};
+$('readImu').onclick=()=>send({T:740},$('imuResult')).catch(report);
+$('sendJson').onclick=()=>{try{send(JSON.parse($('jsonInput').value)).catch(report)}catch(e){report(e)}};
+document.querySelectorAll('[data-json]').forEach(b=>b.onclick=()=>$('jsonInput').value=b.dataset.json);
+$('clearLog').onclick=()=>{logs.length=0;$('log').textContent='记录已清空'};
+$('stop').onclick=async()=>{try{const r=await fetch('/api/cmd',{method:'POST',body:'{"T":0}',headers:{'Content-Type':'application/json'}});if(!r.ok)throw Error('停止请求未接收');toast('已请求退出循环；电机输出请使用设备停止/失能控制')}catch(e){report(e)}};
+$('baudForm').onsubmit=async e=>{e.preventDefault();try{const baud=Number(new FormData(e.target).get('baud'));await send({T:10,baud});$('baudStat').textContent=baud.toLocaleString();toast('主控波特率已更新，请重新扫描')}catch(e){report(e)}};
+document.querySelectorAll('#wifiForm input[type=password]').forEach(input=>{
+ const button=document.createElement('button');button.type='button';button.innerHTML='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>' ;button.setAttribute('aria-label','Show password');button.setAttribute('aria-pressed','false');
+ button.onclick=()=>{const show=input.type==='password';input.type=show?'text':'password';button.setAttribute('aria-pressed',String(show));button.setAttribute('aria-label',show?'Hide password':'Show password')};const wrap=document.createElement('span');wrap.className='password-field';input.before(wrap);wrap.append(input,button);
+});
+let wifiApplying=false;
+$('wifiForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),c={T:400,mode:1};f.forEach((v,k)=>c[k]=k==='channel'?Number(v):v);wifiApplying=true;$('wifiStatus').textContent=t('正在应用配置；连接路由器可能需要 30 秒。');try{await send(c);await info()}catch(e){$('wifiStatus').textContent=t('连接中断，请重新连接热点后查看状态。');report(e)}finally{wifiApplying=false}};
+async function info(){try{const r=await fetch('/api/info',{cache:'no-store',signal:AbortSignal.timeout(3000)});if(!r.ok)throw Error('HTTP '+r.status);const data=await r.json();$('infoResult').textContent=JSON.stringify(data,null,2);$('imuStat').textContent=data.imu_present?'已检测到':'未检测到';$('baudStat').textContent=Number(data.baud||1000000).toLocaleString();
+const states={connected:'已连接',connecting:'正在连接',failed:'连接未成功，请检查 2.4 GHz 网络、SSID 和密码；配置已保留，可重新应用。',disabled:'未设置路由器'};
+$('wifiStatus').textContent='STA: '+t(states[data.sta_state]||'未知')+(data.sta_ssid?' · '+data.sta_ssid:'')+(data.sta_ip?' · IP: '+data.sta_ip:'')+' | AP: '+(data.ap_ip||'—');
+}catch{$('infoResult').textContent='暂时无法获取设备信息';$('imuStat').textContent='未知';if(!wifiApplying)$('wifiStatus').textContent=t('连接中断，请重新连接热点后查看状态。')}}
+setInterval(info,3000);
+/* JSON_TOOLS_START */
+const commandCatalog=[{"T":0,"title":{"zh":"停止任务循环","en":"Stop mission loop"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"请求退出任务循环、清空待执行指令；不会关闭电机输出。","en":"Requests loop exit and clears pending commands; does not disable motors."},"sample":{"T":0}},{"T":10,"title":{"zh":"设置主控总线波特率","en":"Set controller bus baud rate"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":10,"baud":1000000}},{"T":11,"title":{"zh":"STS/SMS 位置控制","en":"STS/SMS position"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":11,"id":1,"pos":2047,"spd":100,"acc":0}},{"T":12,"title":{"zh":"STS/SMS 设置中位","en":"STS/SMS calibrate midpoint"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":12,"id":1}},{"T":13,"title":{"zh":"STS/SMS 修改 ID","en":"STS/SMS change ID"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"old_id / new_id 为不同的 0–253 整数。逐个接入设备，拒绝已占用的新 ID，并在写入后验证新 ID。","en":"Distinct integer old_id / new_id in 0–253. Connect one device at a time. Rejects occupied IDs and verifies the new ID after writing."},"sample":{"T":13,"old_id":1,"new_id":2}},{"T":14,"title":{"zh":"STS/SMS 扭矩开关","en":"STS/SMS torque enable"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":14,"id":1,"state":1}},{"T":15,"title":{"zh":"STS/SMS 状态反馈","en":"STS/SMS feedback"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":15,"id":1}},{"T":16,"title":{"zh":"STS/SMS 同步控制","en":"STS/SMS synchronized targets"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":16,"id":[1,2],"idn":2,"pos":[2047,2047],"spd":[100,100],"acc":[0,0]}},{"T":17,"title":{"zh":"STS/SMS 简化同步控制","en":"STS/SMS simple synchronized targets"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"速度与加速度固定为0，0的含义按舵机型号；需要限速时用T=16。","en":"Speed and acceleration are fixed at0; zero semantics depend on the servo. Use T=16 for explicit speed limits."},"sample":{"T":17,"id":[1,2],"idn":2,"pos":[2047,2047]}},{"T":21,"title":{"zh":"HLS 位置控制","en":"HLS position"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":21,"id":1,"pos":2047,"spd":100,"acc":0,"cl":500}},{"T":22,"title":{"zh":"HLS 设置中位","en":"HLS calibrate midpoint"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":22,"id":1}},{"T":23,"title":{"zh":"HLS 修改 ID","en":"HLS change ID"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"old_id / new_id 为不同的 0–253 整数。逐个接入设备，拒绝已占用的新 ID，并在写入后验证新 ID。","en":"Distinct integer old_id / new_id in 0–253. Connect one device at a time. Rejects occupied IDs and verifies the new ID after writing."},"sample":{"T":23,"old_id":1,"new_id":2}},{"T":24,"title":{"zh":"HLS 扭矩开关","en":"HLS torque enable"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":24,"id":1,"state":1}},{"T":25,"title":{"zh":"HLS 状态反馈","en":"HLS feedback"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":25,"id":1}},{"T":26,"title":{"zh":"HLS 同步控制","en":"HLS synchronized targets"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":26,"id":[1,2],"idn":2,"pos":[2047,2047],"spd":[100,100],"acc":[0,0],"tor":[500,500]}},{"T":27,"title":{"zh":"HLS 简化同步控制","en":"HLS simple synchronized targets"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"固定速度60、加速度50；tor 数组指定各轴电流限制。需要完整参数时用T=26。","en":"Fixed speed60 and acceleration50; tor sets each axis current limit. Use T=26 for full parameters."},"sample":{"T":27,"id":[1,2],"idn":2,"pos":[2047,2047],"tor":[500,500]}},{"T":31,"title":{"zh":"SCS 位置控制","en":"SCS position"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":31,"id":1,"pos":511,"time":0,"spd":100}},{"T":33,"title":{"zh":"SCS 修改 ID","en":"SCS change ID"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"old_id / new_id 为不同的 0–253 整数。逐个接入设备，拒绝已占用的新 ID，并在写入后验证新 ID。","en":"Distinct integer old_id / new_id in 0–253. Connect one device at a time. Rejects occupied IDs and verifies the new ID after writing."},"sample":{"T":33,"old_id":1,"new_id":2}},{"T":34,"title":{"zh":"SCS 扭矩开关","en":"SCS torque enable"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":34,"id":1,"state":1}},{"T":35,"title":{"zh":"SCS 状态反馈","en":"SCS feedback"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":35,"id":1}},{"T":36,"title":{"zh":"SCS 同步控制","en":"SCS synchronized targets"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":36,"id":[1,2],"idn":2,"pos":[511,511],"spd":[100,100]}},{"T":37,"title":{"zh":"SCS 简化同步控制","en":"SCS simple synchronized targets"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"速度固定为0，可能代表最高速度；需要限速时用T=36。","en":"Speed is fixed at0, which may mean maximum speed. Use T=36 for explicit speed limits."},"sample":{"T":37,"id":[1,2],"idn":2,"pos":[511,511]}},{"T":51,"title":{"zh":"等待毫秒数","en":"Wait milliseconds"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"delay：等待时间，毫秒；任务中使用可控制步骤节奏。","en":"delay: milliseconds to wait; useful between mission steps."},"sample":{"T":51,"delay":1000}},{"T":100,"title":{"zh":"设置主控总线波特率","en":"Set controller bus baud rate"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":100,"baud":1000000}},{"T":101,"title":{"zh":"选择通用舵机类型","en":"Select generic servo type"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"type=0 SCS、1 STS/SMS、2 HLS；优先使用明确区分型号的指令。","en":"type=0 SCS, 1 STS/SMS, 2 HLS; prefer the model-specific commands."},"sample":{"T":101,"type":1}},{"T":102,"title":{"zh":"设置舵机坐标换算","en":"Set servo coordinate conversion"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"steps 为舵机每圈计数，angle 为行程角度；这是舵机坐标换算，与外接编码器无关。","en":"steps is servo counts per turn; angle is travel in degrees. This changes servo conversion, not an external encoder."},"sample":{"T":102,"steps":4096,"angle":360}},{"T":103,"title":{"zh":"通用舵机反馈","en":"Generic servo feedback"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":103,"id":1}},{"T":104,"title":{"zh":"通用舵机 Ping","en":"Generic servo ping"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":104,"id":1}},{"T":105,"title":{"zh":"通用舵机修改 ID","en":"Generic servo change ID"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":105,"old_id":1,"new_id":2}},{"T":106,"title":{"zh":"通用舵机设置中位","en":"Generic servo calibrate midpoint"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":106,"id":1}},{"T":107,"title":{"zh":"通用舵机移动至中位","en":"Generic servo move to midpoint"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":107,"id":1}},{"T":108,"title":{"zh":"通用舵机扭矩开关","en":"Generic servo torque enable"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":108,"id":1,"state":1}},{"T":109,"title":{"zh":"SCS 步数控制","en":"SCS step position"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":109,"id":1,"pos":512,"time":0,"spd":100,"move":1}},{"T":112,"title":{"zh":"SCS 角度控制","en":"SCS degree target"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":112,"id":1,"mid":512,"ang":10,"spd":10,"move":1}},{"T":115,"title":{"zh":"SCS 弧度控制","en":"SCS radian target"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":115,"id":1,"mid":512,"rad":0.785,"spd":0.2,"move":1}},{"T":118,"title":{"zh":"执行预置舵机动作","en":"Trigger deferred servo moves"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":118}},{"T":119,"title":{"zh":"SCS 扭矩限制","en":"SCS torque limit"},"group":{"zh":"舵机","en":"Servos"},"note":{"zh":"兼容高级接口；请使用对应型号驱动库配置扭矩限制。","en":"Legacy advanced interface; use the model-specific driver library for torque-limit configuration."},"sample":{"T":119,"id":1,"limit":500}},{"T":130,"title":{"zh":"读取机械臂零位","en":"Read arm zero positions"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":130}},{"T":131,"title":{"zh":"设置机械臂零位","en":"Set arm zero positions"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":131,"pos":[512,512,512,512]}},{"T":132,"title":{"zh":"读取机械臂位置","en":"Read arm positions"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":132}},{"T":133,"title":{"zh":"以当前位置标定机械臂零位","en":"Calibrate arm zeros at current pose"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":133}},{"T":134,"title":{"zh":"机械臂关节角度","en":"Arm joint angles"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":134,"ang":[0,0,0,0]}},{"T":135,"title":{"zh":"机械臂关节弧度","en":"Arm joint radians"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":135,"rad":[0,0,0,0]}},{"T":136,"title":{"zh":"机械臂 XYZG 目标","en":"Arm XYZG target"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":136,"xyzg":[260.5,0,122.38,50]}},{"T":137,"title":{"zh":"机械臂 RBZG 目标","en":"Arm RBZG target"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":137,"rbzg":[260.5,0,122.38,50]}},{"T":138,"title":{"zh":"机械臂平滑 XYZG 运动","en":"Arm smooth XYZG move"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":138,"xyzg":[236.5,0,122.38,0],"spd":0.4}},{"T":139,"title":{"zh":"机械臂平滑 RBZG 运动","en":"Arm smooth RBZG move"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":139,"rbzg":[236.5,0,122.38,0],"spd":0.4,"br":200}},{"T":140,"title":{"zh":"机械臂最大关节速度","en":"Arm maximum joint speed"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":140,"spd":1.2}},{"T":141,"title":{"zh":"读取机械臂反馈弧度","en":"Read arm feedback radians"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":141}},{"T":142,"title":{"zh":"读取机械臂目标弧度","en":"Read arm target radians"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":142}},{"T":143,"title":{"zh":"读取 XYZG 解算状态","en":"Read XYZG IK state"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":143}},{"T":144,"title":{"zh":"读取 RBZG 解算状态","en":"Read RBZG IK state"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":144}},{"T":145,"title":{"zh":"机械臂周期反馈","en":"Arm periodic feedback"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":145,"flag":0,"hz":10}},{"T":146,"title":{"zh":"机械臂连续运动","en":"Arm continuous motion"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":146,"flag":0,"axis":0,"delta":0.01}},{"T":147,"title":{"zh":"机械臂手动标定模式","en":"Arm manual calibration mode"},"group":{"zh":"机械臂预设","en":"Arm presets"},"note":{"zh":"仅用于匹配固件几何参数、舵机 ID 和零位的机械臂；不是任意机械臂通用接口。数组顺序为四个关节/坐标分量。","en":"Only for arms matching firmware geometry, servo IDs and zeros; not a universal arm API. Arrays contain four ordered joints/coordinates."},"sample":{"T":147}},{"T":180,"title":{"zh":"四路轮毂电机速度","en":"Four hub motor speeds"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"A/B/C/D 为匹配的四路轮毂电机速度，寄存器值 × 0.06 = rpm；不是通用步进控制。","en":"A/B/C/D control four compatible hub motors; register value × 0.06 = rpm. Not a generic stepper command."},"sample":{"T":180,"A":0,"B":0,"C":0,"D":0}},{"T":200,"title":{"zh":"兼容 LED 单灯颜色","en":"Legacy LED single color"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":200,"id":40,"set":[1,255,0,0]}},{"T":201,"title":{"zh":"兼容 LED 全部颜色","en":"Legacy LED all colors"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":201,"id":40,"set":[9,0,0]}},{"T":202,"title":{"zh":"OLED 单行文字","en":"OLED single line"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"需要外接 UI Module (A) 的 SSD1306 OLED；line 为 1–4，update=1 立即刷新。默认字体使用 ASCII。","en":"Requires the external UI Module (A) SSD1306 OLED; line is 1–4, update=1 refreshes immediately. Default font uses ASCII."},"sample":{"T":202,"line":1,"text":"Hello, world!","update":1}},{"T":203,"title":{"zh":"OLED 刷新","en":"OLED refresh"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"需要外接 UI Module (A) 的 SSD1306 OLED；line 为 1–4，update=1 立即刷新。默认字体使用 ASCII。","en":"Requires the external UI Module (A) SSD1306 OLED; line is 1–4, update=1 refreshes immediately. Default font uses ASCII."},"sample":{"T":203}},{"T":204,"title":{"zh":"OLED 四行文字","en":"OLED four lines"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"需要外接 UI Module (A) 的 SSD1306 OLED；line 为 1–4，update=1 立即刷新。默认字体使用 ASCII。","en":"Requires the external UI Module (A) SSD1306 OLED; line is 1–4, update=1 refreshes immediately. Default font uses ASCII."},"sample":{"T":204,"l1":"Hello, world!","l2":"Hello, world!","l3":"Hello, world!","l4":"Hello, world!"}},{"T":205,"title":{"zh":"OLED 清屏","en":"OLED clear"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"需要外接 UI Module (A) 的 SSD1306 OLED；line 为 1–4，update=1 立即刷新。默认字体使用 ASCII。","en":"Requires the external UI Module (A) SSD1306 OLED; line is 1–4, update=1 refreshes immediately. Default font uses ASCII."},"sample":{"T":205}},{"T":206,"title":{"zh":"外接模块蜂鸣器","en":"External module buzzer"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"freq：Hz；duration：毫秒。蜂鸣器位于外接 UI Module (A)，GPIO21。","en":"freq: Hz; duration: milliseconds. Buzzer is on the external UI Module (A), GPIO21."},"sample":{"T":206,"freq":1000,"duration":1000}},{"T":208,"title":{"zh":"兼容 Node 修改 ID","en":"Legacy Node change ID"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。","en":"Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."},"sample":{"T":208,"old":0,"new":1}},{"T":209,"title":{"zh":"兼容 Node PWM","en":"Legacy Node PWM"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。","en":"Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."},"sample":{"T":209,"id":0,"ch":0,"pwm":1000}},{"T":210,"title":{"zh":"兼容 Node 单灯颜色","en":"Legacy Node single LED"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。","en":"Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."},"sample":{"T":210,"id":0,"ch":0,"r":7,"g":7,"b":7}},{"T":211,"title":{"zh":"兼容 Node 刷新","en":"Legacy Node flush"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。","en":"Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."},"sample":{"T":211,"id":0,"num":2}},{"T":212,"title":{"zh":"兼容 Node 全灯颜色","en":"Legacy Node all LEDs"},"group":{"zh":"外接模块","en":"External modules"},"note":{"zh":"保留的旧 Node 接口；新程序建议使用 T=710…713 的参数校验和结构化反馈。","en":"Retained legacy Node interface; prefer T=710…713 for validated fields and structured feedback."},"sample":{"T":212,"id":0,"num":2,"r":7,"g":7,"b":7}},{"T":300,"title":{"zh":"列出任务","en":"List missions"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"offset 默认为 0；每页 16 个名称，next=-1 表示结束；包含未完成草稿。","en":"offset defaults to 0; 16 names per page, next=-1 ends pagination. Includes unfinished drafts."},"sample":{"T":300}},{"T":301,"title":{"zh":"创建任务","en":"Create mission"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"name：1–32 位英文字母、数字、下划线或连字符；intro 最多 96 UTF-8 字节；不能覆盖已有任务。","en":"name: 1–32 ASCII letters, digits, underscores or hyphens. intro: at most 96 UTF-8 bytes. Existing missions are not overwritten."},"sample":{"T":301,"name":"demo","intro":"introduction for this mission file."}},{"T":302,"title":{"zh":"读取任务","en":"Read mission"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"offset 为从 0 开始的步骤偏移；每页最多 8 步，返回 intro/steps/total/next。","en":"offset is a zero-based step offset; up to 8 steps per page, returns intro/steps/total/next."},"sample":{"T":302,"name":"demo"}},{"T":303,"title":{"zh":"追加任务步骤","en":"Append mission step"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"json 为转义后的 JSON 字符串；最多 64 步、文件最多 16 KB；步骤不能含 rid 或 T=300…399。","en":"json is an escaped JSON string. Maximum 64 steps and 16 KB per file; no rid or T=300…399 inside a step."},"sample":{"T":303,"name":"demo","json":"{\"T\":51,\"delay\":500}"}},{"T":304,"title":{"zh":"插入任务步骤","en":"Insert mission step"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"step 从 1 开始，插入到指定步骤之前；json 为转义后的 JSON 字符串。","en":"step is 1-based; insert before that step. json is an escaped JSON string."},"sample":{"T":304,"name":"demo","step":1,"json":"{\"T\":51,\"delay\":500}"}},{"T":305,"title":{"zh":"替换任务步骤","en":"Replace mission step"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"step 从 1 开始，替换现有步骤；json 为转义后的 JSON 字符串。","en":"step is 1-based; replaces an existing step. json is an escaped JSON string."},"sample":{"T":305,"name":"demo","step":1,"json":"{\"T\":51,\"delay\":500}"}},{"T":306,"title":{"zh":"删除任务步骤","en":"Delete mission step"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"step 从 1 开始，删除指定步骤。","en":"step is 1-based; deletes the specified step."},"sample":{"T":306,"name":"demo","step":1}},{"T":307,"title":{"zh":"执行一个任务步骤","en":"Run one mission step"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"step 从 1 开始；执行已保存的单步，可能产生运动。","en":"step is 1-based; executes one saved step and may cause motion."},"sample":{"T":307,"name":"demo","step":1}},{"T":308,"title":{"zh":"运行任务","en":"Run mission"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"interval 为每步后额外等待的毫秒数，0–60000；loop 为 1–10000 或 -1 无限循环。用 T=0 退出循环。","en":"interval: extra delay after each step, 0–60000 ms. loop: 1–10000 or -1 for infinite. T=0 exits the loop."},"sample":{"T":308,"name":"demo","interval":1000,"loop":1}},{"T":309,"title":{"zh":"删除任务","en":"Delete mission"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"删除已保存任务，无法撤销。","en":"Deletes a saved mission; cannot be undone."},"sample":{"T":309,"name":"demo"}},{"T":310,"title":{"zh":"保存已验证的草稿","en":"Commit verified draft"},"group":{"zh":"任务脚本","en":"Missions"},"note":{"zh":"source 必须以 draft_ 开头；name 为目标名称。覆盖已有目标必须显式传 overwrite:true。","en":"source must start with draft_; name is the destination. Overwriting requires explicit overwrite:true."},"sample":{"T":310,"source":"draft_upload","name":"demo","overwrite":false}},{"T":399,"title":{"zh":"清空文件系统","en":"Erase filesystem"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"清空全部任务及文件系统内配置；不自动重启，无法撤销。","en":"Erases all missions and filesystem configuration; does not restart automatically. Irreversible."},"sample":{"T":399}},{"T":400,"title":{"zh":"设置 Wi-Fi","en":"Configure Wi-Fi"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"mode=0 关闭 Wi-Fi，1 开启 AP+STA。STA 后台连接，失败仍保留配置；GET /api/info 查询状态和 IP。路由器须支持 2.4 GHz。","en":"mode=0 disables Wi-Fi, 1 enables AP+STA. STA connects asynchronously; failed connections retain settings. GET /api/info reports state and IP. Use a 2.4 GHz router network."},"sample":{"T":400,"mode":1,"ap_ssid":"LYgion","ap_password":"12345678","channel":1,"sta_ssid":"ssid","sta_password":"password"}},{"T":401,"title":{"zh":"读取 Wi-Fi 配置","en":"Read Wi-Fi configuration"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":401}},{"T":402,"title":{"zh":"读取热点 IP","en":"Read AP IP"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":402}},{"T":403,"title":{"zh":"读取路由器分配的 IP","en":"Read station IP"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":403}},{"T":410,"title":{"zh":"初始化 ESP-NOW","en":"Initialize ESP-NOW"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"longrange：0 普通模式，1 长距离模式；双方需支持并使用兼容模式、同一信道。","en":"longrange: 0 normal, 1 long range. Both peers need compatible mode and the same channel."},"sample":{"T":410,"longrange":0}},{"T":411,"title":{"zh":"设置 ESP-NOW 接收模式","en":"Set ESP-NOW receive mode"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"mode：0 关闭接收，1 接收可信 MAC，2 接收广播。","en":"mode: 0 receive off, 1 trusted MAC reception, 2 broadcast reception."},"sample":{"T":411,"mode":1}},{"T":412,"title":{"zh":"读取 MAC 地址","en":"Read MAC address"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":412}},{"T":413,"title":{"zh":"发送 ESP-NOW JSON","en":"Send ESP-NOW JSON"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"mac 为冒号分隔的 MAC；data 为转义的 JSON 字符串。使用 250 字节补零帧，不能任意发送大对象。","en":"mac is colon-separated; data is an escaped JSON string. Uses a zero-padded 250-byte frame, not arbitrary large objects."},"sample":{"T":413,"mac":"FF:FF:FF:FF:FF:FF","data":"{\"T\":205}"}},{"T":414,"title":{"zh":"添加 ESP-NOW 对端","en":"Add ESP-NOW peer"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"mac 为对端 MAC 地址；先确认双方 Wi-Fi 信道相同。","en":"mac is the peer MAC; both devices must use the same Wi-Fi channel."},"sample":{"T":414,"mac":"FF:FF:FF:FF:FF:FF"}},{"T":415,"title":{"zh":"ESP-NOW 模拟 MAC 开关","en":"ESP-NOW synthetic MAC option"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"fake 为兼容应用的模拟 MAC 开关；常规通信保持 0。","en":"fake is a synthetic MAC option for legacy applications; keep 0 for normal communication."},"sample":{"T":415,"fake":0}},{"T":501,"title":{"zh":"发送 CAN 帧","en":"Send CAN frame"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"CAN 档；id 为标识符，ext=0 标准帧/1 扩展帧，data 最多 8 个 0–255 字节；默认 500 kbps。","en":"CAN switch position; id is identifier, ext=0 standard/1 extended, data at most eight bytes 0–255; default 500 kbps."},"sample":{"T":501,"id":291,"ext":0,"data":[17,34,51]}},{"T":600,"title":{"zh":"重启主控","en":"Restart controller"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"立即重启，连接中断；可能无法收到执行回复。","en":"Restarts immediately and disconnects; an execution reply may not arrive."},"sample":{"T":600}},{"T":601,"title":{"zh":"清空 NVS","en":"Erase NVS"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"清空 NVS 设置；与任务文件系统不同。此操作不可撤销。","en":"Erases NVS settings, separate from mission storage. Irreversible."},"sample":{"T":601}},{"T":602,"title":{"zh":"清空文件系统","en":"Erase filesystem"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"清空全部任务及文件系统内配置；不自动重启，无法撤销。","en":"Erases all missions and filesystem configuration; does not restart automatically. Irreversible."},"sample":{"T":602}},{"T":603,"title":{"zh":"读取消息输出设置","en":"Read message output settings"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":603}},{"T":604,"title":{"zh":"设置消息输出","en":"Set message outputs"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"echo/uart/usb 为 0 或 1；关闭 usb 后 USB 不再输出结果。","en":"echo/uart/usb are 0 or 1; disabling usb suppresses USB result output."},"sample":{"T":604,"echo":1,"uart":0,"usb":1}},{"T":605,"title":{"zh":"UART0 转发模式","en":"UART0 forwarding mode"},"group":{"zh":"通信与系统","en":"Communication and system"},"note":{"zh":"sf=1 转发 UART0 字节到舵机总线（默认）；sf=0 将 UART0 输入按 JSON 解析。","en":"sf=1 forwards UART0 bytes to the servo bus (default); sf=0 parses UART0 input as JSON."},"sample":{"T":605,"sf":1}},{"T":700,"title":{"zh":"扫描总线 ID","en":"Scan bus IDs"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":700,"first":0,"last":20}},{"T":710,"title":{"zh":"TTL Node 修改 ID","en":"TTL Node change ID"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":710,"id":1,"new_id":2}},{"T":711,"title":{"zh":"TTL Node PWM","en":"TTL Node PWM"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":711,"id":1,"ch":1,"pwm":0}},{"T":712,"title":{"zh":"TTL Node RGB","en":"TTL Node RGB"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":712,"id":1,"ch":0,"r":1,"g":0,"b":0}},{"T":713,"title":{"zh":"TTL Node 读取 S.BUS","en":"TTL Node read S.BUS"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":713,"id":1}},{"T":720,"title":{"zh":"步进驱动 / 编码器修改 ID","en":"Stepper / encoder change ID"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"id/new_id 为不同的 0–253 整数；逐个接入设备，写入后验证新 ID。编码器与步进驱动共用此接口。","en":"Distinct id/new_id integers in 0–253; connect devices individually. Verifies the new ID. Shared by encoders and steppers."},"sample":{"T":720,"id":1,"new_id":2}},{"T":721,"title":{"zh":"步进驱动模式","en":"Stepper mode"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"mode=0 位置、1 连续转动、2 从动。mode=2 必须提供 leader_id（从 ID，0–253，与本机主 ID 不同），其值与被跟随设备 ID 相同。模式写入关闭输出；0/1 切换无需重启。","en":"mode=0 position, 1 velocity, 2 follower. Mode 2 requires leader_id (secondary ID, 0–253, distinct from own primary ID) matching the leader. Mode writes disable output; switching 0/1 needs no restart."},"sample":{"T":721,"id":1,"mode":0}},{"T":722,"title":{"zh":"步进驱动位置基准","en":"Stepper position reference"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":722,"id":1,"pos":0}},{"T":723,"title":{"zh":"步进驱动反馈","en":"Stepper feedback"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":723,"id":1}},{"T":724,"title":{"zh":"步进驱动位置目标","en":"Stepper position target"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"pos=0–65534，speed=1–32767，acc=0–254，current=0–1000。原始寄存器单位，current 不是安培。需先设位置模式并使能。","en":"pos=0–65534, speed=1–32767, acc=0–254, current=0–1000. Register units; current is not amperes. Set position mode and enable first."},"sample":{"T":724,"id":1,"pos":3200,"speed":100,"acc":10,"current":150}},{"T":725,"title":{"zh":"步进驱动连续速度","en":"Stepper continuous speed"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"speed=-32767–32767，0 停止；acc=0–254，current=0–1000。先设连续模式并使能。","en":"speed=-32767–32767, 0 stops; acc=0–254, current=0–1000. Set velocity mode and enable first."},"sample":{"T":725,"id":1,"speed":0,"acc":10,"current":150}},{"T":726,"title":{"zh":"步进驱动输出开关","en":"Stepper output enable"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"enable=0 失能，1 使能。","en":"enable=0 disables output, 1 enables it."},"sample":{"T":726,"id":1,"enable":0}},{"T":730,"title":{"zh":"编码器位置基准","en":"Encoder position reference"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"pos=0–65534；当前位置基准写入设备，不产生运动。","en":"pos=0–65534; saves current position reference without motion."},"sample":{"T":730,"id":1,"pos":0}},{"T":732,"title":{"zh":"编码器位置与速度","en":"Encoder position and speed"},"group":{"zh":"总线设备","en":"Bus devices"},"note":{"zh":"返回 pos/speed；每圈 4096 计数，多圈位置 0–65534，掉电不保留累计圈数。","en":"Returns pos/speed; 4096 counts/turn, multi-turn position 0–65534. Accumulated turns do not survive power loss."},"sample":{"T":732,"id":1}},{"T":740,"title":{"zh":"读取板载惯性传感器","en":"Read onboard IMU"},"group":{"zh":"板载惯性传感器","en":"Onboard IMU"},"note":{"zh":"按示例字段设置参数；执行前确认目标设备和供电。","en":"Set fields as shown; verify target hardware and power before execution."},"sample":{"T":740}}];
+// Offline JSON reference and transactional mission editor.
+function localText(pair){return pair[language]}
+function renderCatalog(){
+  const query=$('commandSearch').value.toLowerCase().trim();
+  const group=$('commandGroup').value;
+  const list=$('commandList');list.replaceChildren();
+  const matches=commandCatalog.filter(c=>(!group||c.group.en===group)&&(!query||[c.T,c.title.en,c.title.zh,c.note.en,c.note.zh].join(' ').toLowerCase().includes(query)));
+  $('commandCount').textContent=String(matches.length);
+  for(const c of matches){
+    const row=document.createElement('details');row.className='command-entry';
+    const title=document.createElement('summary');title.textContent=`T=${c.T} · ${localText(c.title)}`;
+    const note=document.createElement('p');note.className='small muted';note.textContent=localText(c.note);
+    const code=document.createElement('pre');code.className='result';code.textContent=JSON.stringify(c.sample);
+    const actions=document.createElement('div');actions.className='actions';
+    for(const [label,fn] of [['填入指令',()=>{$('jsonInput').value=JSON.stringify(c.sample,null,2);$('jsonInput').focus()}],['加入脚本',()=>{$('missionSteps').value+=($('missionSteps').value.trim()?'\n':'')+JSON.stringify(c.sample);$('missionSteps').focus()}]]){
+      const b=document.createElement('button');b.textContent=t(label);b.onclick=fn;actions.append(b);
+    }
+    row.append(title,note,code,actions);list.append(row);
+  }
+}
+for(const group of [...new Set(commandCatalog.map(c=>c.group.en))]){
+  const option=document.createElement('option');option.value=group;option.textContent=group;$('commandGroup').append(option);
+}
+$('commandSearch').oninput=renderCatalog;$('commandGroup').onchange=renderCatalog;
+let missionBusy=false;
+async function missionAction(fn){
+  if(missionBusy)return;missionBusy=true;
+  $('missionEditor').querySelectorAll('button,input,textarea,select').forEach(b=>b.disabled=true);
+  try{await fn()}catch(e){$('missionStatus').textContent=t(e.message);report(e)}finally{missionBusy=false;$('missionEditor').querySelectorAll('button,input,textarea,select').forEach(b=>b.disabled=false)}
+}
+function missionName(){const name=$('missionName').value.trim();if(!/^[A-Za-z0-9_-]{1,32}$/.test(name)||name==='boot'||name.startsWith('draft_'))throw Error('任务名称需为 1–32 位字母、数字、下划线或连字符；不能使用 boot 或 draft_ 前缀');return name}
+async function readMission(name){
+  let offset=0,intro='',steps=[];
+  do{const r=await send({T:302,name,offset});if(!Array.isArray(r.steps)||!Number.isInteger(r.next))throw Error('任务读取结果不完整');intro=r.intro;steps.push(...r.steps);if(r.next!==-1&&r.next<=offset)throw Error('任务读取结果不完整');offset=r.next}while(offset!==-1);
+  return {intro,steps};
+}
+async function listMissions(){
+  let offset=0,names=[];
+  do{const r=await send({T:300,offset});if(!Array.isArray(r.missions)||!Number.isInteger(r.next))throw Error('任务读取结果不完整');names.push(...r.missions);if(r.next!==-1&&r.next<=offset)throw Error('任务读取结果不完整');offset=r.next}while(offset!==-1);
+  const select=$('savedMissions');select.replaceChildren();
+  const blank=document.createElement('option');blank.value='';blank.textContent=t('选择已保存任务');select.append(blank);
+  for(const name of names){const option=document.createElement('option');option.value=name;option.textContent=name;select.append(option)}
+  return names;
+}
+$('refreshMissions').onclick=()=>missionAction(listMissions);
+$('loadMission').onclick=()=>missionAction(async()=>{const name=$('savedMissions').value;if(!name)throw Error('请先选择已保存任务');if($('missionSteps').value.trim()&&!confirm(t('替换编辑器中的内容？未保存的修改将丢失。')))return;const data=await readMission(name);$('missionName').value=name.startsWith('draft_')?'recovered':name;$('missionIntro').value=data.intro;$('missionSteps').value=data.steps.join('\n');$('missionStatus').textContent=t('已读取任务；运行前请确认步骤。')});
+$('saveMission').onclick=()=>missionAction(async()=>{
+  const name=missionName(),intro=$('missionIntro').value.trim();
+  if(new TextEncoder().encode(intro).length>96)throw Error('任务说明最多 96 UTF-8 字节');
+  const lines=$('missionSteps').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  if(!lines.length||lines.length>64)throw Error('脚本需要 1–64 行 JSON 指令');
+  const steps=lines.map((line,i)=>{let c;try{c=JSON.parse(line)}catch{throw Error(t('JSON 解析失败，行号：')+(i+1))}if(!c||Array.isArray(c)||!Number.isInteger(c.T)||'rid' in c||(c.T>=300&&c.T<=399))throw Error(t('无效任务步骤，行号：')+(i+1));return JSON.stringify(c)});
+  const draft='draft_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
+  for(const json of steps){if(new TextEncoder().encode(JSON.stringify({T:303,name:draft,json,rid:4294967295})).length>255)throw Error('步骤过长：请缩短 JSON，使上传指令不超过 255 字节')}
+  const names=await listMissions(),overwrite=names.includes(name);
+  if((overwrite||name==='boot_user')&&!confirm(t(name==='boot_user'?'保存 boot_user 后，主板下次启动会自动循环执行这些步骤。继续？':'覆盖已保存的同名任务？')))return;
+  $('missionStatus').textContent=t('正在保存草稿：')+draft;
+  await send({T:301,name:draft,intro});
+  for(const json of steps)await send({T:303,name:draft,json});
+  const check=await readMission(draft);
+  if(check.intro!==intro||JSON.stringify(check.steps)!==JSON.stringify(steps))throw Error('草稿校验失败；原任务未替换');
+  await send({T:310,source:draft,name,overwrite});
+  $('missionStatus').textContent=t('任务保存并校验成功。');await listMissions();$('savedMissions').value=name;
+});
+$('runMission').onclick=()=>missionAction(async()=>{
+  const name=missionName(),interval=Number($('missionInterval').value),loop=Number($('missionLoops').value);
+  if(!Number.isInteger(interval)||interval<0||interval>60000||!Number.isInteger(loop)||!(loop===-1||loop>=1&&loop<=10000))throw Error('运行参数无效');
+  if(!confirm(t('运行主板中已保存的任务？编辑器中未保存的修改不会执行。任务可能使电机运动。')))return;
+  await send({T:308,name,interval,loop});$('missionStatus').textContent=t('任务已启动；可使用JSON 调试中的停止循环按钮退出。');
+});
+$('deleteMission').onclick=()=>missionAction(async()=>{const name=$('savedMissions').value;if(!name)throw Error('请先选择已保存任务');if(!confirm(t('永久删除所选任务？')))return;await send({T:309,name});await listMissions();$('missionStatus').textContent=t('任务已删除。')});
+$('exportMission').onclick=()=>{const blob=new Blob([JSON.stringify({name:$('missionName').value,intro:$('missionIntro').value,steps:$('missionSteps').value},null,2)],{type:'application/json'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='robocore-mission.json';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000)};
+$('openImportMission').onclick=()=>$('importMission').click();
+$('importMission').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>32768)throw Error('导入文件过大');const data=JSON.parse(await file.text());if(typeof data.name!=='string'||typeof data.intro!=='string'||typeof data.steps!=='string')throw Error('导入文件格式无效');if($('missionSteps').value.trim()&&!confirm(t('替换编辑器中的内容？未保存的修改将丢失。')))return;$('missionName').value=data.name;$('missionIntro').value=data.intro;$('missionSteps').value=data.steps;toast('已导入编辑器，尚未保存到主板')}catch(err){report(err)}finally{e.target.value=''}};
+renderCatalog();
+
+/* JSON_TOOLS_END */
+const initial=location.hash.slice(1);if(initial&&document.querySelector('.page#'+CSS.escape(initial)))navigate(initial);window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);if(document.querySelector('.page#'+CSS.escape(id)))navigate(id)});applyLanguage();info();connect();
+</script></body></html>

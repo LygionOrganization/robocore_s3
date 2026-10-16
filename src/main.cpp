@@ -1,3 +1,4 @@
+#include "UsbOutput.h"
 // for PlatformIO. This is the main file of the project.
 // This file is the entry point of the program.
 #include <Arduino.h>
@@ -7,7 +8,8 @@
 #include "sbus.h"
 #include "USB.h"
 #include "USBCDC.h"
-#include "tusb.h"
+#include <atomic>
+#include "CommandLineBuffer.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
@@ -16,6 +18,9 @@
 #include "FilesCtrl.h"
 #include "ScreenCtrl.h"
 #include "Wireless.h"
+#include "BusDevices.h"
+#include "MissionStorage.h"
+#include "SyncCommandValidation.h"
 #ifdef DEV_TYPE_LINKARM_LT
 #include "Arm_page.h"
 #else
@@ -23,7 +28,6 @@
 #endif
 
 QueueHandle_t cmdQueue;
-JsonDocument jsonCmdReceive;
 JsonDocument jsonFeedback;
 /*
 Declare USBSerial as an instance of USBCDC
@@ -31,18 +35,30 @@ Serial is used for USB CDC communication
 Serial0 is used for UART communication
 */
 // USBCDC USBSerial;
-DeserializationError err;
 String outputString;
-uint8_t* newCmdChar;
 JointsCtrl jointsCtrl;
 FilesCtrl filesCtrl;
 ScreenCtrl screenCtrl;
 Wireless wireless;
+BusDevices busDevices;
+SemaphoreHandle_t resultMutex;
+String latestResult = "{}";
 
 #define CMD_MAX_LEN 256
-#define CMD_QUEUE_LEN 50
+#define CMD_QUEUE_LEN 1 // xQueueOverwrite requires exactly one pending item.
 
-bool breakloop = false;
+std::atomic<bool> breakloop{false};
+std::atomic<bool> missionRunning{false};
+std::atomic_flag missionGate = ATOMIC_FLAG_INIT;
+MissionStorage missionStorage;
+struct MissionGuard {
+  bool acquired = !missionGate.test_and_set();
+  ~MissionGuard() { if (acquired) missionGate.clear(); }
+};
+struct MissionRunState {
+  MissionRunState() { missionRunning.store(true); }
+  ~MissionRunState() { missionRunning.store(false); }
+};
 unsigned long tuneStartTime;
 int* jointFeedback;
 
@@ -60,6 +76,7 @@ double rbzgIK[JOINTS_NUM + 1];
 
 void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput);
 void addJsonCmd2Queue(const char* jsonString);
+void usbCdcEvent(void*, esp_event_base_t, int32_t, void*);
 void relativeStepsCtrl(int j0, int j1, int j2, int j3);
 void runMission(String missionName, int intervalTime, int loopTimes);
 
@@ -83,14 +100,16 @@ void msg(String msgStr, bool newLine = true) {
 #endif
   if (usbMsgFlag) {
     if (newLine) {
-      Serial.println(msgStr);
+      usbOutput.println(msgStr);
     } else {
-      Serial.print(msgStr);
+      usbOutput.print(msgStr);
     }
   }
 }
 
 void getMsgStatus() {
+  JsonDocument jsonFeedback;
+  String outputString;
   jsonFeedback.clear();
   jsonFeedback["T"] = CMD_SET_MSG_OUTPUT;
   jsonFeedback["echo"] = echoMsgFlag;
@@ -109,7 +128,7 @@ void buttonBuzzer() {
   digitalWrite(BUZZER_PIN, HIGH);
 }
 
-#include "buttonUI.h"
+#include "ButtonUI.h"
 
 // websocket & http
 AsyncWebServer server(80);
@@ -120,6 +139,8 @@ AsyncWebSocket ws("/ws");
 void handleWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                    AwsEventType type, void *arg, uint8_t *data, size_t len) {
   if (type == WS_EVT_CONNECT) {
+    JsonDocument jsonFeedback;
+    String outputString;
     // feedback after connection
     jsonFeedback.clear();
     jsonFeedback["type"] = "hello";
@@ -131,23 +152,23 @@ void handleWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
   else if (type == WS_EVT_DATA) {
     AwsFrameInfo *info = (AwsFrameInfo *)arg;
     if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-      // recv JSON
-      char cmdBuffer[CMD_MAX_LEN];
+      if (len == 0 || len >= CMD_MAX_LEN || memchr(data, '\0', len)) return;
+      char cmdBuffer[CMD_MAX_LEN] = {};
       memcpy(cmdBuffer, data, len);
-      cmdBuffer[len] = '\0';
-      
-      if (xQueueSend(cmdQueue, cmdBuffer, 0) != pdPASS) {
-        msg("Queue full, dropping command");
-      }
-
-      if (memmem(data, len, "\"T\":0", 5) != nullptr) {
-        char tmp[CMD_MAX_LEN];
-        while (xQueueReceive(cmdQueue, tmp, 0) == pdPASS) {}
-        breakloop = true;
-        msg("breakloop");
-      }
+      addJsonCmd2Queue(cmdBuffer);
     }
   }
+}
+
+// Only the latest executed result is retained, just like the command mailbox.
+void publishResult(const JsonDocument& result) {
+  String payload;
+  serializeJson(result, payload);
+  xSemaphoreTake(resultMutex, portMAX_DELAY);
+  latestResult = payload;
+  xSemaphoreGive(resultMutex);
+  ws.textAll(payload);
+  msg(payload);
 }
 
 // auto push telemetry
@@ -180,6 +201,11 @@ void pushTelemetry() {
 }
 
 void setupHttpRoutes() {
+#ifndef DEV_TYPE_LINKARM_LT
+  server.on("/legacy", HTTP_GET, [](AsyncWebServerRequest *req){
+    req->redirect("/#json");
+  });
+#endif
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *req){
     req->send(200, "text/html; charset=utf-8", INDEX_HTML);
   });
@@ -191,38 +217,53 @@ void setupHttpRoutes() {
 
   // device info：GET /api/info
   server.on("/api/info", HTTP_GET, [](AsyncWebServerRequest *req){
-    // StaticJsonDocument<256> doc;
+    JsonDocument jsonFeedback;
+    String outputString;
     jsonFeedback.clear();
     
     jsonFeedback["chip"]   = "ESP32-S3";
     jsonFeedback["sdk"]    = ESP.getSdkVersion();
-    jsonFeedback["fw_ver"] = "demo-1.0";
+    jsonFeedback["fw_ver"] = "robocore-1.3";
+    jsonFeedback["product"] = "RoboCore S3 / RD Lite";
+    jsonFeedback["imu_present"] = busDevices.imu.present();
+    jsonFeedback["mission_running"] = missionRunning.load();
+    jsonFeedback["sta_state"] = wireless.getSTAState();
+    jsonFeedback["sta_ip"] = wireless.getSTAIP();
+    jsonFeedback["ap_ip"] = wireless.getAPIP();
+    jsonFeedback["sta_ssid"] = WiFi.SSID();
+    jsonFeedback["baud"] = jointsCtrl.baudrate;
     uint8_t m[6]; WiFi.macAddress(m);
     jsonFeedback["mac"]    = wireless.macToString(m);
     serializeJson(jsonFeedback, outputString);
     req->send(200, "application/json", outputString);
   });
 
+  server.on("/api/result", HTTP_GET, [](AsyncWebServerRequest *req){
+    xSemaphoreTake(resultMutex, portMAX_DELAY);
+    String result = latestResult;
+    xSemaphoreGive(resultMutex);
+    req->send(200, "application/json", result);
+  });
+
   // cmd：POST /api/cmd  ->
   server.on("/api/cmd", HTTP_POST, [](AsyncWebServerRequest *req){},
     NULL,
     [](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total){
-      // recv JSON
-      char cmdBuffer[CMD_MAX_LEN];
+      // Fragmented or oversized bodies are not commands; never copy beyond the buffer.
+      if (index != 0) return;
+      if (len != total || len == 0 || len >= CMD_MAX_LEN || memchr(data, '\0', len)) {
+        req->send(413, "application/json", "{\"error\":\"command too large or fragmented\"}");
+        return;
+      }
+      char cmdBuffer[CMD_MAX_LEN] = {};
       memcpy(cmdBuffer, data, len);
-      cmdBuffer[len] = '\0';
-      
-      if (xQueueSend(cmdQueue, cmdBuffer, 0) != pdPASS) {
-        msg("Queue full, dropping command");
+      JsonDocument command;
+      if (deserializeJson(command, cmdBuffer) || !command["T"].is<int>()) {
+        req->send(400, "application/json", "{\"accepted\":false,\"error\":\"integer T required\"}");
+        return;
       }
-
-      if (memmem(data, len, "\"T\":0", 5) != nullptr) {
-        char tmp[CMD_MAX_LEN];
-        while (xQueueReceive(cmdQueue, tmp, 0) == pdPASS) {}
-        breakloop = true;
-        msg("breakloop");
-      }
-      req->send(200, "application/json", "recv");
+      addJsonCmd2Queue(cmdBuffer);
+      req->send(202, "application/json", "{\"accepted\":true,\"policy\":\"latest-wins\"}");
     }
   );
 
@@ -268,10 +309,15 @@ void setup() {
 
   Wire.begin(IIC_SDA, IIC_SCL);
   Wire.setClock(400000);
+  Wire.setTimeOut(20);
+  busDevices.imu.begin(Wire); // Absence on RD Lite is normal, never fatal.
+  resultMutex = xSemaphoreCreateMutex();
+  configASSERT(resultMutex);
 
   cmdQueue = xQueueCreate(CMD_QUEUE_LEN, CMD_MAX_LEN);
   if (cmdQueue == NULL) {
     msg("Failed to create command queue!");
+    abort();
   }
 
   // buzzer
@@ -283,12 +329,16 @@ void setup() {
   CanStart();
 
   // fake args, it will be ignored by the USB stack, default baudrate is 12Mbps
+  USBSerial.setRxBufferSize(2048);
+  USBSerial.onEvent(usbCdcEvent);
   USBSerial.begin(ESP32S3_BAUD_RATE);
+  USBSerial.setTxTimeoutMs(0);
   USB.begin();
   msg("ESP32-S3 USB CDC DONE!");
 
   // init serial for bus devs
   jointsCtrl.init(BUS_SERVO_BAUD_RATE);
+  busDevices.begin(Serial1);
 
 #ifdef USE_UI_CTRL
   screenCtrl.init();
@@ -471,11 +521,13 @@ void delayInterruptible(int ms) {
 
 void breakLoop() {
   breakloop = true;
-  char tmp[CMD_MAX_LEN];
-  while (xQueueReceive(cmdQueue, tmp, 0) == pdPASS) {}
+  if (cmdQueue) xQueueReset(cmdQueue);
 }
 
 bool runStep(String missionName, int step) {
+  String outputString;
+  JsonDocument jsonCmdReceive;
+  DeserializationError err;
   outputString = filesCtrl.readStep(missionName, step);
   err = deserializeJson(jsonCmdReceive, outputString);
   if (err == DeserializationError::Ok) {
@@ -488,11 +540,10 @@ bool runStep(String missionName, int step) {
   }
 }
 
-void runMission(String missionName, int intervalTime, int loopTimes) {
+void executeMission(String missionName, int intervalTime, int loopTimes) {
   if (!filesCtrl.checkMission(missionName)) {
     return;
   }
-  intervalTime = intervalTime - timeOffset;
   if (intervalTime < 0) {intervalTime = 0;}
   int j = 1;
   while (true) {
@@ -509,12 +560,13 @@ void runMission(String missionName, int intervalTime, int loopTimes) {
         msg("Step: ", false);
         msg(String(i));
         i++;
-        delay(intervalTime);
+        delayInterruptible(intervalTime);
       } else {
         msg("Mission Completed.");
         break;
       }
     }
+    delay(1); // Yield even when an empty legacy mission loops forever.
     j++;
     if (j > loopTimes && loopTimes != -1) {
       return;
@@ -522,11 +574,36 @@ void runMission(String missionName, int intervalTime, int loopTimes) {
   }
 }
 
-void addJsonCmd2Queue(const char* jsonString) {
-  if (xQueueSend(cmdQueue, jsonString, 0) != pdPASS) {
-    msg("Queue full, dropping command");
-  }
+void runMission(String missionName, int intervalTime, int loopTimes) {
+  MissionGuard guard;
+  if (!guard.acquired) return;
+  MissionRunState state;
+  breakloop.store(false);
+  executeMission(missionName, intervalTime, loopTimes);
 }
+
+void addJsonCmd2Queue(const char* jsonString) {
+  if (!cmdQueue || !jsonString) return;
+  const size_t len = strnlen(jsonString, CMD_MAX_LEN);
+  if (!len || len >= CMD_MAX_LEN) return;
+
+  // Parse privately: callbacks must not touch the executing command's document.
+  JsonDocument command;
+  if (deserializeJson(command, jsonString, len) || !command["T"].is<int>()) return;
+  if (command["T"].as<int>() == CMD_BREAK_LOOP) {
+    // Out-of-band stop remains effective while runMission occupies loop().
+    // Do not enqueue it: executing it later could erase a newer command.
+    xQueueReset(cmdQueue);
+    breakloop.store(true);
+    return;
+  }
+
+  // FreeRTOS copies CMD_MAX_LEN bytes, including for short string literals.
+  char cmdBuffer[CMD_MAX_LEN] = {};
+  memcpy(cmdBuffer, jsonString, len);
+  xQueueOverwrite(cmdQueue, cmdBuffer);
+}
+
 
 void relativeStepsCtrl(int j0, int j1, int j2, int j3) {
   espNowPacket[0] = j0;
@@ -537,6 +614,51 @@ void relativeStepsCtrl(int j0, int j1, int j2, int j3) {
 }
 
 void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput) {
+  const int idType = jsonCmdInput["T"] | -1;
+  if (idType == 13 || idType == 23 || idType == 33) {
+    JsonDocument result; result["T"] = idType;
+    if (jsonCmdInput["rid"].is<uint32_t>()) result["rid"] = jsonCmdInput["rid"];
+    int oldId = jsonCmdInput["old_id"] | -1, newId = jsonCmdInput["new_id"] | -1;
+    bool valid = jsonCmdInput["old_id"].is<int>() && jsonCmdInput["new_id"].is<int>() && oldId >= 0 && oldId <= 253 && newId >= 0 && newId <= 253 && oldId != newId;
+    bool ok = valid && (idType == 13 ? jointsCtrl.changeIDSTSM(oldId,newId) : idType == 23 ? jointsCtrl.changeIDHL(oldId,newId) : jointsCtrl.changeIDSC(oldId,newId));
+    result["ok"] = ok;
+    if (ok) result["new_id"] = newId;
+    else result["error"] = valid ? "ID change not verified; check connection, duplicate IDs and scan again" : "distinct old_id and new_id in 0..253 required";
+    publishResult(result); return;
+  }
+  if (!validSyncCommand(jsonCmdInput)) {
+    JsonDocument result;
+    result["T"] = jsonCmdInput["T"];
+    if (jsonCmdInput["rid"].is<uint32_t>()) result["rid"] = jsonCmdInput["rid"];
+    result["ok"] = false;
+    result["error"] = "invalid_sync_parameters";
+    publishResult(result);
+    return;
+  }
+  const int missionType = jsonCmdInput["T"] | -1;
+  if (missionType >= 300 && missionType <= 310) {
+    JsonDocument result;
+    MissionGuard guard;
+    MissionApi::handle(missionStorage, jsonCmdInput, result, !guard.acquired);
+    const bool run = result["ok"].as<bool>() && (missionType == 307 || missionType == 308);
+    if (run) {
+      MissionRunState state;
+      breakloop.store(false);
+      publishResult(result);
+      if (missionType == 307) runStep(jsonCmdInput["name"], jsonCmdInput["step"]);
+      else executeMission(jsonCmdInput["name"], jsonCmdInput["interval"], jsonCmdInput["loop"]);
+      result["status"] = "finished";
+      publishResult(result);
+    } else publishResult(result);
+    return;
+  }
+  JsonDocument deviceResult;
+  if (busDevices.handle(jsonCmdInput, deviceResult)) {
+    publishResult(deviceResult);
+    return;
+  }
+  JsonDocument jsonFeedback;
+  String outputString;
   int cmdType;
   cmdType = jsonCmdInput["T"].as<int>();
   switch(cmdType){
@@ -816,10 +938,12 @@ void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput) {
                                                jsonCmdInput["move"]);
                         break;
   case CMD_STEPS_CTRL_SMST:
-                        // void
+                        jsonFeedback["ok"] = false;
+                        jsonFeedback["error"] = "unsupported_command";
                         break;
   case CMD_STEPS_CTRL_HL:
-                        // void
+                        jsonFeedback["ok"] = false;
+                        jsonFeedback["error"] = "unsupported_command";
                         break;
   case CMD_ANGLE_CTRL_SC:
                         jointsCtrl.angleCtrlSC(jsonCmdInput["id"], 
@@ -1091,7 +1215,6 @@ void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput) {
                         tuneStartTime = millis();
                         while (millis() - tuneStartTime < jsonCmdInput["duration"]) {
                           if (breakloop) {
-                            breakloop = false;
                             noTone(BUZZER_PIN);
                             digitalWrite(BUZZER_PIN, HIGH);
                             break;
@@ -1135,100 +1258,47 @@ void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput) {
                         break;
 
 
-  case CMD_SCAN_FILES:
-                        filesCtrl.scan();
-                        break;
-  case CMD_CREATE_MISSION:
-                        filesCtrl.createMission(jsonCmdInput["name"], 
-                                                jsonCmdInput["intro"]);
-                        break;
   case CMD_FORMAT_FLASH:
-                        filesCtrl.flash();
-                        break;
-  case CMD_MISSION_CONTENT:
-                        filesCtrl.missionContent(jsonCmdInput["name"]);
-                        break;
-  case CMD_APPEND_SETP_JSON:
-                        filesCtrl.appendStep(jsonCmdInput["name"],
-                                             jsonCmdInput["json"]);
-                        break;
-  case CMD_INSERT_SETP_JSON:
-                        filesCtrl.insertStep(jsonCmdInput["name"],
-                                             jsonCmdInput["step"],
-                                             jsonCmdInput["json"]);
-                        break;
-  case CMD_REPLACE_SETP_JSON:
-                        filesCtrl.replaceStep(jsonCmdInput["name"],
-                                              jsonCmdInput["step"],
-                                              jsonCmdInput["json"]);
-                        break;
-  case CMD_DELETE_SETP:
-                        filesCtrl.deleteStep(jsonCmdInput["name"],
-                                             jsonCmdInput["step"]);
-                        break;
-  case CMD_RUN_STEP:    
-                        runStep(jsonCmdInput["name"], jsonCmdInput["step"]);
-                        break;
-  case CMD_RUN_MISSION: 
-                        runMission(jsonCmdInput["name"], 
-                                   jsonCmdInput["interval"], 
-                                   jsonCmdInput["loop"]);
-                        break;
-  case CMD_DELETE_MISSION:
-                        filesCtrl.deleteMission(jsonCmdInput["name"]);
-                        break;
-  
+    filesCtrl.flash();
+    break;
 
-
-  case CMD_SET_WIFI_MODE:
-                        if (jsonCmdInput["mode"] == 0) {
-                          wireless.setWifiMode(jsonCmdInput["mode"], "", "", 0, "", "");
-                          jsonFeedback.clear();
-                          jsonFeedback["T"] = CMD_SET_WIFI_MODE;
-                          jsonFeedback["mode"] = 0;
-                          serializeJson(jsonFeedback, outputString);
-                          filesCtrl.checkReplaceStep("boot", outputString);
-                        } else if (jsonCmdInput["mode"] == 1) {
-                          if (wireless.setWifiMode(jsonCmdInput["mode"], 
-                                                   jsonCmdInput["ap_ssid"], 
-                                                   jsonCmdInput["ap_password"], 
-                                                   jsonCmdInput["channel"], 
-                                                   jsonCmdInput["sta_ssid"], 
-                                                   jsonCmdInput["sta_password"])) {
-                              jsonFeedback.clear();
-                              jsonFeedback["T"] = CMD_SET_WIFI_MODE;
-                              jsonFeedback["mode"] = 1;
-                              jsonFeedback["ap_ssid"] = jsonCmdInput["ap_ssid"];
-                              jsonFeedback["ap_password"] = jsonCmdInput["ap_password"];
-                              jsonFeedback["channel"] = jsonCmdInput["channel"];
-                              jsonFeedback["sta_ssid"] = jsonCmdInput["sta_ssid"];
-                              jsonFeedback["sta_password"] = jsonCmdInput["sta_password"];
-                              serializeJson(jsonFeedback, outputString);
-                              filesCtrl.checkReplaceStep("boot", outputString);
-                          } else {
-                              jsonFeedback.clear();
-                              jsonFeedback["T"] = CMD_SET_WIFI_MODE;
-                              jsonFeedback["mode"] = 1;
-                              jsonFeedback["ap_ssid"] = jsonCmdInput["ap_ssid"];
-                              jsonFeedback["ap_password"] = jsonCmdInput["ap_password"];
-                              jsonFeedback["channel"] = jsonCmdInput["channel"];
-                              jsonFeedback["sta_ssid"] = "";
-                              jsonFeedback["sta_password"] = "";
-                              serializeJson(jsonFeedback, outputString);
-                              filesCtrl.checkReplaceStep("boot", outputString);
-                          }
-                        }
-                        break;
+  case CMD_SET_WIFI_MODE: {
+    const int mode = jsonCmdInput["mode"] | -1;
+    String ap = jsonCmdInput["ap_ssid"] | "", pass = jsonCmdInput["ap_password"] | "";
+    String ssid = jsonCmdInput["sta_ssid"] | "", password = jsonCmdInput["sta_password"] | "";
+    int channel = jsonCmdInput["channel"] | 1;
+    if ((mode != 0 && mode != 1) || (mode == 1 && (ap.length() < 1 || ap.length() > 32 || pass.length() < 8 || pass.length() > 63 || ssid.length() > 32 || password.length() > 63 || channel < 1 || channel > 13))) {
+      jsonFeedback["ok"] = false; jsonFeedback["error"] = "invalid_wifi_settings"; break;
+    }
+    // Save the user's configuration independently of router availability.
+    JsonDocument saved; saved.set(jsonCmdInput); saved.remove("rid");
+    String config; serializeJson(saved, config);
+    if (!filesCtrl.checkReplaceStep("boot", config)) {
+      jsonFeedback["ok"] = false; jsonFeedback["error"] = "wifi_config_save_failed"; break;
+    }
+    bool applied = wireless.setWifiMode(mode, ap, pass, channel, ssid, password);
+    jsonFeedback["ok"] = mode == 0 || applied;
+    if (mode == 1 && !applied) jsonFeedback["error"] = "ap_start_failed";
+    jsonFeedback["sta_state"] = wireless.getSTAState();
+    jsonFeedback["sta_ip"] = wireless.getSTAIP();
+    break;
+  }
   case CMD_WIFI_INFO:
                         outputString = filesCtrl.findCmdByType("boot", CMD_SET_WIFI_MODE);
+                        deserializeJson(jsonFeedback, outputString);
+                        jsonFeedback.remove("ap_password");
+                        jsonFeedback.remove("sta_password");
+                        outputString = ""; serializeJson(jsonFeedback, outputString);
                         msg(outputString);
                         break;
   case CMD_GET_AP_IP:
                         outputString = wireless.getAPIP();
+                        jsonFeedback["ap_ip"] = outputString;
                         msg(outputString);
                         break;
   case CMD_GET_STA_IP:
                         outputString = wireless.getSTAIP();
+                        jsonFeedback["sta_ip"] = outputString;
                         msg(outputString);
                         break;
 
@@ -1242,6 +1312,7 @@ void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput) {
                         break;
   case CMD_GET_MAC:
                         outputString = wireless.getMac();
+                        jsonFeedback["mac"] = outputString;
                         msg(outputString);
                         break;
   case CMD_ESP_NOW_SEND:
@@ -1273,6 +1344,9 @@ void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput) {
                         filesCtrl.flash();
                         break;
   case CMD_GET_MSG_OUTPUT:
+                        jsonFeedback["echo"] = echoMsgFlag;
+                        jsonFeedback["uart"] = uartMsgFlag;
+                        jsonFeedback["usb"] = usbMsgFlag;
                         getMsgStatus();
                         break;
   case CMD_SET_MSG_OUTPUT:
@@ -1307,48 +1381,52 @@ void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput) {
                         msg("test - 4");
                         break;
   
+  default:
+    jsonFeedback["ok"] = false;
+    jsonFeedback["error"] = "unsupported_command";
+    break;
+  }
+  if (jsonCmdInput["rid"].is<uint32_t>()) {
+    // Shared HTTP/WS results must not expose Wi-Fi credentials.
+    jsonFeedback.remove("ap_password");
+    jsonFeedback.remove("sta_password");
+    jsonFeedback["rid"] = jsonCmdInput["rid"];
+    jsonFeedback["command_T"] = jsonCmdInput["T"];
+    jsonFeedback["dispatched"] = true;
+    publishResult(jsonFeedback);
   }
 }
 
 
-// USB CDC receive callback
-void tud_cdc_rx_cb(uint8_t itf) {
-  static String receivedData;
-  char buffer[256];
-  uint32_t count = tud_cdc_read(buffer, sizeof(buffer));
+// Arduino owns tud_cdc_rx_cb and transfers bytes into USBSerial's RX queue.
+// This runs in the USB event task, independently of loop() and runMission().
+void usbCdcEvent(void*, esp_event_base_t base, int32_t eventId, void*) {
+  static CommandLineBuffer<CMD_MAX_LEN> line;
+  if (base != ARDUINO_USB_CDC_EVENTS) return;
+  if (eventId == ARDUINO_USB_CDC_DISCONNECTED_EVENT) {
+    line.reset();
+    return;
+  }
+  if (eventId == ARDUINO_USB_CDC_RX_OVERFLOW_EVENT) {
+    // Lost bytes must never turn two partial commands into one command.
+    line.reset(true);
+  } else if (eventId != ARDUINO_USB_CDC_RX_EVENT) {
+    return;
+  }
 
-  for (uint32_t i = 0; i < count; i++) {
-    char receivedChar = buffer[i];
-    receivedData += receivedChar;
-
-    // Detect the end of the JSON string based on a specific termination character
-    if (receivedChar == '\n') {
-      // Now we have received the complete JSON string
-      char cmdBuffer[CMD_MAX_LEN];
-      size_t len = receivedData.length();
-      if (len >= CMD_MAX_LEN) len = CMD_MAX_LEN - 1;
-      newCmdChar = (uint8_t*)receivedData.c_str();
-      memcpy(cmdBuffer, newCmdChar, len);
-      cmdBuffer[len] = '\0';
-
-      if (xQueueSend(cmdQueue, cmdBuffer, 0) != pdPASS) {
-        msg("Queue full, dropping command");
-      }
-      
-      if (memmem(newCmdChar, len, "\"T\":0", 5) != nullptr) {
-        char tmp[CMD_MAX_LEN];
-        while (xQueueReceive(cmdQueue, tmp, 0) == pdPASS) {}
-        breakloop = true;
-        msg("breakloop");
-      }
-      receivedData = "";
-    }
+  // Snapshot the byte count so a continuous sender cannot monopolize this task.
+  // Subsequent data has its own RX event. No writes/logs/bus I/O in this callback.
+  int remaining = USBSerial.available();
+  while (remaining-- > 0) {
+    int value = USBSerial.read();
+    if (value < 0) break;
+    line.push(static_cast<char>(value), addJsonCmd2Queue);
   }
 }
-
 
 void serialCtrl() {
   if (serialForwarding) {
+    BusGuard busGuard;
     // Serial0 -> Serial1
     while (Serial0.available()) {
       int data = Serial0.read();
@@ -1360,29 +1438,12 @@ void serialCtrl() {
       Serial0.write(data);
     }
   } else {
-    static String receivedData;
-
-    while (Serial0.available() > 0) {
-      char receivedChar = Serial0.read();
-      receivedData += receivedChar;
-
-      // Detect the end of the JSON string based on a specific termination character
-      if (receivedChar == '\n') {
-        // Now we have received the complete JSON string
-        DeserializationError err = deserializeJson(jsonCmdReceive, receivedData);
-        if (err == DeserializationError::Ok) {
-          if (echoMsgFlag) {
-            msg(receivedData, false);
-          }
-          jsonCmdReceiveHandler(jsonCmdReceive);
-        } else {
-          // Handle JSON parsing error here
-          msg("JSON parsing error: ", false);
-          msg(err.c_str());
-        }
-        // Reset the receivedData for the next JSON string
-        receivedData = "";
-      }
+    static CommandLineBuffer<CMD_MAX_LEN> line;
+    int remaining = Serial0.available();
+    while (remaining-- > 0) {
+      int value = Serial0.read();
+      if (value < 0) break;
+      line.push(static_cast<char>(value), addJsonCmd2Queue);
     }
   } 
 }
@@ -1396,7 +1457,7 @@ void printExecuteFrequency() {
   currentTime = millis();
   if (currentTime - lastPrintTime >= PRINT_INTERVAL) {
     float frequency = (float)executeCount / (PRINT_INTERVAL / 1000.0f);
-    Serial.println(frequency);
+    usbOutput.println(frequency);
     lastPrintTime = currentTime;
     executeCount = 0;
   }
@@ -1404,6 +1465,19 @@ void printExecuteFrequency() {
 
 
 void loop() {
+  static unsigned long networkRefresh = 0;
+  static String lastNetwork;
+  if (millis() - networkRefresh >= 1000) {
+    networkRefresh = millis();
+    String state = wireless.getSTAState();
+    String network = state + wireless.getSTAIP() + wireless.getAPIP();
+    if (network != lastNetwork) {
+      lastNetwork = network;
+      screenCtrl.changeSingleLine(2, "AP:" + wireless.getAPIP(), false);
+      screenCtrl.changeSingleLine(3, "STA:" + (state == "connected" ? wireless.getSTAIP() : state), true);
+    }
+  }
+
   // unsigned long startMicros = micros();
 #ifndef TTL_ADAPTER_MACHINE
   serialCtrl();
@@ -1412,7 +1486,7 @@ void loop() {
   receiveCANasJson();
   // unsigned long endMicros = micros();
   // unsigned long elapsedTime = endMicros - startMicros;
-  // Serial.println(elapsedTime);
+  // usbOutput.println(elapsedTime);
 
 #ifdef UART0_AS_SBUS
   if (sbus.Read()) {
@@ -1420,13 +1494,13 @@ void loop() {
     sbusData = sbus.data();
     /* Display the received data */
     for (int8_t i = 0; i < sbusData.NUM_CH; i++) {
-      Serial.print(sbusData.ch[i]);
-      Serial.print("\t");
+      usbOutput.print(sbusData.ch[i]);
+      usbOutput.print("\t");
     }
     /* Display lost frames and failsafe data */
-    Serial.print(sbusData.lost_frame);
-    Serial.print("\t");
-    Serial.println(sbusData.failsafe);
+    usbOutput.print(sbusData.lost_frame);
+    usbOutput.print("\t");
+    usbOutput.println(sbusData.failsafe);
 
     float speed_limit = 1.0;
     if (sbusData.ch[4] < 300) {
@@ -1536,6 +1610,7 @@ void loop() {
 
   char cmdBuffer[CMD_MAX_LEN];
   if (xQueueReceive(cmdQueue, cmdBuffer, 0) == pdPASS) {
+    JsonDocument jsonCmdReceive;
     DeserializationError err = deserializeJson(jsonCmdReceive, cmdBuffer);
     if (err == DeserializationError::Ok) {
       jsonCmdReceiveHandler(jsonCmdReceive);

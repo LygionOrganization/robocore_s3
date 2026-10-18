@@ -30,7 +30,7 @@ static const char PROGMEM INDEX_HTML[] = R"HTML(
 <section class="page" id="stepper" hidden><div class="heading"><div><p class="eyebrow">TTL STEPPER DRIVER</p><h1>Position and continuous motion</h1><p class="muted">Set the operating mode before enabling output and sending a target.</p></div></div><div class="note warning">Modes 0 / 1 switch without restarting; only phase configuration changes require a restart. For follower mode, set the secondary ID to the leader ID and follow the device guide for EDS wiring. Current parameters are register values, not amperes.</div><div class="grid" id="stepperForms"></div></section>
 <section class="page" id="encoder" hidden><div class="heading"><div><p class="eyebrow">TTL ENCODER</p><h1>Precise joint feedback over the bus</h1><p class="muted">Read position and speed, and set a mechanical reference point.</p></div></div><div class="note">4096 counts per turn; multi-turn position 0–65534. The calibrated reference is saved, but accumulated turn counts do not survive power loss.</div><div class="grid" id="encoderForms"></div></section>
 <section class="page" id="servo" hidden><div class="heading"><div><p class="eyebrow">BUS SERVOS</p><h1>Bus servo control</h1><p class="muted">Confirm the model and travel limits. Start at low speed.</p></div></div><div id="servoForms"></div><p class="note">STS / SMS share a protocol. Use JSON tools for synchronized commands and mission scripts.</p></section>
-<section class="page" id="imu" hidden><div class="heading"><div><p class="eyebrow">ON-BOARD SENSING</p><h1>Onboard IMU</h1><p class="muted">Six-axis QMI8658A data, sharing I²C with the OLED.</p></div></div><div class="grid"><article class="card"><h2>Read sensor</h2><p class="muted">If the IMU is not detected, check the sensor and shared I²C wiring. Other functions remain available.</p><button class="primary" id="readImu">Read once</button><pre class="result" id="imuResult">Waiting to read</pre></article><article class="card"><h2>About the data</h2><p>Acceleration: g<br>Angular velocity: °/s<br>Temperature: °C</p><p class="muted small">Configured range: ±8g / ±512°/s. These are physical sensor measurements, not fused Euler angles. Axes depend on the mounting orientation.</p></article></div></section>
+<section class="page" id="imu" hidden><div class="heading"><div><p class="eyebrow">ON-BOARD SENSING</p><h1>Onboard IMU</h1><p class="muted">Six-axis QMI8658A data, sharing I²C with the OLED.</p></div></div><div class="grid"><article class="card"><h2>Read sensor</h2><p class="muted">If the IMU is not detected, check the sensor and shared I²C wiring. Other functions remain available.</p><div class="actions"><button class="primary" id="imuLive" aria-pressed="false">开始实时显示</button><button id="readImu">Read once</button><button id="imuZero">航向归零</button></div><p id="imuStatus" class="muted small" role="status">等待采集</p><canvas id="imuCanvas" style="width:100%;height:320px;background:linear-gradient(#f0f5ff,#fff);border-radius:12px" aria-label="IMU 3D orientation"></canvas><div class="telemetry"><div>横滚 Roll<strong id="imuRoll">—</strong></div><div>俯仰 Pitch<strong id="imuPitch">—</strong></div><div>相对航向 Yaw<strong id="imuYaw">—</strong></div></div><p class="note">六轴姿态估算：航向会随时间漂移。模型轴向对应传感器坐标；平放时以 Z 轴朝下为参考。快速运动和网络延迟会降低精度，不用于控制反馈。</p><pre class="result" id="imuResult">Waiting to read</pre></article><article class="card"><h2>About the data</h2><p>Acceleration: g<br>Angular velocity: °/s<br>Temperature: °C</p><p class="muted small">Configured range: ±8g / ±512°/s. These are physical sensor measurements, not fused Euler angles. Axes depend on the mounting orientation.</p></article></div></section>
 <section class="page" id="json" hidden><div class="heading"><div><p class="eyebrow">DEVELOPER TOOLS</p><h1>JSON console</h1><p class="muted">Send the same command over HTTP, WebSocket or USB CDC.</p></div></div><div class="grid"><article class="card"><h2>Send command</h2><div class="tabs"><button data-json='{"T":700,"first":0,"last":20}'>Scan</button><button data-json='{"T":713,"id":1}'>S.BUS</button><button data-json='{"T":732,"id":1}'>Encoder</button><button data-json='{"T":740}'>Onboard IMU</button></div><div class="tabs"><button data-json='{"T":204,"l1":"Hello, world!","l2":"Hello, world!","l3":"Hello, world!","l4":"Hello, world!"}'>OLED four lines</button><button data-json='{"T":206,"freq":1000,"duration":1000}'>External module buzzer</button><button data-json='{"T":410,"longrange":0}'>Initialize ESP-NOW</button><button data-json='{"T":411,"mode":1}'>Set ESP-NOW receive mode</button><button data-json='{"T":412}'>Read MAC address</button><button data-json='{"T":413,"mac":"FF:FF:FF:FF:FF:FF","data":"{\"T\":205}"}'>Send ESP-NOW JSON</button><button data-json='{"T":414,"mac":"FF:FF:FF:FF:FF:FF"}'>Add ESP-NOW peer</button></div><label for="jsonInput" class="small muted">One JSON object</label><textarea id="jsonInput" spellcheck="false">{"T":700,"first":0,"last":20}</textarea><div class="actions" style="margin-top:14px"><button id="sendJson" class="primary">Send command</button><button class="danger" id="stop">Stop loop</button><button id="clearLog">Clear log</button></div><div class="note">Only the latest pending command is kept. HTTP 202 means accepted, not executed. Results are matched by rid; timed-out commands are not retried automatically.</div></article><article class="card"><h2>Activity log</h2><pre id="log" class="result" style="max-height:460px;min-height:280px">Waiting for commands…</pre></article></div><div class="grid" style="margin-top:20px"><article class="card full"><h2>指令参考</h2><p class="small muted">选择示例只会填入编辑器，不会发送。请检查参数后再执行。</p><div class="fields"><label>搜索指令<input id="commandSearch" type="search"></label><label>指令分类<select id="commandGroup"><option value="">全部指令</option></select></label></div><p class="small muted"><span id="commandCount"></span> <span>条指令</span></p><div id="commandList"></div></article><article class="card full" id="missionEditor"><h2>自动化任务脚本</h2><p class="muted small">每行一个 JSON 对象，按顺序执行。保存不等于运行；运行按钮执行主板中已保存的版本。</p><div class="fields"><label>已保存任务<select id="savedMissions"><option value="">选择已保存任务</option></select></label><div class="actions"><button id="refreshMissions">刷新列表</button><button id="loadMission">读取任务</button><button id="deleteMission" class="danger">删除任务</button></div><label>任务名称<input id="missionName" value="demo" maxlength="32"></label><label>任务说明<input id="missionIntro" value="My first mission"></label></div><label for="missionSteps">任务步骤（JSON Lines）</label><textarea id="missionSteps" spellcheck="false" rows="8">{"T":740}
 {"T":51,"delay":500}
 {"T":740}</textarea><div class="note">最多 64 步。任务步骤不含 rid，也不能调用或编辑其它任务。boot_user 会在开机时自动循环执行，boot 为系统保留名称。</div><div class="actions"><button id="saveMission" class="primary">校验并保存到主板</button><button id="exportMission">导出文件</button><button id="openImportMission" type="button">导入文件</button><input type="file" id="importMission" accept="application/json,.json" hidden></div><div class="fields"><label>每步额外间隔（ms）<input id="missionInterval" type="number" min="0" max="60000" value="0"></label><label>循环次数（-1 为无限）<input id="missionLoops" type="number" min="-1" max="10000" value="1"></label></div><button id="runMission">运行已保存任务</button><p class="note warning">停止循环不会关闭电机输出。任务执行期间请先停止循环，再编辑或发送其它指令。上传中断后可从列表读取 draft_ 草稿恢复。</p><pre class="result" id="missionStatus" role="status">尚未执行</pre></article></div></section>
@@ -310,6 +310,7 @@ const translations = {
   "开发工具": "DEVELOPER TOOLS",
   "连接设置": "SETTINGS"
 };
+Object.assign(translations,{"开始实时显示": "Start live view", "暂停实时显示": "Pause live view", "航向归零": "Zero heading", "等待采集": "Waiting for samples", "横滚 Roll": "Roll", "俯仰 Pitch": "Pitch", "相对航向 Yaw": "Relative yaw", "姿态已更新": "Orientation updated", "实时显示已暂停": "Live view paused", "等待新数据，姿态已冻结": "Waiting for new data; orientation frozen", "六轴姿态估算：航向会随时间漂移。模型轴向对应传感器坐标；平放时以 Z 轴朝下为参考。快速运动和网络延迟会降低精度，不用于控制反馈。": "Six-axis estimate: heading drifts over time. Model axes follow the sensor, with Z pointing down at rest. Fast motion and network delays reduce accuracy. Not for control feedback."});
 let language='en';
 try { if(localStorage.getItem('robocore-language')==='zh') language='zh'; } catch {}
 const originalText=new WeakMap();
@@ -385,10 +386,22 @@ function toast(message){$('toast').textContent=message;$('toast').hidden=false;c
 function navigate(id){document.querySelectorAll('.page').forEach(p=>p.hidden=p.id!==id);document.querySelectorAll('[data-page]').forEach(b=>{if(b.dataset.page===id){b.setAttribute('aria-current','page');$('crumb').textContent=b.lastChild.textContent.trim()}else b.removeAttribute('aria-current')});location.hash=id;window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.onclick=()=>navigate(b.dataset.page||b.dataset.goto));
 function log(direction,value){value={...value};for(const k of ['ap_password','sta_password'])if(k in value)value[k]='***';logs.unshift(new Date().toLocaleTimeString()+' '+direction+' '+JSON.stringify(value));if(logs.length>50)logs.pop();$('log').textContent=logs.join('\n\n')}
-function received(value){if(value.T===50&&value.rid===undefined){if(value.baud)$('baudStat').textContent=value.baud.toLocaleString();return} if(value.rid!==undefined)log('←',value);if(active&&value.rid===active.id)active.finish(value)}
+const receivedResults=new Map();
+function received(value){
+ if(value.T===50&&value.rid===undefined){if(value.baud)$('baudStat').textContent=value.baud.toLocaleString();return}
+ if(value.rid===undefined)return;
+ const key=JSON.stringify(value),prior=receivedResults.get(value.rid);
+ // /api/result retains the previous command: it is not a new event.
+ // Ignore unrelated history; allow changed results for a known multi-stage command.
+ if(prior===key || (!prior && (!active || value.rid!==active.id)))return;
+ receivedResults.set(value.rid,key);
+ if(receivedResults.size>100)receivedResults.delete(receivedResults.keys().next().value);
+ log('←',value);
+ if(active&&value.rid===active.id)active.finish(value);
+}
 function connect(){socket=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');socket.onopen=()=>{$('connection').classList.add('online');$('connectionText').textContent='设备已连接'};socket.onmessage=e=>{try{received(JSON.parse(e.data))}catch{}};socket.onclose=()=>{$('connection').classList.remove('online');$('connectionText').textContent='重连中 · HTTP 可用';setTimeout(connect,2000)};socket.onerror=()=>socket.close()}
 async function send(command,output){if(active)throw Error('正在等待上一条指令，请稍候');if(!command||Array.isArray(command)||!Number.isInteger(command.T))throw Error('JSON 必须是包含整数 T 的对象');const id=++rid;command={...command,rid:id};const data=JSON.stringify(command);if(new TextEncoder().encode(data).length>255)throw Error('指令超过 255 字节，请缩短内容');if(command.T===0){await fetch('/api/cmd',{method:'POST',body:data,headers:{'Content-Type':'application/json'}});toast('已请求停止循环；不是电机急停');return}log('→',command);if(output)output.textContent='已发送，等待执行结果…';document.querySelectorAll('form button[type=submit],#sendJson,#readImu').forEach(b=>b.disabled=true);
-try{return await new Promise((resolve,reject)=>{let timer,poll;const cleanup=()=>{clearTimeout(timer);clearInterval(poll);active=null};active={id,finish:value=>{cleanup();if(output)output.textContent=JSON.stringify(value,null,2);value.ok===false?reject(Error(value.error||'设备执行失败')):resolve(value)}};timer=setTimeout(()=>{cleanup();reject(Error('结果超时：指令可能被覆盖、任务仍在执行或连接已中断，请先读取状态确认。'))},20000);let polling=false;poll=setInterval(async()=>{if(polling)return;polling=true;try{const r=await fetch('/api/result',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok)received(await r.json())}catch{}finally{polling=false}},250);if(socket?.readyState===WebSocket.OPEN)socket.send(data);else fetch('/api/cmd',{method:'POST',headers:{'Content-Type':'application/json'},body:data}).then(r=>{if(!r.ok)throw Error('HTTP '+r.status)}).catch(e=>{cleanup();reject(e)})})}finally{document.querySelectorAll('form button[type=submit],#sendJson,#readImu').forEach(b=>b.disabled=false)}}
+try{return await new Promise((resolve,reject)=>{let timer,poll;const cleanup=()=>{clearTimeout(timer);clearInterval(poll);active=null};active={id,finish:value=>{cleanup();if(output)output.textContent=JSON.stringify(value,null,2);value.ok===false?reject(Error(value.error||'设备执行失败')):resolve(value)}};timer=setTimeout(()=>{cleanup();reject(Error('结果超时：指令可能被覆盖、任务仍在执行或连接已中断，请先读取状态确认。'))},20000);let polling=false;poll=setInterval(async()=>{if(polling)return;polling=true;try{const r=await fetch('/api/result',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){const value=await r.json();if(value.rid===id)received(value)}}catch{}finally{polling=false}},250);if(socket?.readyState===WebSocket.OPEN)socket.send(data);else fetch('/api/cmd',{method:'POST',headers:{'Content-Type':'application/json'},body:data}).then(r=>{if(!r.ok)throw Error('HTTP '+r.status)}).catch(e=>{cleanup();reject(e)})})}finally{document.querySelectorAll('form button[type=submit],#sendJson,#readImu').forEach(b=>b.disabled=false)}}
 function report(e){toast(e.message||String(e))}
 function number(key,label,value,min,max){return {key,label,value,min,max}}
 const idField=()=>number('id','设备 ID',1,0,253);
@@ -407,7 +420,76 @@ form('encoderForms','读取位置与速度','原始计数返回；每圈 4096 �
 changeId('encoderForms',720);
 for(const [name,T,max] of [['STS / SMS',11,4095],['HLS',21,4095],['SCS',31,1023]]){const group=document.createElement('section');group.className='servo-group';const title=document.createElement('h2');title.textContent=name;group.append(title);const grid=document.createElement('div');grid.className='grid servo-grid';grid.id='servoFamily'+T;group.append(grid);$('servoForms').append(group);form(grid.id,name+' 设置设备 ID','请逐个接入设备设置 ID，主 ID 不可重复。',T+2,[number('old_id','设备 ID',1,0,253),number('new_id','新 ID',2,0,253)],'保存新 ID','确认修改设备 ID？该设置会写入设备。');const fields=[idField(),number('pos','目标位置',Math.floor(max/2),0,max),number('spd','速度',100,1,32767)];if(T!==31)fields.push(number('acc','加速度',10,0,254));if(T===21)fields.push(number('cl','电流限制',150,0,1000));if(T===31)fields.push(number('time','时间（ms）',1000,0,65535));form(grid.id,name+' 位置控制','传统协议命令；返回 dispatched 仅表示完成分发。',T,fields,'发送目标');form(grid.id,name+' 状态反馈','检查位置、速度与通信状态。',T===31?35:T+4,[idField()],'读取状态')}
 $('scanForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),first=Number(f.get('first')),last=Number(f.get('last'));if(first>last)return toast('起始 ID 不能大于结束 ID');$('scanInfo').textContent='正在扫描，请稍候…';try{const r=await send({T:700,first,last});$('ids').replaceChildren();for(const id of r.ids){const b=document.createElement('button');b.textContent='ID '+id;b.onclick=()=>{document.querySelectorAll('input[name=id]').forEach(i=>i.value=id);toast('已选择 ID '+id+'，请选择对应设备组件')};$('ids').append(b)}$('deviceStat').textContent=r.ids.length+' 个';$('scanInfo').textContent=r.ids.length?'扫描完成 · 点击 ID 填入控制组件':'未发现设备，请检查供电、接线和波特率'}catch(e){$('scanInfo').textContent=e.message;report(e)}};
-$('readImu').onclick=()=>send({T:740},$('imuResult')).catch(report);
+/* IMU_VIEW_START */
+// Six-axis visualization only: relative yaw drifts without a magnetic reference.
+class ImuAttitude {
+  constructor(){this.q=[1,0,0,0];this.count=null;this.yawZero=0;}
+  update(s){
+    const a=s.accel_g,g=s.gyro_dps;
+    if(!Array.isArray(a)||!Array.isArray(g)||a.length!==3||g.length!==3||![...a,...g].every(Number.isFinite)||!Number.isInteger(s.sample_count))return false;
+    const n=Math.hypot(...a),delta=this.count===null?0:((s.sample_count-this.count)&0xffffff);
+    if(this.count!==null&&delta===0)return false;
+    if(n<0.05)return false;
+    if(this.count===null||delta/112.1>0.5){
+      const r=Math.atan2(-a[1],-a[2])/2,p=Math.atan2(a[0],Math.hypot(a[1],a[2]))/2;
+      this.q=[Math.cos(r)*Math.cos(p),Math.sin(r)*Math.cos(p),Math.cos(r)*Math.sin(p),-Math.sin(r)*Math.sin(p)];
+    }else{
+      let [w,x,y,z]=this.q;
+      const v=[2*(x*z-w*y),2*(w*x+y*z),w*w-x*x-y*y+z*z];
+      const m=a.map(v=>-v/n),gain=Math.abs(n-1)<0.2?2:0;
+      const rate=g.map(v=>v*Math.PI/180);
+      rate[0]+=gain*(m[1]*v[2]-m[2]*v[1]);rate[1]+=gain*(m[2]*v[0]-m[0]*v[2]);rate[2]+=gain*(m[0]*v[1]-m[1]*v[0]);
+      const dt=delta/112.1,steps=Math.ceil(dt/0.01),h=dt/steps/2;
+      for(let i=0;i<steps;i++){
+        [w,x,y,z]=this.q;const [gx,gy,gz]=rate;
+        const q=[w+(-x*gx-y*gy-z*gz)*h,x+(w*gx+y*gz-z*gy)*h,y+(w*gy-x*gz+z*gx)*h,z+(w*gz+x*gy-y*gx)*h];
+        const norm=Math.hypot(...q);this.q=q.map(v=>v/norm);
+      }
+    }
+    this.count=s.sample_count;return true;
+  }
+  angles(){const [w,x,y,z]=this.q;return [Math.atan2(2*(w*x+y*z),1-2*(x*x+y*y)),Math.asin(Math.max(-1,Math.min(1,2*(w*y-z*x)))),Math.atan2(2*(w*z+x*y),1-2*(y*y+z*z))];}
+  rotate([a,b,c]){const [w,x,y,z]=this.q;return [(1-2*y*y-2*z*z)*a+2*(x*y-w*z)*b+2*(x*z+w*y)*c,2*(x*y+w*z)*a+(1-2*x*x-2*z*z)*b+2*(y*z-w*x)*c,2*(x*z-w*y)*a+2*(y*z+w*x)*b+(1-2*x*x-2*y*y)*c];}
+}
+const imuPose=new ImuAttitude();let imuLive=false,imuTimer,imuGeneration=0,imuLast=0;
+function drawImu(){
+  const canvas=$('imuCanvas'),ctx=canvas.getContext('2d'),width=canvas.clientWidth||600,height=320,dpr=Math.min(devicePixelRatio||1,2);
+  canvas.width=width*dpr;canvas.height=height*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,width,height);
+  const scale=Math.min(width/5,100),yaw=-imuPose.yawZero;
+  function project(p){let [x,y,z]=imuPose.rotate(p);[x,y]=[x*Math.cos(yaw)-y*Math.sin(yaw),x*Math.sin(yaw)+y*Math.cos(yaw)];return [width/2+scale*(x-y)*0.8,height/2+scale*((x+y)*0.35-z*0.9),x+y+z];}
+  const points=[[-1,-.65,-.08],[1,-.65,-.08],[1,.65,-.08],[-1,.65,-.08],[-1,-.65,.08],[1,-.65,.08],[1,.65,.08],[-1,.65,.08]].map(project);
+  const faces=[[0,1,2,3],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0],[4,7,6,5]];
+  faces.sort((a,b)=>a.reduce((s,i)=>s+points[i][2],0)-b.reduce((s,i)=>s+points[i][2],0));
+  for(const face of faces){ctx.beginPath();face.forEach((i,j)=>ctx[j?'lineTo':'moveTo'](points[i][0],points[i][1]));ctx.closePath();ctx.fillStyle=face.includes(4)&&face.includes(6)?'#245ddd':'#91aed8';ctx.fill();ctx.strokeStyle='#173c72';ctx.stroke();}
+  const origin=project([0,0,.12]);ctx.font='bold 14px system-ui';
+  for(const [p,label,color] of [[[1.6,0,.12],'X','#c73e43'],[[0,1.3,.12],'Y','#07836f'],[[0,0,1.2],'Z','#794ad0']]){const end=project(p);ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(...origin.slice(0,2));ctx.lineTo(...end.slice(0,2));ctx.stroke();ctx.fillStyle=color;ctx.fillText(label,end[0]+5,end[1]);}
+  const angles=imuPose.angles();angles[2]-=imuPose.yawZero;
+  ['imuRoll','imuPitch','imuYaw'].forEach((id,i)=>$(id).textContent=((angles[i]*180/Math.PI+540)%360-180).toFixed(1)+'°');
+}
+function stopImu(){imuLive=false;++imuGeneration;clearTimeout(imuTimer);$('imuLive').textContent=t('开始实时显示');$('imuLive').setAttribute('aria-pressed','false');}
+async function readImuView(token){
+  const s=await send({T:740},$('imuResult'));
+  if(token!==imuGeneration)return;
+  if(!imuPose.update(s))return;
+  imuLast=performance.now();$('imuResult').textContent=JSON.stringify(s,null,2);$('imuStatus').textContent=t('姿态已更新');drawImu();
+}
+async function pollImu(){
+  if(!imuLive)return;
+  if(document.hidden||$('imu').hidden){stopImu();return;}
+  const token=imuGeneration;
+  if(!active){try{await readImuView(token)}catch(e){if(token!==imuGeneration)return;$('imuStatus').textContent=e.message;if(!['imu_data_not_ready','imu_no_fresh_sample'].includes(e.message)){stopImu();return;}}}
+  if(imuLive&&token===imuGeneration)imuTimer=setTimeout(pollImu,50);
+}
+$('imuLive').onclick=()=>{if(imuLive){stopImu();$('imuStatus').textContent=t('实时显示已暂停');return;}imuPose.count=null;imuLive=true;++imuGeneration;$('imuLive').textContent=t('暂停实时显示');$('imuLive').setAttribute('aria-pressed','true');pollImu();};
+$('readImu').onclick=()=>readImuView(imuGeneration).catch(e=>{$('imuStatus').textContent=e.message;report(e)});
+$('imuZero').onclick=()=>{imuPose.yawZero=imuPose.angles()[2];drawImu();};
+new MutationObserver(()=>{if($('imu').hidden&&imuLive){stopImu();$('imuStatus').textContent=t('实时显示已暂停')}else if(!$('imu').hidden)drawImu()}).observe($('imu'),{attributes:true,attributeFilter:['hidden']});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&imuLive){stopImu();$('imuStatus').textContent=t('实时显示已暂停')}});
+window.addEventListener('resize',()=>{if(!$('imu').hidden)drawImu()});
+setInterval(()=>{if(imuLive&&performance.now()-imuLast>1500)$('imuStatus').textContent=t('等待新数据，姿态已冻结')},500);
+drawImu();
+
+/* IMU_VIEW_END */
 $('sendJson').onclick=()=>{try{send(JSON.parse($('jsonInput').value)).catch(report)}catch(e){report(e)}};
 document.querySelectorAll('[data-json]').forEach(b=>b.onclick=()=>$('jsonInput').value=b.dataset.json);
 $('clearLog').onclick=()=>{logs.length=0;$('log').textContent='记录已清空'};

@@ -9,6 +9,7 @@ extra = 'const commandCatalog='+json.dumps(catalog,ensure_ascii=False,separators
 extra += (root/'web/json-tools.js').read_text(encoding='utf-8')
 html = re.sub(r'/\* JSON_TOOLS_START \*/.*?/\* JSON_TOOLS_END \*/',
               lambda _: '/* JSON_TOOLS_START */\n'+extra+'\n/* JSON_TOOLS_END */',html,flags=re.S)
+html = re.sub(r'/\* IMU_VIEW_START \*/.*?/\* IMU_VIEW_END \*/', lambda _: '/* IMU_VIEW_START */\n' + (root/'web/imu-view.js').read_text(encoding='utf-8-sig') + '\n/* IMU_VIEW_END */', html, flags=re.S)
 (root/'web/index.html').write_text(html,encoding='utf-8')
 assert ')HTML"' not in html
 (root / 'src/Web_page.h').write_text(

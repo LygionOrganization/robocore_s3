@@ -28,3 +28,10 @@ class FakeUsb {
   size_t write(uint8_t byte) { return write(&byte, 1); }
 };
 inline FakeUsb Serial;
+
+inline void delayMicroseconds(unsigned) {}
+
+// Match the real ESP32 Arduino core: this macro can silently replace local calls.
+inline uint16_t makeWord(uint16_t value) { return value; }
+inline uint16_t makeWord(uint8_t high, uint8_t low) { return (uint16_t(high)<<8)|low; }
+#define word(...) makeWord(__VA_ARGS__)

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
+#include <esp_system.h>
 #include <nvs_flash.h>
 #include "sbus.h"
 #include "USB.h"
@@ -167,7 +168,7 @@ void publishResult(const JsonDocument& result) {
   xSemaphoreTake(resultMutex, portMAX_DELAY);
   latestResult = payload;
   xSemaphoreGive(resultMutex);
-  ws.textAll(payload);
+  if (ws.availableForWriteAll()) ws.textAll(payload);
   msg(payload);
 }
 
@@ -195,7 +196,7 @@ void pushTelemetry() {
       }
       jsonFeedback["uptime"] = (uint32_t)(millis()/1000);
       serializeJson(jsonFeedback, outputString);
-      ws.textAll(outputString);
+      if (ws.availableForWriteAll()) ws.textAll(outputString);
     }
   }
 }
@@ -222,10 +223,14 @@ void setupHttpRoutes() {
     jsonFeedback.clear();
     
     jsonFeedback["chip"]   = "ESP32-S3";
+    jsonFeedback["uptime_ms"] = millis();
+    jsonFeedback["free_heap"] = ESP.getFreeHeap();
+    jsonFeedback["min_free_heap"] = ESP.getMinFreeHeap();
+    jsonFeedback["reset_reason"] = int(esp_reset_reason());
     jsonFeedback["sdk"]    = ESP.getSdkVersion();
-    jsonFeedback["fw_ver"] = "robocore-1.3";
+    jsonFeedback["fw_ver"] = "robocore-1.3.7";
     jsonFeedback["product"] = "RoboCore S3 / RD Lite";
-    jsonFeedback["imu_present"] = busDevices.imu.present();
+    jsonFeedback["imu_present"] = busDevices.imuPresent();
     jsonFeedback["mission_running"] = missionRunning.load();
     jsonFeedback["sta_state"] = wireless.getSTAState();
     jsonFeedback["sta_ip"] = wireless.getSTAIP();
@@ -238,6 +243,17 @@ void setupHttpRoutes() {
     req->send(200, "application/json", outputString);
   });
 
+  // Read-only telemetry: no command queue, serial output or WS broadcast.
+  server.on("/api/imu", HTTP_GET, [](AsyncWebServerRequest *req){
+    JsonDocument command, result;
+    command["T"] = 740;
+    busDevices.handle(command, result);
+    String payload;
+    serializeJson(result, payload);
+    auto* response = req->beginResponse(200, "application/json", payload);
+    response->addHeader("Cache-Control", "no-store");
+    req->send(response);
+  });
   server.on("/api/result", HTTP_GET, [](AsyncWebServerRequest *req){
     xSemaphoreTake(resultMutex, portMAX_DELAY);
     String result = latestResult;
@@ -310,7 +326,7 @@ void setup() {
   Wire.begin(IIC_SDA, IIC_SCL);
   Wire.setClock(400000);
   Wire.setTimeOut(20);
-  busDevices.imu.begin(Wire); // Absence on RD Lite is normal, never fatal.
+  // IMU initialization and continuous acquisition run after other peripherals start.
   resultMutex = xSemaphoreCreateMutex();
   configASSERT(resultMutex);
 
@@ -503,6 +519,12 @@ void setup() {
   screenCtrl.init();
   screenCtrl.displayText("TTLA IO", 0, 0, 4);
 #endif
+  // Same continuous sampling model as QMI-FINAL-1; HTTP/JSON only reads snapshots.
+  const BaseType_t imuTaskCreated = xTaskCreate([](void*) {
+    busDevices.startImuSampling();
+    for (;;) { busDevices.pollImu(); vTaskDelay(pdMS_TO_TICKS(2) > 0 ? pdMS_TO_TICKS(2) : 1); }
+  }, "ImuSampler", 4096, nullptr, 1, nullptr);
+  configASSERT(imuTaskCreated == pdPASS);
 }
 
 void delayInterruptible(int ms) {
@@ -1469,6 +1491,7 @@ void loop() {
   static String lastNetwork;
   if (millis() - networkRefresh >= 1000) {
     networkRefresh = millis();
+    ws.cleanupClients(4);
     String state = wireless.getSTAState();
     String network = state + wireless.getSTAIP() + wireless.getAPIP();
     if (network != lastNetwork) {

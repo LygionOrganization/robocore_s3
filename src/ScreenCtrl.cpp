@@ -1,4 +1,5 @@
 #include "ScreenCtrl.h"
+#include "I2cGuard.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -9,13 +10,15 @@ String line_3 = "";
 String line_4 = "";
 
 // Create an instance of the SSD1306 display
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1, 400000UL, 400000UL);
 
 ScreenCtrl::ScreenCtrl() {
     // Constructor
 }
 
 void ScreenCtrl::init() {
+    I2cGuard guard;
+    if (!guard.acquired) return;
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C, true, false)) { // Default I2C address is 0x3C
         // Initialization failed, handle error here (e.g., log or retry)
         return;
@@ -26,16 +29,22 @@ void ScreenCtrl::init() {
 }
 
 void ScreenCtrl::rotate(int rotateMode) {
+    I2cGuard guard;
+    if (!guard.acquired) return;
     display.setRotation(rotateMode);
 }
 
 void ScreenCtrl::updateScreen() {
+    I2cGuard guard;
+    if (!guard.acquired) return;
     display.clearDisplay();
     display.display();
 }
 
 // size = 1：ABCDEFGHIJK0123456789 in one line
 void ScreenCtrl::displayText(String text, int16_t x, int16_t y, uint8_t size) {
+    I2cGuard guard;
+    if (!guard.acquired) return;
     display.setCursor(x, y);
     display.setTextSize(size); // Default text size
     display.print(text);
@@ -43,6 +52,8 @@ void ScreenCtrl::displayText(String text, int16_t x, int16_t y, uint8_t size) {
 }
 
 void ScreenCtrl::changeSingleLine(int lineNum, String text, bool updateFlag) {
+    I2cGuard guard;
+    if (!guard.acquired) return;
     switch (lineNum) {
         case 1:
             line_1 = text;
@@ -63,6 +74,8 @@ void ScreenCtrl::changeSingleLine(int lineNum, String text, bool updateFlag) {
 }
 
 void ScreenCtrl::updateFrame() {
+    I2cGuard guard;
+    if (!guard.acquired) return;
     display.clearDisplay();
     display.setCursor(0, 0);
     display.setTextSize(1);
@@ -77,6 +90,8 @@ void ScreenCtrl::updateFrame() {
 }
 
 void ScreenCtrl::clearDisplay() {
+    I2cGuard guard;
+    if (!guard.acquired) return;
     display.clearDisplay();
     display.display();
 }

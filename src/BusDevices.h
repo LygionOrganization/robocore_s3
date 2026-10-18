@@ -1,5 +1,7 @@
 #pragma once
 #include <ArduinoJson.h>
+#include <mutex>
+#include <atomic>
 #include <lygion_devs.h>
 #include <OptionalQMI8658.h>
 #include "BusGuard.h"
@@ -16,8 +18,27 @@ class BusDevices {
  public:
   OptionalQMI8658 imu;
   void begin(HardwareSerial& port) { node_.pSerial = &port; stepper_.pSerial = &port; }
+  bool imuPresent();
+  void startImuSampling();
+  void pollImu();
   bool handle(const JsonDocument& command, JsonDocument& response);
  private:
+  struct ImuSnapshot {
+    OptionalQMI8658::Sample sample = {};
+    bool present = false, valid = false;
+    uint8_t address = 0;
+    uint32_t updated = 0, acquired = 0, restarts = 0, before = 0, after = 0;
+    const char* error = "imu_not_present";
+    const char* state = "not_sampled";
+  };
+  ImuSnapshot snapshot_;
+  std::mutex snapshotMutex_;
+  ImuSnapshot snapshot();
+  void publishSnapshot();
+  std::atomic<bool> backgroundImu_{false};
+  bool cachedImu_ = false;
+  OptionalQMI8658::Sample imuCache_ = {};
+  uint32_t imuUpdated_ = 0, imuRestarted_ = 0, imuAccepted_ = 0, imuRestarts_ = 0;
   NodeClass node_;
   TTLSDClass stepper_;
 };

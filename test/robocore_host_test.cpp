@@ -29,16 +29,30 @@ int main() {
   assert(output["accel_g"][0].as<float>()==1.0f);
   assert(output["gyro_dps"][0].as<float>()==4.0f);
   assert(output["temperature_c"].as<float>()==25.0f);
+  assert(output["accel_g"][1].as<float>()==-2.0f);
+  assert(output["accel_g"][2].as<float>()==0.5f);
+  assert(output["gyro_dps"][1].as<float>()==-10.0f);
+  assert(output["gyro_dps"][2].as<float>()==2.0f);
   assert(output["sample_count"]==1);
   Wire.sampleCount=2; Wire.ax=-4096;
   assert(run("{\"T\":740}")); assert(output["accel_g"][0].as<float>()==-1.0f);
   started=millis(); assert(!run("{\"T\":740}"));
-  assert(output["error"]=="imu_data_timeout" && millis()-started==300);
+  assert(output["error"]=="imu_data_not_ready" && millis()-started==6);
   Wire.sampleCount=0xFFFFFF; assert(run("{\"T\":740}"));
   Wire.sampleCount=0; assert(run("{\"T\":740}")); // Counter rollover is a fresh sample.
-  Wire.ready=false; assert(!run("{\"T\":740}")); Wire.ready=true;
-  Wire.torn=true; ++Wire.sampleCount; assert(!run("{\"T\":740}")); Wire.torn=false;
+  Wire.ready=false; ++Wire.sampleCount; assert(run("{\"T\":740}")); Wire.ready=true; // No status-bit gate.
+  Wire.torn=true; ++Wire.sampleCount; assert(run("{\"T\":740}")); Wire.torn=false;
   assert(run("{\"T\":740}"));
+  OptionalQMI8658::Sample unchanged = {1,2,3,4,5,6,7,8};
+  assert(!bus.imu.sample(unchanged));
+  assert(unchanged.ax==1 && unchanged.sampleCount==8);
+  Wire.clock=100000; Wire.slowClockTears=true; ++Wire.sampleCount;
+  assert(run("{\"T\":740}")); assert(Wire.clock==400000);
+  Wire.tornReads=1; ++Wire.sampleCount;
+  assert(run("{\"T\":740}")); // A single update boundary recovers in this request.
+  Wire.shortBurst=true; ++Wire.sampleCount;
+  assert(!run("{\"T\":740}")); assert(!Wire.locked);
+  Wire.shortBurst=false; ++Wire.sampleCount; assert(run("{\"T\":740}"));
   Wire.failRead=true; assert(!run("{\"T\":740}")); Wire.failRead=false;
   Wire.ignoreConfig=true; Wire.registers[8]=0;
   assert(!bus.imu.begin(Wire)); assert(!run("{\"T\":740}"));
@@ -46,6 +60,19 @@ int main() {
   Wire.ignoreConfig=false; assert(bus.imu.begin(Wire));
   Wire.failReset=true; assert(!bus.imu.begin(Wire)); assert(bus.imu.error()==std::string("imu_reset_failed"));
   Wire.failReset=false; assert(bus.imu.begin(Wire));
+  Wire.failHandshake=true; assert(!bus.imu.begin(Wire));
+  assert(std::string(bus.imu.error())=="imu_clock_gating_failed");
+  Wire.failHandshake=false; assert(bus.imu.begin(Wire));
+  BusDevices sampler;
+  sampler.startImuSampling(); sampler.pollImu();
+  JsonDocument readCommand, snapshot;
+  deserializeJson(readCommand,"{\"T\":740}");
+  sampler.handle(readCommand,snapshot);
+  assert(snapshot["ok"]==true && snapshot["sample_age_ms"]==0);
+  delay(101); snapshot.clear(); sampler.handle(readCommand,snapshot);
+  assert(snapshot["ok"]==false && snapshot["error"]=="imu_no_fresh_sample");
+  ++Wire.sampleCount; sampler.pollImu();snapshot.clear();sampler.handle(readCommand,snapshot);
+  assert(snapshot["ok"]==true && snapshot["samples_acquired"]==2);
   devices[1].present=true;devices[5].present=true;
   assert(run("{\"T\":700}")); assert(output["ids"].size()==2);
   assert(!run("{\"T\":700,\"first\":20,\"last\":1}"));
@@ -69,6 +96,30 @@ int main() {
   assert(!run("{\"T\":725,\"id\":2,\"speed\":-32768,\"acc\":10,\"current\":150}"));
   assert(run("{\"T\":725,\"id\":2,\"speed\":-1,\"acc\":10,\"current\":150}"));
   assert(run("{\"T\":732,\"id\":2}"));assert(output["speed"]==-1); // Valid negative speed, not a transport error.
+  devices[2].enabled=1; devices[2].status=16;
+  writes=busWrites;
+  assert(run("{\"T\":723,\"id\":2}"));
+  assert(output["device_fault"]==false && output["device_status"]==0 && output["reply_status"]==16);
+  assert(output["warning"].isNull());
+  devices[2].driverStatus=16;
+  assert(run("{\"T\":723,\"id\":2}"));
+  assert(output["current_limited"]==true && output["device_fault"]==false && output["warning"].isNull());
+  assert(run("{\"T\":725,\"id\":2,\"speed\":0,\"acc\":10,\"current\":150}"));
+  assert(output["ok"]==true && output["warning"].isNull());
+  writes=busWrites; // Explicit stop command above writes; subsequent reads must not.
+  devices[2].speed=-1;
+  devices[2].driverStatus=4;
+  assert(run("{\"T\":723,\"id\":2}"));
+  assert(output["device_fault"]==true && !output["warning"].isNull());
+  devices[2].driverStatus=0;
+  assert(output["speed"]==-1 && output["pos"]==devices[2].pos);
+  assert(devices[2].enabled==1 && busWrites==writes);
+  failSpeedRead=true;
+  assert(!run("{\"T\":723,\"id\":2}"));
+  assert(output["error"]=="speed read communication failed" && output["bus_error"]==1);
+  assert(output["pos"].isNull() && output["speed"].isNull());
+  failSpeedRead=false;
+  devices[2].status=0;
   int reads=speedReads;
   assert(!run("{\"T\":732,\"id\":3}")); assert(speedReads==reads);
   assert(!run("{\"T\":730,\"id\":2,\"pos\":65535}"));

@@ -1,4 +1,6 @@
 #include "BusDevices.h"
+#include "I2cGuard.h"
+#include <cstring>
 
 namespace {
 bool integer(const JsonDocument& doc, const char* key, int low, int high) {
@@ -11,7 +13,62 @@ bool status(LYS& bus, JsonDocument& out) {
   out["ok"] = ok;
   if (!ok) out["error"] = "device did not acknowledge or reported a fault";
   return ok;
+ }
+// Stepper acknowledgement status includes operating conditions such as current
+// limiting. A nonzero byte alone does not mean that a command was rejected.
+bool status(TTLSDClass& bus, JsonDocument& out) {
+  out["bus_error"] = bus.getLastError(); out["reply_status"] = bus.getState();
+  const bool ok = bus.getLastError() == 0;
+  out["ok"] = ok;
+  if (!ok) out["error"] = "stepper communication failed";
+  return ok;
 }
+}
+
+BusDevices::ImuSnapshot BusDevices::snapshot() {
+  std::lock_guard<std::mutex> lock(snapshotMutex_);
+  return snapshot_;
+}
+void BusDevices::publishSnapshot() {
+  ImuSnapshot value;
+  value.sample=imuCache_; value.present=imu.present(); value.valid=cachedImu_;
+  value.address=imu.address(); value.updated=imuUpdated_; value.acquired=imuAccepted_;
+  value.restarts=imuRestarts_; value.before=imu.countBefore; value.after=imu.countAfter;
+  value.error=imu.error(); value.state=imu.readState;
+  // Only fixed-size copy under this lock: never I2C, JSON, delay or network I/O.
+  std::lock_guard<std::mutex> lock(snapshotMutex_);
+  snapshot_=value;
+}
+bool BusDevices::imuPresent() {
+  if (backgroundImu_) return snapshot().present;
+  I2cGuard guard;
+  return guard.acquired && imu.present();
+}
+void BusDevices::startImuSampling() {
+  backgroundImu_ = true;
+  cachedImu_ = false;
+  {
+    I2cGuard guard;
+    if (guard.acquired) { Wire.setClock(400000); imu.begin(Wire); }
+  }
+  imuRestarted_ = millis();
+  publishSnapshot();
+}
+void BusDevices::pollImu() {
+  {
+    I2cGuard guard;
+    if (!guard.acquired) return;
+    OptionalQMI8658::Sample value;
+    if (imu.sample(value)) {
+      imuCache_ = value; imuUpdated_ = millis(); cachedImu_ = true; ++imuAccepted_;
+    }
+    if (uint32_t(millis() - imuRestarted_) >= 5000 &&
+        (!cachedImu_ || uint32_t(millis() - imuUpdated_) > 2000)) {
+      cachedImu_ = false;
+      ++imuRestarts_; imu.begin(Wire); imuRestarted_ = millis();
+    }
+  }
+  publishSnapshot();
 }
 
 bool BusDevices::handle(const JsonDocument& in, JsonDocument& out) {
@@ -22,10 +79,37 @@ bool BusDevices::handle(const JsonDocument& in, JsonDocument& out) {
   out["T"] = type; out["ok"] = false;
   if (in["rid"].is<uint32_t>()) out["rid"] = in["rid"];
   if (type == IMU_READ) {
-    out["present"] = imu.present();
+    out["sampling_mode"] = "sync_locked";
     OptionalQMI8658::Sample s;
-    if (!imu.sample(s)) { failure(out, imu.error()); return true; }
-    out["ok"] = true; out["address"] = imu.address(); out["temperature_c"] = s.temperature;
+    if (backgroundImu_) {
+      const ImuSnapshot value = snapshot();
+      out["present"] = value.present;
+      const uint32_t age = millis() - value.updated;
+      out["sample_age_ms"] = value.valid ? int32_t(age) : -1;
+      out["samples_acquired"] = value.acquired;
+      out["sensor_restarts"] = value.restarts;
+      if (!value.valid || age > 100) {
+        failure(out,value.present ? "imu_no_fresh_sample" : value.error);
+        out["read_state"] = value.state;
+        out["count_before"] = value.before; out["count_after"] = value.after;
+        return true;
+      }
+      s=value.sample; out["address"] = value.address;
+    } else {
+      I2cGuard guard;
+      if (!guard.acquired) { failure(out,"imu_bus_busy"); return true; }
+      out["present"] = imu.present();
+      Wire.setClock(400000);
+      bool fresh=false;
+      for(unsigned attempt=0;attempt<4;++attempt) {
+        if(imu.sample(s)){fresh=true;break;}
+        if(std::strcmp(imu.error(),"imu_data_not_ready")!=0)break;
+        if(attempt<3)delay(2);
+      }
+      if(!fresh){failure(out,imu.error());return true;}
+      out["address"] = imu.address();
+    }
+    out["ok"] = true; out["temperature_c"] = s.temperature;
     out["sample_count"] = s.sampleCount;
     auto a = out["accel_g"].to<JsonArray>(); a.add(s.ax); a.add(s.ay); a.add(s.az);
     auto g = out["gyro_dps"].to<JsonArray>(); g.add(s.gx); g.add(s.gy); g.add(s.gz);
@@ -113,10 +197,33 @@ bool BusDevices::handle(const JsonDocument& in, JsonDocument& out) {
   }
   if (type == STEPPER_READ || type == ENCODER_READ) {
     int pos = stepper_.ReadPos(id);
-    if (!status(stepper_,out)) return true;
+    out["bus_error"] = stepper_.getLastError();
+    out["position_status"] = stepper_.getState();
+    if (stepper_.getLastError() != 0) { failure(out,"position read communication failed"); return true; }
+    const uint8_t positionStatus = uint8_t(stepper_.getState());
     int speed = stepper_.ReadSpeed(id);
-    if (!status(stepper_,out)) return true;
-    out["pos"] = pos; out["speed"] = speed; return true;
+    out["bus_error"] = stepper_.getLastError();
+    out["speed_status"] = stepper_.getState();
+    if (stepper_.getLastError() != 0) { failure(out,"speed read communication failed"); return true; }
+    // Nonzero device status does not invalidate a correctly received payload.
+    // Preserve both reply statuses; a fault must remain visible to the caller.
+    const uint8_t deviceStatus = uint8_t(positionStatus | stepper_.getState());
+    out["reply_status"] = deviceStatus; // Raw protocol byte; not a fault-register value.
+    if (type == STEPPER_READ) {
+      const int driverStatus = stepper_.readByte(id, 0x41);
+      out["bus_error"] = stepper_.getLastError();
+      if (driverStatus < 0 || stepper_.getLastError() != 0) {
+        failure(out,"driver status register read failed"); return true;
+      }
+      out["device_status"] = driverStatus;
+      // Decode the actual driver register, not the acknowledgement status byte.
+      out["device_fault"] = (driverStatus & 0x0D) != 0; // voltage, overheat, overcurrent
+      out["current_limited"] = (driverStatus & 0x10) != 0;
+      out["limit_active"] = (driverStatus & 0xA0) != 0;
+      out["target_out_of_range"] = (driverStatus & 0x42) != 0;
+      if (driverStatus & 0x0D) out["warning"] = "driver voltage, temperature or overcurrent fault";
+    }
+    out["ok"] = true; out["pos"] = pos; out["speed"] = speed; return true;
   }
   if (type == STEPPER_ENABLE) {
     if (!integer(in,"enable",0,1)) { failure(out,"enable=0 or 1 required"); return true; }

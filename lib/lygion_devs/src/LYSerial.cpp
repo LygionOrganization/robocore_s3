@@ -91,7 +91,9 @@ int LYSerial::writeSCS(unsigned char bDat)
 
 void LYSerial::rFlushSCS()
 {
-	while(pSerial->read()!=-1);
+	int remaining = pSerial->available();
+	if (remaining > 256) remaining = 256;
+	while (remaining-- > 0 && pSerial->read() != -1) {}
 }
 
 void LYSerial::wFlushSCS()

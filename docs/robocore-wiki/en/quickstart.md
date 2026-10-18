@@ -14,19 +14,19 @@ The factory AP is `Robot`, password `12345678`. Stay connected when your phone r
 
 If network settings were changed, use the current SSID and address. The OLED or router client list can help locate the board.
 
-## Discover an ID
+## Scan bus IDs
 
-Open **总线设备** (Bus devices), scan 0–253, and match the controller baud rate to the device (examples use 1Mbps). Results show IDs only. Click an ID to fill it into the control components; choose the device type yourself.
+Open **Bus devices**, scan 0–253, and match the controller baud rate to the device (examples use 1Mbps). Results show IDs only. Click an ID to fill it into the control components; choose the device type yourself.
 
 No result: check motor power, signal wiring, ground and baud rate. A scan cannot reliably distinguish devices with identical IDs. Configure those individually.
 
 ## Read before moving
 
-- E02: open **编码器**, read position, then turn the shaft by hand.
+- E02: open **Encoder**, read position, then turn the shaft by hand.
 - TTL Node: open **TTL Node** and read S.BUS channels.
-- Stepper: open **步进驱动**, read position/speed, then follow the mode/enable sequence in [Bus devices](devices.md).
+- Stepper: open **Stepper driver**, read position/speed, then follow the mode/enable sequence in [Bus devices](devices.md).
 
-Network changes are under **设置**. Applying settings may disconnect the current session; reconnect to the new AP or router-assigned address. Internet access is unnecessary.
+Network changes are under **Settings**. Applying settings may disconnect the current session; reconnect to the new AP or router-assigned address. Internet access is unnecessary.
 
 Next: [Web console](web-console.md), [Bus devices](devices.md), [Troubleshooting](faq.md).
 
@@ -35,4 +35,4 @@ Next: [Web console](web-console.md), [Bus devices](devices.md), [Troubleshooting
 
 RoboCore S3 uses 2.4 GHz Wi-Fi. The device joining its hotspot must support 2.4 GHz; most phones, tablets and laptops do, usually without extra setup. For STA mode, enable 2.4 GHz on the router; 5 GHz / 6 GHz-only networks are not supported.
 
-Apply the router SSID and password in Settings. The page shows connecting, connected or unsuccessful, and the STA IP after connection. The OLED also updates. Use the eye button to reveal passwords. Failed connections retain the settings; check the network and apply again. AP or channel changes can disconnect the browser; reconnect to the board hotspot to check status.
+Apply the router SSID and password in Settings. The page shows connecting, connected or unsuccessful, and the STA IP after connection. The OLED also updates when User Interface Module (A) is connected. Use the eye button to reveal passwords. Failed connections retain the settings; check the network and apply again. AP or channel changes can disconnect the browser; reconnect to the board hotspot to check status.

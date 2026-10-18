@@ -72,7 +72,21 @@ int main() {
   delay(101); snapshot.clear(); sampler.handle(readCommand,snapshot);
   assert(snapshot["ok"]==false && snapshot["error"]=="imu_no_fresh_sample");
   ++Wire.sampleCount; sampler.pollImu();snapshot.clear();sampler.handle(readCommand,snapshot);
-  assert(snapshot["ok"]==true && snapshot["samples_acquired"]==2);
+  assert(snapshot["ok"]==true && snapshot["sample_count"]==Wire.sampleCount);
+  assert(snapshot["sampling_mode"].isNull() && snapshot["samples_acquired"].isNull());
+  assert(snapshot["sensor_restarts"].isNull() && snapshot["count_before"].isNull());
+  fakeI2cBusy=true;
+  snapshot.clear(); sampler.handle(readCommand,snapshot);
+  assert(snapshot["ok"]==true); // Read-only snapshot does not wait for the I2C bus.
+  assert(sampler.imuPresent());
+  sampler.pollImu(); // Busy bus skips this poll rather than waiting indefinitely.
+  fakeI2cBusy=false;
+  for(unsigned i=0;i<100000;++i){
+    ++Wire.sampleCount; sampler.pollImu();
+    snapshot.clear(); sampler.handle(readCommand,snapshot);
+    assert(snapshot["ok"]==true && snapshot["sample_count"]==Wire.sampleCount);
+    delay(9);
+  }
   devices[1].present=true;devices[5].present=true;
   assert(run("{\"T\":700}")); assert(output["ids"].size()==2);
   assert(!run("{\"T\":700,\"first\":20,\"last\":1}"));

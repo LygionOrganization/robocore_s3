@@ -95,8 +95,9 @@ bool receiveCANasJson() {
         return false;
     }
 
-    // create JSON
-    jsonFeedback.clear();
+    // Local buffers keep CAN output independent of other producers.
+    JsonDocument jsonFeedback;
+    String outputString;
     jsonFeedback["T"] = CMD_CAN_SEND;
     jsonFeedback["id"] = rxFrame.identifier;
     jsonFeedback["ext"] = rxFrame.extd;
@@ -108,7 +109,7 @@ bool receiveCANasJson() {
 
     serializeJson(jsonFeedback, outputString);
     msg(outputString);
-    ws.textAll(outputString);
+    if (outputString.length() <= 4096 && ws.availableForWriteAll()) ws.textAll(outputString);
 
     uint8_t resp[1] = {0xAA};
     sendCANFrame(0x101, false, resp, 1);

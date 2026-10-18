@@ -1,13 +1,13 @@
 # 在 AI 帮助下开发
 
-下载 [AGENTS.md](../../../assets/files/robocore-s3/ai-guide.zip)，放到自己的项目根目录。它说明硬件约束、API、依赖和验证方法。资料源均在 [LygionOrganization](https://github.com/LygionOrganization/) 组织下。
+下载 [AI 开发指南压缩包](../../../assets/files/robocore-s3/ai-guide.zip)，解压后将其中的 `AGENTS.md` 放到自己的项目根目录。完整固件源码的根目录也提供此文件。它说明硬件约束、API、依赖和验证方法。资料源均在 [LygionOrganization](https://github.com/LygionOrganization/) 组织下。
 
 ## 提供给 AI 的信息
 
 - 板卡：RoboCore S3。
 - 设备型号、ID、波特率、供电电压与实际接线。
-- 使用出厂固件的 Python 控制，还是替换固件的 Arduino 项目。
-- 目标动作、机械行程、停止条件、允许丢失旧指令与否。
+- 通过上位机控制完整固件，还是使用 Arduino / PlatformIO 编写自定义固件。
+- 目标动作、机械行程、停止条件、发送频率，以及需要逐条确认的配置操作。
 
 可从这个提示开始：
 
@@ -17,7 +17,7 @@
 
 ## 检查 AI 的结果
 
-核对函数是否存在于附带 SDK，尤其不要把旧文档的 `WheelMode()` 直接套到当前 C++ TTLSDClass，应以 `SetMode()` 为准。确认模式 0/1 切换不要求重启、GPIO 未改变、无 板载 IMU 不死循环、USB 使用 EVENT。
+请让 AI 根据项目附带的 SDK 核对函数和参数，并保持与实际接线一致的 GPIO 配置。修改完整固件时，应保留传感器异常处理、通信超时和高频输入保护；具体约束见 `AGENTS.md`。步进驱动模式设置使用 `TTLSDClass::SetMode()`，模式 0 与 1 可直接切换。
 
 让 AI 列出实际跑过的编译和测试，不把“生成代码”或模拟测试称为实机验证。完整项目可运行 `pio run`、USB 主机测试和例程编译脚本。将可运行的代码和自己的接线、参数记录一起保存，便于后续复现。
 

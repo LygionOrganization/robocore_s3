@@ -10,7 +10,6 @@ class OptionalQMI8658 {
   bool begin(TwoWire& wire = Wire) {
     wire_ = &wire;
     present_ = false;
-    haveSample_ = false;
     error_ = "imu_not_present";
     // The caller owns Wire.begin() so the OLED keeps its pins and bus state.
     for (uint8_t address : {uint8_t(0x6A), uint8_t(0x6B)}) {
@@ -52,22 +51,19 @@ class OptionalQMI8658 {
   bool present() const { return present_; }
   uint8_t address() const { return address_; }
   const char* error() const { return error_; }
-  uint32_t countBefore = 0, countAfter = 0;
-  const char* readState = "not_sampled";
   bool sample(Sample& value) {
     if (!present_) return false;
     // SyncSample locks the sensor output until GZ_H (0x40) is read.
     // Unlike timestamp-before/after rejection, this tolerates Wi-Fi scheduling.
     uint8_t data[14], status = 0;
-    readState = "i2c_error";
     if (!read(0x2D, &status, 1)) { error_ = "imu_read_failed"; return false; }
     if (!(status & 1)) {
-      readState = "no_sample_available"; error_ = "imu_data_not_ready"; return false;
+      error_ = "imu_data_not_ready"; return false;
     }
     if (!(status & 2)) {
       delayMicroseconds(12); // ODR code 6: maximum Data_Lock_Delay, section 13.3.
       if (!waitStatus(2, true, 5)) {
-        releaseSample(); readState = "lock_timeout"; error_ = "imu_lock_timeout"; return false;
+        releaseSample(); error_ = "imu_lock_timeout"; return false;
       }
     }
     uint32_t count;
@@ -75,16 +71,12 @@ class OptionalQMI8658 {
     if (!readCount(count) || !read(0x33, data, sizeof(data))) {
       releaseSample(); error_ = "imu_read_failed"; return false;
     }
-    countBefore = countAfter = count;
-    lastSample_ = count;
-    haveSample_ = true;
     // Avoid Arduino word(...) macro: decode actual signed little-endian bytes.
     auto decodeInt16LE = [&](size_t offset) { return int16_t(uint16_t(data[offset]) | (uint16_t(data[offset + 1]) << 8)); };
     value.temperature = decodeInt16LE(0) / 256.0f;
     value.ax = decodeInt16LE(2) / 4096.0f; value.ay = decodeInt16LE(4) / 4096.0f; value.az = decodeInt16LE(6) / 4096.0f;
     value.gx = decodeInt16LE(8) / 64.0f; value.gy = decodeInt16LE(10) / 64.0f; value.gz = decodeInt16LE(12) / 64.0f;
-    value.sampleCount = lastSample_;
-    readState = "fresh";
+    value.sampleCount = count;
     error_ = "";
     return true;
   }
@@ -124,7 +116,5 @@ class OptionalQMI8658 {
   TwoWire* wire_ = nullptr;
   uint8_t address_ = 0;
   bool present_ = false;
-  bool haveSample_ = false;
-  uint32_t lastSample_ = 0;
   const char* error_ = "imu_not_present";
 };

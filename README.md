@@ -27,7 +27,7 @@ For Lite power ratings, connectors and peripherals, follow the [Lite Wiki](https
 | Local interaction | Add User Interface Module (A) for buttons, buzzer alerts and OLED display |
 | Custom development | Build the complete firmware with PlatformIO or start from a focused Arduino example |
 
-The main web console works offline, opens in English by default and offers a **中文** button in the upper-right corner. Advanced mission and multi-axis tools remain available through the classic console at `/legacy`.
+The main web console works offline, opens in English by default and offers a **中文** button in the upper-right corner. Use JSON Debug for mission scripts and multi-axis commands; `/legacy` redirects to that page.
 
 ## Start with the web console
 
@@ -98,7 +98,7 @@ Build output is under `.pio/build/esp32-s3-devkitc-1-n8r8/`. For toolchain detai
 
 The [`arduino_example/`](arduino_example/) directory contains 18 standalone sketches covering bus devices, CAN, external RS485, the IMU, User Interface Module (A), and JSON transports.
 
-Start with the [English Arduino guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/arduino/) or the [local setup and dependency list](arduino_example/README.md). The checked configuration uses **ESP32S3 Dev Module**, **8 MB flash**, **OPI PSRAM**, **USB-OTG (TinyUSB)** and **USB CDC On Boot enabled**.
+Start with the [English Arduino guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/arduino/) or the [local setup and dependency list](arduino_example/README.md). The checked configuration uses **ESP32S3 Dev Module**, **8 MB flash**, **OPI PSRAM**, **USB-OTG (TinyUSB)** and **USB CDC On Boot according to each sketch's header**.
 
 **Uploading a standalone sketch replaces the complete firmware and its web console.** The HTTP/WebSocket/USB teaching sketches use their own minimal protocol; they do not implement the full controller's JSON command set.
 
@@ -118,7 +118,7 @@ Start with the [English Arduino guide](https://wiki.lygion.ai/en/reference/bus-d
 
 **Match the supply voltage to every powered bus device.** A 48V-capable controller does not make a low-voltage servo compatible with 48V. USB alone does not provide actuator power.
 
-External RS485 on IO13/IO14 is independent of the servo bus on IO4/IO5. Servo RS485 and TTL share one UART. The CAN/RS485 switch selects the hardware path; your firmware must use the matching protocol. See the [hardware guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/hardware/) before wiring.
+External RS485 on IO13/IO14 is independent of the servo bus on IO4/IO5. Bus-device RS485 and TTL share one UART. The CAN/RS485 switch selects the hardware path; your firmware must use the matching protocol. See the [hardware guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/hardware/) before wiring.
 
 ## Repository guide
 
@@ -133,8 +133,12 @@ External RS485 on IO13/IO14 is independent of the servo bus on IO4/IO5. Servo RS
 | [`tools/`](tools/) | Web embedding, example checks and packaging |
 | [`test/`](test/) | Host regression checks and web-console checks |
 
-For AI-assisted projects, provide the [development guide](docs/ROBOCORE_AI_AGENTS.md), JSON reference, device models, IDs, baud rate and intended behavior. Begin with a read-only feedback test.
+For AI-assisted projects, provide the [development guide](AGENTS.md), JSON reference, device models, IDs, baud rate and intended behavior. Begin with a read-only feedback test.
 
 ## License
 
 This project is licensed under [GNU AGPL v3](LICENSE). Bundled third-party components retain their respective licenses.
+
+## Release and AI development
+
+[AGENTS.md](AGENTS.md) maps the architecture and development constraints. See [release instructions](docs/RELEASING.md) for clean source and firmware packages. Local caches and internal archives under `.pio/` are not distribution contents.

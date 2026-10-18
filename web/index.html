@@ -465,8 +465,16 @@ function drawImu(){
   ['imuRoll','imuPitch','imuYaw'].forEach((id,i)=>$(id).textContent=((angles[i]*180/Math.PI+540)%360-180).toFixed(1)+'°');
 }
 function stopImu(){imuLive=false;++imuGeneration;clearTimeout(imuTimer);$('imuLive').textContent=t('开始实时显示');$('imuLive').setAttribute('aria-pressed','false');}
-async function readImuView(token){
-  const s=await send({T:740},$('imuResult'));
+async function readImuView(token,live=false){
+  let s;
+  if(live){
+    const response=await fetch('/api/imu',{cache:'no-store',signal:AbortSignal.timeout(2500)});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    s=await response.json();
+    if(token!==imuGeneration)return;
+    $('imuResult').textContent=JSON.stringify(s,null,2);
+    if(s.ok===false)throw Error(s.error||'IMU read failed');
+  }else s=await send({T:740},$('imuResult'));
   if(token!==imuGeneration)return;
   if(!imuPose.update(s))return;
   imuLast=performance.now();$('imuResult').textContent=JSON.stringify(s,null,2);$('imuStatus').textContent=t('姿态已更新');drawImu();
@@ -475,8 +483,8 @@ async function pollImu(){
   if(!imuLive)return;
   if(document.hidden||$('imu').hidden){stopImu();return;}
   const token=imuGeneration;
-  if(!active){try{await readImuView(token)}catch(e){if(token!==imuGeneration)return;$('imuStatus').textContent=e.message;if(!['imu_data_not_ready','imu_no_fresh_sample'].includes(e.message)){stopImu();return;}}}
-  if(imuLive&&token===imuGeneration)imuTimer=setTimeout(pollImu,50);
+  if(!active){try{await readImuView(token,true)}catch(e){if(token!==imuGeneration)return;$('imuStatus').textContent=e.message;if(!['imu_data_not_ready','imu_no_fresh_sample'].includes(e.message)){stopImu();return;}}}
+  if(imuLive&&token===imuGeneration)imuTimer=setTimeout(pollImu,100);
 }
 $('imuLive').onclick=()=>{if(imuLive){stopImu();$('imuStatus').textContent=t('实时显示已暂停');return;}imuPose.count=null;imuLive=true;++imuGeneration;$('imuLive').textContent=t('暂停实时显示');$('imuLive').setAttribute('aria-pressed','true');pollImu();};
 $('readImu').onclick=()=>readImuView(imuGeneration).catch(e=>{$('imuStatus').textContent=e.message;report(e)});

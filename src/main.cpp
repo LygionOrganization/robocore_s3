@@ -140,6 +140,7 @@ AsyncWebSocket ws("/ws");
 void handleWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                    AwsEventType type, void *arg, uint8_t *data, size_t len) {
   if (type == WS_EVT_CONNECT) {
+    if (ws.count() > 4) { client->close(); return; }
     JsonDocument jsonFeedback;
     String outputString;
     // feedback after connection
@@ -168,7 +169,7 @@ void publishResult(const JsonDocument& result) {
   xSemaphoreTake(resultMutex, portMAX_DELAY);
   latestResult = payload;
   xSemaphoreGive(resultMutex);
-  if (ws.availableForWriteAll()) ws.textAll(payload);
+  if (payload.length() <= 4096 && ws.availableForWriteAll()) ws.textAll(payload);
   msg(payload);
 }
 
@@ -196,7 +197,7 @@ void pushTelemetry() {
       }
       jsonFeedback["uptime"] = (uint32_t)(millis()/1000);
       serializeJson(jsonFeedback, outputString);
-      if (ws.availableForWriteAll()) ws.textAll(outputString);
+      if (outputString.length() <= 4096 && ws.availableForWriteAll()) ws.textAll(outputString);
     }
   }
 }
@@ -228,7 +229,7 @@ void setupHttpRoutes() {
     jsonFeedback["min_free_heap"] = ESP.getMinFreeHeap();
     jsonFeedback["reset_reason"] = int(esp_reset_reason());
     jsonFeedback["sdk"]    = ESP.getSdkVersion();
-    jsonFeedback["fw_ver"] = "robocore-1.3.7";
+    jsonFeedback["fw_ver"] = "robocore-1.3.8";
     jsonFeedback["product"] = "RoboCore S3 / RD Lite";
     jsonFeedback["imu_present"] = busDevices.imuPresent();
     jsonFeedback["mission_running"] = missionRunning.load();
@@ -319,7 +320,7 @@ void setup() {
 #else
     Serial0.begin(ESP32S3_BAUD_RATE);
     msg("Serial0 initialized for normal communication.");
-    while (!Serial0) {}
+    // Hardware UART does not require a connected terminal.
 #endif
   msg("Device starting...");
 
@@ -583,6 +584,7 @@ void executeMission(String missionName, int intervalTime, int loopTimes) {
         msg(String(i));
         i++;
         delayInterruptible(intervalTime);
+        delay(1); // Even zero-interval scripts must yield between commands.
       } else {
         msg("Mission Completed.");
         break;
@@ -1241,6 +1243,7 @@ void jsonCmdReceiveHandler(const JsonDocument& jsonCmdInput) {
                             digitalWrite(BUZZER_PIN, HIGH);
                             break;
                           }
+                          delay(1); // Keep scheduler/idle tasks running during long tones.
                         }
                         noTone(BUZZER_PIN);
                         digitalWrite(BUZZER_PIN, HIGH);
@@ -1450,14 +1453,14 @@ void serialCtrl() {
   if (serialForwarding) {
     BusGuard busGuard;
     // Serial0 -> Serial1
-    while (Serial0.available()) {
-      int data = Serial0.read();
-      Serial1.write(data);
+    int budget = 128;
+    while (budget-- > 0 && Serial0.available() && Serial1.availableForWrite() > 0) {
+      Serial1.write(uint8_t(Serial0.read()));
     }
     // Serial1 -> Serial0
-    while (Serial1.available()) {
-      int data = Serial1.read();
-      Serial0.write(data);
+    budget = 128;
+    while (budget-- > 0 && Serial1.available() && Serial0.availableForWrite() > 0) {
+      Serial0.write(uint8_t(Serial1.read()));
     }
   } else {
     static CommandLineBuffer<CMD_MAX_LEN> line;
@@ -1660,5 +1663,6 @@ void loop() {
   msg("TTL Adapter Test");
   jointsCtrl.ttlTestMachine();
 #endif
+  delay(1); // Continuous command/serial traffic must not starve idle tasks.
 }
 

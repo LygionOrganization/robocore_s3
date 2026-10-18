@@ -32,9 +32,8 @@ BusDevices::ImuSnapshot BusDevices::snapshot() {
 void BusDevices::publishSnapshot() {
   ImuSnapshot value;
   value.sample=imuCache_; value.present=imu.present(); value.valid=cachedImu_;
-  value.address=imu.address(); value.updated=imuUpdated_; value.acquired=imuAccepted_;
-  value.restarts=imuRestarts_; value.before=imu.countBefore; value.after=imu.countAfter;
-  value.error=imu.error(); value.state=imu.readState;
+  value.address=imu.address(); value.updated=imuUpdated_;
+  value.error=imu.error();
   // Only fixed-size copy under this lock: never I2C, JSON, delay or network I/O.
   std::lock_guard<std::mutex> lock(snapshotMutex_);
   snapshot_=value;
@@ -60,12 +59,12 @@ void BusDevices::pollImu() {
     if (!guard.acquired) return;
     OptionalQMI8658::Sample value;
     if (imu.sample(value)) {
-      imuCache_ = value; imuUpdated_ = millis(); cachedImu_ = true; ++imuAccepted_;
+      imuCache_ = value; imuUpdated_ = millis(); cachedImu_ = true;
     }
     if (uint32_t(millis() - imuRestarted_) >= 5000 &&
         (!cachedImu_ || uint32_t(millis() - imuUpdated_) > 2000)) {
       cachedImu_ = false;
-      ++imuRestarts_; imu.begin(Wire); imuRestarted_ = millis();
+      imu.begin(Wire); imuRestarted_ = millis();
     }
   }
   publishSnapshot();
@@ -79,19 +78,14 @@ bool BusDevices::handle(const JsonDocument& in, JsonDocument& out) {
   out["T"] = type; out["ok"] = false;
   if (in["rid"].is<uint32_t>()) out["rid"] = in["rid"];
   if (type == IMU_READ) {
-    out["sampling_mode"] = "sync_locked";
     OptionalQMI8658::Sample s;
     if (backgroundImu_) {
       const ImuSnapshot value = snapshot();
       out["present"] = value.present;
       const uint32_t age = millis() - value.updated;
       out["sample_age_ms"] = value.valid ? int32_t(age) : -1;
-      out["samples_acquired"] = value.acquired;
-      out["sensor_restarts"] = value.restarts;
       if (!value.valid || age > 100) {
         failure(out,value.present ? "imu_no_fresh_sample" : value.error);
-        out["read_state"] = value.state;
-        out["count_before"] = value.before; out["count_after"] = value.after;
         return true;
       }
       s=value.sample; out["address"] = value.address;
@@ -198,15 +192,13 @@ bool BusDevices::handle(const JsonDocument& in, JsonDocument& out) {
   if (type == STEPPER_READ || type == ENCODER_READ) {
     int pos = stepper_.ReadPos(id);
     out["bus_error"] = stepper_.getLastError();
-    out["position_status"] = stepper_.getState();
     if (stepper_.getLastError() != 0) { failure(out,"position read communication failed"); return true; }
     const uint8_t positionStatus = uint8_t(stepper_.getState());
     int speed = stepper_.ReadSpeed(id);
     out["bus_error"] = stepper_.getLastError();
-    out["speed_status"] = stepper_.getState();
     if (stepper_.getLastError() != 0) { failure(out,"speed read communication failed"); return true; }
     // Nonzero device status does not invalidate a correctly received payload.
-    // Preserve both reply statuses; a fault must remain visible to the caller.
+    // Combine reply flags; actual driver faults are read separately below.
     const uint8_t deviceStatus = uint8_t(positionStatus | stepper_.getState());
     out["reply_status"] = deviceStatus; // Raw protocol byte; not a fault-register value.
     if (type == STEPPER_READ) {

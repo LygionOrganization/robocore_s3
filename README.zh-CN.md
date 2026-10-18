@@ -27,7 +27,7 @@ Lite 的供电、接口和外设请以 [Lite 中文 Wiki](https://wiki.lygion.ai
 | 本地交互 | 连接 User Interface Module (A)，实现按键输入、蜂鸣器提醒与 OLED 显示 |
 | 自定义开发 | 使用 PlatformIO 构建完整固件，或从独立 Arduino 例程开始 |
 
-主网页控制台无需联网，默认显示英文，点击右上角 **中文** 即可切换语言。任务脚本、多轴操作等高级功能可通过 `/legacy` 进入经典控制台使用。
+主网页控制台无需联网，默认显示英文，点击右上角 **中文** 即可切换语言。任务脚本、多轴操作等高级功能通过 JSON 调试使用；`/legacy` 会跳转到该页面。
 
 ## 先用网页控制设备
 
@@ -98,7 +98,7 @@ pio run
 
 [`arduino_example/`](arduino_example/) 提供 18 个独立工程，覆盖总线设备、CAN、外部 RS485、IMU、User Interface Module (A) 和 JSON 通信。
 
-从 [Arduino 使用指南](https://wiki.lygion.ai/reference/bus-devices/robocore-s3/arduino/)或[本地依赖与操作说明](arduino_example/README.md)开始。已验证的配置为 **ESP32S3 Dev Module**、**8 MB Flash**、**OPI PSRAM**、**USB-OTG (TinyUSB)**、**USB CDC On Boot Enabled**。
+从 [Arduino 使用指南](https://wiki.lygion.ai/reference/bus-devices/robocore-s3/arduino/)或[本地依赖与操作说明](arduino_example/README.md)开始。已验证的配置为 **ESP32S3 Dev Module**、**8 MB Flash**、**OPI PSRAM**、**USB-OTG (TinyUSB)**、**USB CDC On Boot 按各例程顶部说明设置**。
 
 **上传独立例程会替换完整固件，网页控制台不会同时保留。** HTTP/WebSocket/USB 教学例程使用简化协议，不包含完整控制固件的全部 JSON 指令。
 
@@ -133,8 +133,12 @@ IO13/IO14 的外部 RS485 与 IO4/IO5 的舵机总线独立；舵机 RS485 与 T
 | [`tools/`](tools/) | 网页嵌入、例程检查与打包工具 |
 | [`test/`](test/) | 主机回归测试与网页检查 |
 
-借助 AI 开发时，请提供[开发指南](docs/ROBOCORE_AI_AGENTS.md)、JSON 指令表、设备型号、ID、波特率和目标行为，先完成只读反馈测试，再添加运动控制。
+借助 AI 开发时，请提供[开发指南](AGENTS.md)、JSON 指令表、设备型号、ID、波特率和目标行为，先完成只读反馈测试，再添加运动控制。
 
 ## 开源协议
 
 本项目采用 [GNU AGPL v3](LICENSE)。附带的第三方组件遵循各自的开源协议。
+
+## 发布与 AI 二次开发
+
+[AGENTS.md](AGENTS.md) 提供架构、功能入口和开发约束，AI 工具可从根目录直接读取。[发布说明](docs/RELEASING.md) 介绍干净源码包与固件工具包的制作方法；`.pio/` 中的本地缓存与内部归档不属于对外交付内容。

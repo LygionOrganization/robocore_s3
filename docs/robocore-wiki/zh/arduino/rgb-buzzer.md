@@ -4,7 +4,7 @@
 
 ## 准备硬件与接线
 
-本例需要另行接线的两颗 WS2812 灯（示例 GPIO26）及 UI Module (A) 的 GPIO21 蜂鸣器。RoboCore S3 无板载可寻址 RGB，GPIO26 未引出到 PH1.25-10P；普通用户测试模块请使用 User_Interface_Module_A。若改用扩展口空闲 GPIO，请先修改 leds 构造函数，且不能与已连接按键或总线共用。
+本例需要另行接线的两颗 WS2812 灯（示例 GPIO26）及 UI Module (A) 的 GPIO21 蜂鸣器。RoboCore S3 无板载可寻址 RGB，GPIO26 未引出到 PH1.25-10P；使用 UI 模块的按键、屏幕和蜂鸣器时，请选择 User_Interface_Module_A。若改用扩展口空闲 GPIO，请先修改 leds 构造函数，且不能与已连接按键或总线共用。
 
 ## Arduino IDE 与开发板设置
 

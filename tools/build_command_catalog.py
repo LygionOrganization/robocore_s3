@@ -124,7 +124,7 @@ rows = '''0|停止任务循环|Stop mission loop
 726|步进驱动输出开关|Stepper output enable
 730|编码器位置基准|Encoder position reference
 732|编码器位置与速度|Encoder position and speed
-740|读取板载惯性传感器|Read onboard IMU
+740|读取板载惯性传感器|Read onboard IMU'''
 extra = [
  {'T':700,'first':0,'last':20}, {'T':710,'id':1,'new_id':2},
  {'T':711,'id':1,'ch':1,'pwm':0}, {'T':712,'id':1,'ch':0,'r':1,'g':0,'b':0},

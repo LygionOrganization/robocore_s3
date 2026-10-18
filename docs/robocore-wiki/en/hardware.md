@@ -42,7 +42,7 @@ GH1.25-3P provides board-to-board TTL communication and power decoupling.
 | Type-C UART | TXD0 / RXD0 via USB-to-UART | Firmware download and debugging, with automatic download circuit |
 | Type-C USB | IO19 USB D−, IO20 USB D+ | Native ESP32-S3 USB, including host USB CDC communication |
 | 5264-3P | IO4 TX / IO5 RX via single-wire TTL circuit | TTL bus devices; power follows XT30 input |
-| XH2.54-4P | IO4 TX / IO5 RX via RS485 circuit | Servo/device RS485 bus; power follows XT30 input |
+| XH2.54-4P | IO4 TX / IO5 RX via RS485 circuit | RS485 bus devices; power follows XT30 input |
 | GH1.25-3P | Single-wire TTL | Board-to-board TTL communication and power decoupling |
 | PH1.25-10P expansion | IO6 SDA, IO7 SCL, IO2, IO9, IO10, IO11, IO12, IO21, 3.3V, GND | Lygion User Interface Module (A) |
 | CAN/RS485 selector | IO13 RX / IO14 TX | Select the external communication circuit |
@@ -54,12 +54,12 @@ GH1.25-3P provides board-to-board TTL communication and power decoupling.
 
 ## CAN/RS485 selector
 
-!!! warning "External communication and the servo bus use different GPIO pairs"
+!!! warning "External communication and the device bus use different GPIO pairs"
     **CAN position: IO13 RX / IO14 TX communicate over the CAN 2+2 connector.**
     **485 position: the same IO13 RX / IO14 TX communicate over GH1.25-5P RS485.**
     These two external interfaces cannot use this GPIO pair simultaneously. The switch selects the physical circuit; firmware must also use the corresponding CAN or UART protocol. Stop communication before switching.
 
-External RS485 on IO13/IO14 is independent of bus-device RS485 on IO4/IO5. **Bus-device RS485 and single-wire TTL share IO4 TX / IO5 RX**, including the UART data and baud rate. They are not independent serial ports; avoid duplicate IDs and reply collisions when both are connected. The CAN/RS485 selector does not affect this servo GPIO pair.
+External RS485 on IO13/IO14 is independent of bus-device RS485 on IO4/IO5. **Bus-device RS485 and single-wire TTL share IO4 TX / IO5 RX**, including the UART data and baud rate. They are not independent serial ports; avoid duplicate IDs and reply collisions when both are connected. The CAN/RS485 selector does not affect this device-bus GPIO pair.
 
 The CAN example uses 500 kbps and needs a matching peer and common ground. The board has a 120Ω CAN termination resistor; account for existing termination across the entire network. The external RS485 example uses 115200 8N1 and automatic hardware direction control. Coordinate half-duplex access between peers. See [Arduino examples](arduino.md). Switching to 485 does not automatically create a factory JSON gateway.
 

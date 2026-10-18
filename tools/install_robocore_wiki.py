@@ -4,10 +4,13 @@ Only writes the named docs/assets and mkdocs navigation; never deletes content.
 """
 from pathlib import Path
 import shutil
+import argparse
 
 root = Path(__file__).resolve().parents[1]
 stage = root / '.pio/wiki_staging'
-wiki = Path('G:/lygion/产品资料包/lygion-wiki').resolve()
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('wiki', type=Path, help='Path to the lygion-wiki checkout')
+wiki = parser.parse_args().wiki.resolve()
 assert (wiki / 'mkdocs.yml').is_file()
 for source in (stage / 'docs').rglob('*'):
     if not source.is_file(): continue

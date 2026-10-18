@@ -2,7 +2,7 @@
 
 The console opens in English. Use **中文** at the upper right for Chinese, or **English** to switch back. Your browser remembers the choice when local storage is available. Switching preserves inputs and sends no commands; JSON fields and raw device replies remain unchanged.
 
-All pages are embedded in the firmware, with no internet or CDN requirement. Desktop navigation uses simple blue dots; phones use the horizontally scrollable top navigation.
+All pages are embedded in the firmware, with no internet or CDN requirement. Use the sidebar to switch pages on desktop; phones use the horizontally scrollable top navigation.
 
 | Page | Purpose |
 | --- | --- |
@@ -10,15 +10,19 @@ All pages are embedded in the firmware, with no internet or CDN requirement. Des
 | Bus devices | Discover IDs and fill control panels with the selected ID |
 | TTL Node | ID, PWM, RGB and S.BUS |
 | Stepper driver | Mode, output enable, position/speed, reference and ID |
-| Encoder | E02 position, speed and reference calibration |
-| Bus servos | SCS, HLS and STS/SMS position and feedback |
-| Onboard IMU | Onboard QMI8658A acceleration, angular velocity and temperature |
+| Encoder | Position, speed, reference calibration and ID |
+| Bus servos | ID, position and feedback grouped by SCS, HLS and STS/SMS |
+| Onboard IMU | QMI8658A single/live readings, temperature and 3D orientation |
 | JSON tools | Commands, result log, complete command reference and mission scripts |
 | Settings | Wi-Fi, controller baud and firmware information |
 
+## Onboard IMU
+
+Read once retrieves a current measurement. Enable live display to update the readings and 3D model as the board moves. You can pause the display or set the current heading as the reference. Leaving the page or hiding the tab pauses updates. Heading is estimated from six-axis data and drifts over time; it is not an absolute compass direction.
+
 ## JSON tools
 
-Enter one JSON object and click Send command. Results match by rid; HTTP202 means accepted. `ok:false` indicates failure, while legacy `dispatched:true` only confirms dispatch, not successful physical motion. Timeouts do not trigger retries; inspect state first.
+Enter one JSON object and click Send command. Results match by rid; HTTP202 means accepted. `ok:false` indicates failure, while `dispatched:true` only confirms dispatch, not successful physical motion. Timeouts do not trigger retries; inspect state first.
 
 Search the command reference by category or keyword. Expand an entry for its purpose and example. Load command fills the single-command editor; Add to script appends to the mission editor. Neither sends a command. See the [JSON reference](json-api.md) for parameters. Device controls and Wi-Fi settings remain in their dedicated pages.
 

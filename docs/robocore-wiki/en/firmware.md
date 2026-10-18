@@ -20,7 +20,7 @@ Use this package to restore the web console, bus-device control and JSON communi
 | partitions.bin | 0x8000 |
 | firmware.bin | 0x10000 |
 
-3. Choose COM and baud (start with 921600; lower it if unreliable), click START, wait for completion, and press RESET.
+3. Choose COM and baud (start with 115200; use 921600 with a stable connection), click START, wait for completion, and press RESET.
 4. Connect the external antenna before wireless use. Preserved settings retain your previous network; a fresh configuration uses hotspot **Robot**, password **12345678**, at `http://192.168.4.1`.
 5. Check the console, language switch and onboard IMU status. Reconnect bus devices and rated motor power, scan IDs, then begin control.
 

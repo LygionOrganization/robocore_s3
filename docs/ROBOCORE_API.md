@@ -78,6 +78,29 @@ JSON 的字段名区分大小写。表格中的示例是完整对象；按实际
 | GET /api/info | 固件、总线波特率、IMU、任务状态，以及 sta_state、sta_ip、ap_ip、sta_ssid；无密码 |
 | GET /api/result | 最新一条执行结果，通过 rid 匹配；不保存历史 |
 
+## IMU 反馈（T=740 / GET /api/imu）
+
+`GET /api/imu` 直接返回只读快照，不进入指令队列。单次指令发送 `{"T":740,"rid":1}`，成功接收格式如下（数值仅为示例）：
+
+```json
+{"T":740,"rid":1,"ok":true,"present":true,"address":106,"sample_age_ms":2,"sample_count":123,"temperature_c":25.0,"accel_g":[0,0,1],"gyro_dps":[0,0,0]}
+```
+
+| 字段 | 含义 |
+| --- | --- |
+| `present` / `address` | 是否检测到传感器 / 十进制 I2C 地址 |
+| `accel_g` / `gyro_dps` | X、Y、Z 轴加速度（g）/ 角速度（度/秒）|
+| `temperature_c` | 传感器温度（℃）|
+| `sample_count` | 24 位循环样本计数；相同计数表示同一份样本 |
+| `sample_age_ms` | 缓存样本距今的毫秒数；无有效样本为 -1 |
+| `ok` / `error` | 仅在 ok=true 时使用测量值；超过 100 ms 的旧样本返回 imu_no_fresh_sample |
+
+实时读取应逐次等待响应，建议每秒约 10 次或更低，不保存请求历史。网页估算横滚、俯仰和相对航向；六轴 IMU 不提供绝对航向。
+
+1.3.8 移除仅供排障的 `sampling_mode`、`samples_acquired`、`sensor_restarts`、`read_state`、`count_before`、`count_after`，客户端不要依赖这些字段。采样锁、新鲜度检查和有限频率的恢复仍保留。
+
+T=723/732 不再返回逐次读取的 position_status、speed_status，保留合并的 reply_status。T=723 的 device_status 来自实际驱动状态寄存器，device_fault、current_limited、limit_active、target_out_of_range 分别表示故障、限流、限位和目标越界；限流不等于故障。
+
 <!-- COMMAND_TABLES -->
 
 ## 通信与系统

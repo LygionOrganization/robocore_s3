@@ -36,7 +36,7 @@ JSON field names are case-sensitive. Examples are complete objects: change IDs, 
 | `flag / hz` | T=145 periodic arm feedback0/1 and frequency; unrelated to T=740 onboard IMU readings |
 | `flag / axis / delta` | T=146 continuous-motion enable0/1, preset coordinate axis and increment; only for the matching arm application |
 
-Scan with T=700, read model-specific feedback, then try low-speed movement within limits. TTL and servo RS485 share IO4/IO5 baud and data; they are not separate UARTs. External CAN/RS485 uses IO13/IO14 and requires both the correct selector position and matching program.
+Scan with T=700, read model-specific feedback, then try low-speed movement within limits. TTL and bus-device RS485 share IO4/IO5 baud and data; they are not separate UARTs. External CAN/RS485 uses IO13/IO14 and requires both the correct selector position and matching program.
 
 ### Synchronized servo example
 

@@ -18,7 +18,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 ENV = 'esp32-s3-devkitc-1-n8r8'
-VENDOR = ROOT / 'download_tool/RD_ESP32S3_LITE_Download_Tool'
+VENDOR = ROOT / 'download_tool/RoboCore_S3_Download_Tool'
 DEST = ROOT / 'download_tool/RoboCore_S3_Download_Tool'
 EXE = 'flash_download_tool_3.9.9_R2.exe'
 OFFSETS = {'bootloader.bin': 0x0, 'partitions.bin': 0x8000, 'firmware.bin': 0x10000}
@@ -29,6 +29,8 @@ def digest(data):
 
 
 def git(*args):
+    if not (ROOT / '.git').exists():
+        return None
     return subprocess.check_output(
         ['git', '-c', f'safe.directory={ROOT.as_posix()}', *args],
         cwd=ROOT, text=True, encoding='utf-8').strip()

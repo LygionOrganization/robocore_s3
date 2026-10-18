@@ -35,6 +35,8 @@ A unit sketch replaces factory firmware. Follow [recovery](firmware.md). Missing
 
 ## IMU readings do not update
 
-Firmware 1.3 resets the QMI8658A at startup, verifies configuration and checks the sensor sample counter. Successful T=740 replies include `sample_count`, which advances between readings and wraps at 24 bits. No fresh sample within 300 ms returns `imu_data_timeout`, rather than a successful stale reading. `imu_reset_failed` and `imu_config_failed` identify reset or configuration readback failures.
+On the Onboard IMU page, use Read once or enable live display, then gently tilt and rotate the board. At rest, acceleration magnitude is about 1 g and angular velocity is near zero. Tilting changes the acceleration components; rotation changes angular velocity. The 3D view is a visual estimate, and relative heading drifts over time.
 
-The web button reads once. Click again after tilting the board. Near-zero gyro values at rest are normal; watch acceleration change with tilt or read angular rate during rotation. If it still fails, retain the complete T=740 response and check power and shared I²C peripherals.
+Send `{"T":740}` to inspect raw feedback. Use measurements only when `ok:true`. The wrapping 24-bit `sample_count` identifies samples; equal counts mean the same sample. `sample_age_ms` is the cache age. Readings older than 100 ms return `imu_no_fresh_sample`.
+
+If an error occurs, retain the complete reply, check power, and inspect shared I²C peripherals such as the external OLED with power disconnected. `imu_not_present` means the sensor was not detected; `imu_reset_failed` or `imu_config_failed` indicates initialization failure. Live display pauses when you leave the page or hide the browser tab; enable it again when you return.

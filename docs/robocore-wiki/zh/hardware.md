@@ -42,24 +42,24 @@ GH1.25-3P 用于板间 TTL 通信、供电解耦。
 | Type-C UART | TXD0 / RXD0，经 USB 转串口 | 程序下载、串口调试；带自动下载电路 |
 | Type-C USB | IO19 USB D−、IO20 USB D+ | ESP32-S3 原生 USB；用于 USB CDC 上位机通信，减少串口桥接瓶颈 |
 | 5264-3P | IO4 TX、IO5 RX，经单线 TTL 电路 | 单线 TTL 总线设备；动力供电等于 XT30 输入 |
-| XH2.54-4P | IO4 TX、IO5 RX，经 RS485 电路 | RS485 总线舵机/设备；动力供电等于 XT30 输入 |
+| XH2.54-4P | IO4 TX、IO5 RX，经 RS485 电路 | RS485 总线设备；动力供电等于 XT30 输入 |
 | GH1.25-3P | 单线 TTL | 板间 TTL 通信、供电解耦 |
 | PH1.25-10P 扩展口 | IO6 SDA、IO7 SCL、IO2、IO9、IO10、IO11、IO12、IO21，3.3V、GND | 连接 Lygion User Interface Module (A) |
 | CAN/RS485 选择开关 | IO13 RX、IO14 TX | 选择外部通信的 CAN 或 RS485 物理通路 |
 | CAN 2+2 | CAN H/L，XT30 电源端 | 为主板供电；CAN 档时使用 IO13 RX、IO14 TX 通信 |
 | GH1.25-5P | RS485 A/B、GND、5V 输出 | 485 档时使用 IO13 RX、IO14 TX 通信 |
-| QMI8658A 六轴 板载 IMU | IO6 SDA、IO7 SCL | 三轴加速度、三轴角速度；与外接 OLED 共用 I²C |
+| QMI8658A 六轴板载 IMU | IO6 SDA、IO7 SCL | 三轴加速度、三轴角速度；与外接 OLED 共用 I²C |
 | BOOT 按键 | IO0，按下为低 | 配合 RESET 手动进入下载模式 |
 | RESET 按键 | EN，按下为低 | 按住时主控保持复位，松开后重新启动；不是整板电源断开开关 |
 
 ## CAN/RS485 开关注意事项
 
-!!! warning "外部通信与舵机总线是两组资源"
+!!! warning "外部通信与设备总线使用不同的引脚"
     **CAN 档：IO13 为 RX、IO14 为 TX，通过 CAN 2+2 接口进行 CAN 通信。**
     **485 档：同一对 IO13 RX、IO14 TX，通过 GH1.25-5P 进行外部 RS485 通信。**
     这两种外部通信复用同一组 GPIO，不能同时使用；开关只切换硬件通路，程序也必须运行对应 CAN 或 UART 协议。停止通信后再切换档位。
 
-外部 RS485（IO13/IO14）与总线设备 RS485（IO4/IO5）独立，可分别通信。**总线设备 RS485 与单线 TTL 共用 IO4 TX、IO5 RX**：它们不是两条独立串口，使用同一 UART 的数据和波特率；同时连接时应避免重复 ID 和响应冲突。CAN/RS485 选择开关不改变这组舵机引脚。
+外部 RS485（IO13/IO14）与总线设备 RS485（IO4/IO5）独立，可分别通信。**总线设备 RS485 与单线 TTL 共用 IO4 TX、IO5 RX**：它们不是两条独立串口，使用同一 UART 的数据和波特率；同时连接时应避免重复 ID 和响应冲突。CAN/RS485 选择开关不改变这组设备总线引脚。
 
 CAN 例程为 500 kbps，需要匹配波特率的对端和共地。板上有 120Ω CAN 终端电阻，组网时需考虑各节点已有终端，避免每个节点都叠加终端。外部 RS485 例程为 115200、8N1，板上自动控制收发方向；双方应协调半双工发送。详见 [Arduino 例程](arduino.md)。出厂 JSON 接口与单元通信例程的协议不同，不应假设将开关拨到 485 就会自动出现 JSON 网关。
 
@@ -74,7 +74,7 @@ CAN 例程为 500 kbps，需要匹配波特率的对端和共地。板上有 120
 | OLED | SDA IO6、SCL IO7，SSD1306 128×32，地址 0x3C |
 | 板载 IMU | 同一 I²C 总线，驱动探测 0x6A / 0x6B |
 
-`User_Interface_Module_A` 例程包含按键去抖、短鸣和屏幕显示；没有 OLED 时仍可读取按键。不要在 OLED 和 板载 IMU 驱动里重复改变 Wire 引脚。
+`User_Interface_Module_A` 例程包含按键去抖、短鸣和屏幕显示；没有 OLED 时仍可读取按键。不要在 OLED 和板载 IMU 驱动里重复改变 Wire 引脚。
 
 ## 下载与 USB 通信
 

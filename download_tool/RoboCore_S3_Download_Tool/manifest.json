@@ -1,6 +1,6 @@
 {
   "package": "RoboCore_S3_Download_Tool",
-  "built_at": "2026-10-18T14:22:14+08:00",
+  "built_at": "2026-10-18T19:13:32+08:00",
   "supported_boards": [
     "RoboCore S3",
     "Robot Driver with ESP32S3 Lite"
@@ -8,35 +8,35 @@
   "environment": "esp32-s3-devkitc-1-n8r8",
   "flash_size": "8MB",
   "hardware_validated": false,
-  "source_commit": "4b4660d9b6d88ed5c74d94f5b060fe43737fef28",
+  "source_commit": "50d24f290d13e7aeac4a7becba077a9a54139962",
   "working_tree_dirty": true,
-  "source_tree_sha256": "2de1630b35a2b0ecfeb146a2cb059584e1c3d3e1a44501004066684ff5f0c40b",
+  "source_tree_sha256": "33e5f58e035a7255db1000fbced81d26a85e790e0dfa808bc300efe5f56199d2",
   "source_files": {
     "src/Arm_page.h": "23400a1981a4fe8a18bdfa0586464a7d9475d8cf4975ccaa78cefb4ba345ff2d",
     "src/BodyCtrl.cpp": "3067c5931ef637e4a961be597571bde573dbb191e0588d21c76b2f384e503c54",
     "src/BodyCtrl.h": "32e491e30b709b3952659bfb5193d34f0653dd9ed231bdd4126cf9cf9d1242c1",
-    "src/BusDevices.cpp": "29b218866b63db2ca22e718e5e4d0997be4aee0d394d5b9f9c485d5db78f66ce",
-    "src/BusDevices.h": "bca21bf2a6d442ee6230d6b5a396ae80656d8e009e42dd077355aadfbd6f589e",
+    "src/BusDevices.cpp": "bebb30fba59de412dca0b6f6d676cb73b973d5fdf478db75b2a3d658a69181dc",
+    "src/BusDevices.h": "0f3ff2b9bd48de0beaffd1ad415f746db934db9fe6df1390a146b0079d37d9fd",
     "src/ButtonUI.h": "831903219a9b832eba68a65068aaa421c96aee4429b8c80ddc04228eb93edf4d",
-    "src/Can.h": "cc68748654d9b31bcabeb30612b9ba89fc6528174a1f71f75aaa510f8eefcdd7",
+    "src/Can.h": "b9fcc1055a07413a5b7c95e96d19dcaea01d03137b80f1a57e0442fda0a105a1",
     "src/Config.h": "cd90cc6a35d1518b1d421fa840efd1e5328b4c513f25d5ad550f44dad28a720c",
     "src/FilesCtrl.cpp": "62b41292de5f892a8fecf04fcb45665e1f55d7987c507e8dffe8e5302ba4d265",
     "src/FilesCtrl.h": "321c7d2c736ccb8b39eb8476d1f15dced8b8ea2303f16ec8249dacbe4f95f464",
     "src/jointsCtrl.cpp": "1431269525a2aca31a00f61d7a8f3b4ecf62c9dced5dfcb1bbc736b9cdf41bb2",
     "src/jointsCtrl.h": "c3c8af2bef664b559b0d97dc7d065c619664b925a26ba83f7289bba59aa9ad40",
-    "src/main.cpp": "ee443b0248a54c88472905b5cf993f2a3542b1ef65dcb14cd41116792c63bda0",
+    "src/main.cpp": "a4fd81554908081d9fc84bd3be3afe464909ccf4914ce5da0a883246b0fbe75f",
     "src/MissionStorage.h": "cc619d09020b516188bedae45d391cd5eba22ed1196b2f90e9f0c0581e0e1f1b",
     "src/RGBLight.cpp": "633ef2038823886615c8d942572a89d44e9fc416a3ceff4d6ae8f3763b6b63be",
     "src/RGBLight.h": "f5cde336e75f5101de4fd900bfbf7ac12b46754d03d74558f7e521e8689b00c0",
-    "src/ScreenCtrl.cpp": "6317a8263775789dfed49d7381a65e2ef53cb32a58535c3c94e178820f6be93b",
+    "src/ScreenCtrl.cpp": "9211a320930a12181cebafd879ea288b7d3c8fd60f66cb83d454cf0bc55f7f93",
     "src/ScreenCtrl.h": "c1b4e73da7459558bab3bb65ff411b5468861cd317b6c31eb7f79778081c6793",
     "src/src.ino": "5cef6c5ff273e59d1bcbf0b3352415f3bfe3a597f425614c4ad8e212825019d1",
-    "src/Web_page.h": "84bbe28410e38ed418da8e0fe255a88058e6e7db0bd6432ea1adfe6fe738313c",
+    "src/Web_page.h": "33dd43af5da1938e032c6144eac91c820b48ea376b55ccdb0fa30d75202e20f5",
     "src/Wireless.cpp": "c89c9d0067f9cfa4e2c4529f4b3080269b0c7a5e5ae088b7d29239cd3c295b53",
     "src/Wireless.h": "9f44e68d7487911126b4b829b107126187d0aa94f13de6250b721beb555f6cad",
     "include/BusGuard.h": "de8a874e3309b5e1dac544217810b5404d73e61a9bbcf5aa71929101fc4800a9",
     "include/CommandLineBuffer.h": "e6afb9b44f529679408bcdf836aca260447e2396ec367f4eba0fe6bb0158fd3a",
-    "include/I2cGuard.h": "787492f176cff85685a3fd854e277ce157ea2baa35bbf7f967db91817380c474",
+    "include/I2cGuard.h": "aa69d87f3d55de1938d568f77f259ced22c46a1c698aa4b97de486c8fdf418bd",
     "include/MissionApi.h": "9b83d7c1580f6ea2293de7c8d25b29ee714181edff065e8ad4a8e157437d63c5",
     "include/SyncCommandValidation.h": "e1c9dca748f3c93480e9f36483d5d554d73c696a576da1fe4e806d3d7ef57396",
     "include/UsbOutput.h": "58b0ca298a2d3b45a808c9e975f82d497dc8a4daedf742a0d910e277ce2f12d6",
@@ -73,7 +73,7 @@
     "lib/lygion_devs/src/LYNode.h": "2d5486b3fcfede404b62f6177ccdf3a338f20b2f6a6d128b0c1afd0b88e12ab9",
     "lib/lygion_devs/src/LYS.cpp": "f5ffda7517e40988c1bfb9d7898571c8aa20087b705a6f5f647a12c83c93489e",
     "lib/lygion_devs/src/LYS.h": "cce2165ece31e76fbb0508faf0752ae97c33ecb2b8fd853df0284af0b667e026",
-    "lib/lygion_devs/src/LYSerial.cpp": "fd12956f2dabe0e953b5456c9347d90098f331f7cbad87bec320dcf4c55fd9ca",
+    "lib/lygion_devs/src/LYSerial.cpp": "5bb817abcdd5adfa17eb9627a6313bac3dd698e62aabaa8be685d4b9e554c908",
     "lib/lygion_devs/src/LYSerial.h": "d638377e609d2e33978fd4ec5274539c595ad3669ec5ea9f928b79da36ab37a3",
     "lib/lygion_devs/src/LYST.h": "71821ffcb5dffe19b83ea4c0a8594c13553e9284216aa64c6438ad6a1184d99d",
     "lib/lygion_devs/src/lyttlsd.cpp": "dfe3a54514304450ed844dd0614a90f4965d522c32a99185192060ecbe00116d",
@@ -84,11 +84,11 @@
     "lib/ModbusRtu/src/Rtu.cpp": "4c21aeb87071a2a85fc3b7c9825102d974d8e1207f3a70b519fb4c021bf835b3",
     "lib/ModbusRtu/src/Rtu.h": "2f82ad8a52843b7efae2aee4bcfe47c211437d5ff41fa8a0bafd0e3232a82799",
     "lib/RoboCoreSupport/library.properties": "7df93b41e191f9955c9063a7da352219304cc46df28ab724cbc76552438aae97",
-    "lib/RoboCoreSupport/src/OptionalQMI8658.h": "27199b1fd55e5ec0ddf4acc6af4cd86e598fc2374db4faea8ea4541eb7bdcb83",
-    "web/imu-view.js": "beff8645897f69c3b2876dfd811f47be483ecdab31c1788c83534b2ab4ec8a5a",
-    "web/index.html": "e8a171a59529d124bf8bf7410913349fdc15523ba2b4876d80ca0adb2b40a729",
+    "lib/RoboCoreSupport/src/OptionalQMI8658.h": "20327bc0f9f0053c86496e8e45a2d17a11abea2c298bb5b205d9f81a43e4b41d",
+    "web/imu-view.js": "55c4f7464cd47961f75ff03767f85e7771880b4acbbe5bcf24f73e94e84d982e",
+    "web/index.html": "814b8c2d1564dfbdaf4c01cb40c6954771e82045cd1305f7eabe9431576cf060",
     "web/json-tools.js": "46332f7237aea88acc3447709e8ba1aabd33d54158475564e9d285afb0725689",
-    "platformio.ini": "2950bf71352086a87afd1867f9f9f202773263b2ef4bf6fb1ede36ab7539652e",
+    "platformio.ini": "d4765d520cad9921015a9c4035e3c9d1ceeaf7f1cf02b032fbbbcd69e3b84839",
     "tools/embed_web.py": "c82819052eb9f560c69efee898069cf5cfa8ba57d7e506e1c66c487bbb954463",
     "tools/pio_python_path.py": "aa67174ff2135594647291cbc8b5aa2715074181bb1b40e90c4e7094f280070b"
   },
@@ -151,8 +151,8 @@
       "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
     },
     "bin/firmware.bin": {
-      "bytes": 1403184,
-      "sha256": "e6b3faca738cbaf5bc4c0637b1669baf24f917e2d468348fa8a119cec37e14fd"
+      "bytes": 1405488,
+      "sha256": "b84c5e4c83cd5c32c77a2db7bc648eeb800034d25140e05d871cf6e01389a4b5"
     },
     "flash_download_tool_3.9.9_R2.exe": {
       "bytes": 25477017,
@@ -175,12 +175,12 @@
       "sha256": "95b0c72f2b8b8df0cad5428429007b21d039cbca98bdf0a0f4ce9323ee9d8fcb"
     },
     "README.md": {
-      "bytes": 7172,
-      "sha256": "284bebb3d8d0c1f1934c1c5bbfa9083de0cf993684cc786d494c2856e10050a1"
+      "bytes": 3802,
+      "sha256": "0c7cdafa878ed4ec9851e4138219d470d580c2c1f0349c2cf17e858465509c10"
     },
     "README.zh-CN.md": {
-      "bytes": 7212,
-      "sha256": "88e8fa1fcbe2286936939c5ea9c29e13219e983ed53986e0aae48d5a6296b050"
+      "bytes": 3405,
+      "sha256": "88bbcb20b0b2f17bc6009d10c99d08d69f1f71bf8c54f9a7013bf64e62b6a576"
     },
     "Start_Download_Tool.bat": {
       "bytes": 258,

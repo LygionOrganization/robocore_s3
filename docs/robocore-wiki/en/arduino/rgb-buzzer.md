@@ -4,7 +4,7 @@
 
 ## Hardware and wiring
 
-Requires two separately wired WS2812 LEDs (example GPIO26) and the UI Module (A) GPIO21 buzzer. RoboCore S3 has no onboard addressable RGB; GPIO26 is not exposed on PH1.25-10P. Use User_Interface_Module_A for normal module testing. To use a free expansion GPIO, edit the leds constructor and avoid pins occupied by connected keys or buses.
+Requires two separately wired WS2812 LEDs (example GPIO26) and the UI Module (A) GPIO21 buzzer. RoboCore S3 has no onboard addressable RGB; GPIO26 is not exposed on PH1.25-10P. Use User_Interface_Module_A for the module’s buttons, display and buzzer. To use a free expansion GPIO, edit the leds constructor and avoid pins occupied by connected keys or buses.
 
 ## Arduino IDE and board settings
 

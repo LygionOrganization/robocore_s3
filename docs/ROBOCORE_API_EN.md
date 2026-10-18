@@ -67,6 +67,29 @@ Replies below are illustrative. Read HTTP replies through GET /api/result or rec
 | GET /api/info | Firmware, baud rate, IMU, mission state, sta_state, sta_ip, ap_ip, sta_ssid; no passwords |
 | GET /api/result | Latest result only; match rid |
 
+## IMU feedback (T=740 / GET /api/imu)
+
+`GET /api/imu` returns a read-only snapshot without enqueueing a command. For a single command, send `{"T":740,"rid":1}`. A successful response is shaped as follows (example values):
+
+```json
+{"T":740,"rid":1,"ok":true,"present":true,"address":106,"sample_age_ms":2,"sample_count":123,"temperature_c":25.0,"accel_g":[0,0,1],"gyro_dps":[0,0,0]}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `present` / `address` | Sensor detected / I2C address (decimal) |
+| `accel_g` / `gyro_dps` | X, Y, Z acceleration in g / angular velocity in degrees/s |
+| `temperature_c` | Sensor temperature in degrees C |
+| `sample_count` | Sensor's wrapping 24-bit counter; equal values are the same sample |
+| `sample_age_ms` | Age of the cached reading; -1 if unavailable |
+| `ok` / `error` | Use readings only when ok=true; stale readings (>100 ms) return imu_no_fresh_sample |
+
+Live requests should be sequential, approximately 10 per second or slower. No request history is stored. The web view estimates roll, pitch and relative heading; this six-axis sensor does not provide absolute heading.
+
+Firmware 1.3.8 removes investigation-only fields `sampling_mode`, `samples_acquired`, `sensor_restarts`, `read_state`, `count_before`, `count_after`. Clients must not depend on these fields. Sensor locking, freshness checks and bounded recovery remain enabled.
+
+T=723/732 omit per-read position_status and speed_status; reply_status retains their combined flags. For T=723, device_status is the actual driver register; device_fault, current_limited, limit_active and target_out_of_range remain available. Current limiting alone is not a fault.
+
 <!-- COMMAND_TABLES -->
 
 ## Communication and system

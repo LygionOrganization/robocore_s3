@@ -1,35 +1,0 @@
-*************************** START ****************************
-Chip: ESP32S3
-Download mode: uart
-Start time: 20250903-16:27
-Connect baud: 115200
-Com:COM19
-connecting...
-manufacturer_id: 0x20
-device_id: 0x4017
-fs:0x200200
-address/file: 0 D:\Backup\Documents\PlatformIO\Projects\Example for Robot Driver Lite\download_tool\RD_ESP32S3_LITE_Download_Tool\dl_temp\bin_tmp\downloadPanel1\bootloader.bin
-address/file: 32768 D:\Backup\Documents\PlatformIO\Projects\Example for Robot Driver Lite\download_tool\RD_ESP32S3_LITE_Download_Tool\dl_temp\bin_tmp\downloadPanel1\partitions.bin
-address/file: 65536 D:\Backup\Documents\PlatformIO\Projects\Example for Robot Driver Lite\download_tool\RD_ESP32S3_LITE_Download_Tool\dl_temp\bin_tmp\downloadPanel1\firmware.bin
-Wrote 20256 bytes (13096 compressed) at 0x00000000 in 0.2 seconds (effective 686.7 kbit/s)...
-Wrote 3072 bytes (146 compressed) at 0x00008000 in 0.0 seconds (effective 1830.0 kbit/s)...
-Wrote 1351504 bytes (779274 compressed) at 0x00010000 in 9.9 seconds (effective 1096.7 kbit/s)...
-File: D:\Backup\Documents\PlatformIO\Projects\Example for Robot Driver Lite\download_tool\RD_ESP32S3_LITE_Download_Tool\dl_temp\bin_tmp\downloadPanel1\bootloader.bin
-File  md5: dbf8eebb0d251ef251971fa226e342dc
-Flash md5: dbf8eebb0d251ef251971fa226e342dc
-Hash of data verified.
-File: D:\Backup\Documents\PlatformIO\Projects\Example for Robot Driver Lite\download_tool\RD_ESP32S3_LITE_Download_Tool\dl_temp\bin_tmp\downloadPanel1\partitions.bin
-File  md5: 801ba71678a964614657a6d8fbc6baca
-Flash md5: 801ba71678a964614657a6d8fbc6baca
-Hash of data verified.
-File: D:\Backup\Documents\PlatformIO\Projects\Example for Robot Driver Lite\download_tool\RD_ESP32S3_LITE_Download_Tool\dl_temp\bin_tmp\downloadPanel1\firmware.bin
-File  md5: cc4a3fbf4a8a11e749487e851fda4daa
-Flash md5: cc4a3fbf4a8a11e749487e851fda4daa
-Hash of data verified.
-
-Leaving...
-com closed
-Total use time: 15 s
-Download result: PASS
-*************************** END ****************************
-

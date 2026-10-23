@@ -9,7 +9,7 @@ See [Web automation scripts](automation.md) for editing, saving and running miss
 
 ## Common fields and operating sequence
 
-JSON field names are case-sensitive. Examples are complete objects: change IDs, positions and speeds for your hardware before sending. Supply all shown fields unless explicitly optional. Legacy servo/arm interfaces retain their original protocol and lack the new bus API’s comprehensive validation; check mechanical travel yourself. Sync commands validate array lengths, unique IDs, numeric types and positions (SCS0–1023, other sync families0–4095).
+JSON field names are case-sensitive. Examples are complete objects: change IDs, positions and speeds for your hardware before sending. Supply all shown fields unless explicitly optional. Servo and arm parameter limits depend on the device model and mechanism; check the target hardware and mechanical travel before sending commands. Sync commands validate array lengths, unique IDs, numeric types and positions (SCS0–1023, other sync families0–4095).
 
 | Field | Meaning and units |
 | --- | --- |
@@ -36,7 +36,7 @@ JSON field names are case-sensitive. Examples are complete objects: change IDs, 
 | `flag / hz` | T=145 periodic arm feedback0/1 and frequency; unrelated to T=740 onboard IMU readings |
 | `flag / axis / delta` | T=146 continuous-motion enable0/1, preset coordinate axis and increment; only for the matching arm application |
 
-Scan with T=700, read model-specific feedback, then try low-speed movement within limits. TTL and servo RS485 share IO4/IO5 baud and data; they are not separate UARTs. External CAN/RS485 uses IO13/IO14 and requires both the correct selector position and matching program.
+Scan with T=700, read model-specific feedback, then try low-speed movement within limits. TTL and bus-device RS485 share IO4/IO5 baud and data; they are not separate UARTs. External CAN/RS485 uses IO13/IO14 and requires both the correct selector position and matching program.
 
 ### Synchronized servo example
 
@@ -55,7 +55,7 @@ Replies below are illustrative. Read HTTP replies through GET /api/result or rec
 | Operation | Send | Example reply |
 | --- | --- | --- |
 | Scan | `{"T":700,"first":0,"last":20,"rid":1}` | `{"T":700,"rid":1,"ok":true,"ids":[1,5],"first":0,"last":20}` |
-| Encoder | `{"T":732,"id":1,"rid":2}` | `{"T":732,"rid":2,"id":1,"ok":true,"bus_error":0,"device_status":0,"pos":2048,"speed":0}` |
+| Encoder | `{"T":732,"id":1,"rid":2}` | `{"T":732,"rid":2,"id":1,"ok":true,"bus_error":0,"reply_status":0,"pos":2048,"speed":0}` |
 | IMU unavailable | `{"T":740,"rid":3}` | `{"T":740,"rid":3,"ok":false,"present":false,"error":"imu_not_present"}` |
 
 `ok:false` indicates invalid parameters or device communication failure. `dispatched:true` means handler dispatch only, not verified motion. ID commands T=13/23/33/710/720 verify the new ID; encoders share T=720 with steppers.
@@ -66,6 +66,7 @@ Replies below are illustrative. Read HTTP replies through GET /api/result or rec
 | --- | --- |
 | GET /api/info | Firmware, baud rate, IMU, mission state, sta_state, sta_ip, ap_ip, sta_ssid; no passwords |
 | GET /api/result | Latest result only; match rid |
+| GET /api/imu | Latest onboard IMU snapshot; read-only, bypasses the command queue; fields below |
 
 ## IMU feedback (T=740 / GET /api/imu)
 
@@ -86,9 +87,17 @@ Replies below are illustrative. Read HTTP replies through GET /api/result or rec
 
 Live requests should be sequential, approximately 10 per second or slower. No request history is stored. The web view estimates roll, pitch and relative heading; this six-axis sensor does not provide absolute heading.
 
-Firmware 1.3.8 removes investigation-only fields `sampling_mode`, `samples_acquired`, `sensor_restarts`, `read_state`, `count_before`, `count_after`. Clients must not depend on these fields. Sensor locking, freshness checks and bounded recovery remain enabled.
+For T=723/732, reply_status combines the status flags from position and speed replies. For T=723, device_status is the actual driver register; device_fault, current_limited, limit_active and target_out_of_range remain available. Current limiting alone is not a fault.
 
-T=723/732 omit per-read position_status and speed_status; reply_status retains their combined flags. For T=723, device_status is the actual driver register; device_fault, current_limited, limit_active and target_out_of_range remain available. Current limiting alone is not a fault.
+## TTL 6DOF IMU
+
+Use the **TTL 6DOF IMU** panel for one-shot reads, live feedback and ID changes. Scan with T=700 (include ID 200 in the range), select the ID, then open the panel. The upstream examples use ID 200 at 1 Mbps; verify the actual device settings. Connect only the intended device when changing its ID.
+
+Read: `{"T":751,"id":200,"rid":1}`. Change ID: `{"T":750,"id":200,"new_id":201,"rid":2}`. Wait for matching `rid` and `ok:true`; after changing ID, select the new ID before reading again. Never automatically retry a timed-out configuration write.
+
+Feedback contains `accel_raw`, `gyro_raw` (three signed raw counts) and `quaternion_xyzw` (four floating-point values). It does not reuse the onboard QMI8658A units or endpoint. The SDK does not define the physical scale mapping or expose a sample counter; a successful bus read cannot establish internal sensor freshness. The browser issues sequential reads with 200 ms between completed requests and clears live values after 1.5 seconds without a valid reply. Leaving the page pauses polling. The 3D model shares the onboard IMU renderer, uses the device quaternion directly, and displays roll, pitch and relative yaw with heading zero. Pending requests retain the last frame without blanking; expired feedback freezes the model and clears the values. Heading is relative and drifts.
+
+Protocol reference: [upstream Python IMU SDK](https://github.com/ftservo/FTServo_Python/blob/main/scservo_sdk/imu.py), reviewed blob `2028869faa4bb9e52b688cc8e1089a73bd0c91ef`. Reads registers 56–78; ID is register 5 and EEPROM lock is register 55. Acceleration/gyro use sign-magnitude; quaternion XYZ uses binary16, W is reconstructed as the nonnegative square root (zero if XYZ squared sum exceeds one), matching the SDK.
 
 <!-- COMMAND_TABLES -->
 
@@ -232,6 +241,8 @@ T=723/732 omit per-read position_status and speed_status; reply_status retains t
 | 726 | Stepper output enable | `{"T":726,"id":1,"enable":0}` | enable=0 disables output, 1 enables it. |
 | 730 | Encoder position reference | `{"T":730,"id":1,"pos":0}` | pos=0–65534; saves current position reference without motion. |
 | 732 | Encoder position and speed | `{"T":732,"id":1}` | Returns pos/speed; 4096 counts/turn, multi-turn position 0–65534. Accumulated turns do not survive power loss. |
+| 750 | TTL 6DOF IMU change ID | `{"T":750,"id":200,"new_id":201}` | Distinct id/new_id integers 0–253. Connect individually; occupied IDs rejected. Unlock, write, read back and relock. Scan after failure; no automatic retries. |
+| 751 | TTL 6DOF IMU feedback | `{"T":751,"id":200}` | id=0–253; accel_raw/gyro_raw are signed-magnitude decoded raw counts; quaternion_xyzw decodes half floats and reconstructs nonnegative W. SDK supplies no physical-unit mapping or sample counter. Six-axis heading drifts. |
 
 ## Onboard IMU
 

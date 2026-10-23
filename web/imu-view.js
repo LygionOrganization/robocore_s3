@@ -29,19 +29,20 @@ class ImuAttitude {
   rotate([a,b,c]){const [w,x,y,z]=this.q;return [(1-2*y*y-2*z*z)*a+2*(x*y-w*z)*b+2*(x*z+w*y)*c,2*(x*y+w*z)*a+(1-2*x*x-2*z*z)*b+2*(y*z-w*x)*c,2*(x*z-w*y)*a+2*(y*z+w*x)*b+(1-2*x*x-2*y*y)*c];}
 }
 const imuPose=new ImuAttitude();let imuLive=false,imuTimer,imuGeneration=0,imuLast=0;
-function drawImu(){
-  const canvas=$('imuCanvas'),ctx=canvas.getContext('2d'),width=canvas.clientWidth||600,height=320,dpr=Math.min(devicePixelRatio||1,2);
-  canvas.width=width*dpr;canvas.height=height*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,width,height);
-  const scale=Math.min(width/5,100),yaw=-imuPose.yawZero;
-  function project(p){let [x,y,z]=imuPose.rotate(p);[x,y]=[x*Math.cos(yaw)-y*Math.sin(yaw),x*Math.sin(yaw)+y*Math.cos(yaw)];return [width/2+scale*(x-y)*0.8,height/2+scale*((x+y)*0.35-z*0.9),x+y+z];}
+function drawImu(pose=imuPose,prefix='imu'){
+  const canvas=$(prefix+'Canvas'),ctx=canvas.getContext('2d'),width=canvas.clientWidth||600,height=320,dpr=Math.min(devicePixelRatio||1,2);
+  if(canvas.width!==Math.round(width*dpr)||canvas.height!==Math.round(height*dpr)){canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);}
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
+  const scale=Math.min(width/5,100),yaw=-pose.yawZero;
+  function project(p){let [x,y,z]=pose.rotate(p);[x,y]=[x*Math.cos(yaw)-y*Math.sin(yaw),x*Math.sin(yaw)+y*Math.cos(yaw)];return [width/2+scale*(x-y)*0.8,height/2+scale*((x+y)*0.35-z*0.9),x+y+z];}
   const points=[[-1,-.65,-.08],[1,-.65,-.08],[1,.65,-.08],[-1,.65,-.08],[-1,-.65,.08],[1,-.65,.08],[1,.65,.08],[-1,.65,.08]].map(project);
   const faces=[[0,1,2,3],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0],[4,7,6,5]];
   faces.sort((a,b)=>a.reduce((s,i)=>s+points[i][2],0)-b.reduce((s,i)=>s+points[i][2],0));
   for(const face of faces){ctx.beginPath();face.forEach((i,j)=>ctx[j?'lineTo':'moveTo'](points[i][0],points[i][1]));ctx.closePath();ctx.fillStyle=face.includes(4)&&face.includes(6)?'#245ddd':'#91aed8';ctx.fill();ctx.strokeStyle='#173c72';ctx.stroke();}
   const origin=project([0,0,.12]);ctx.font='bold 14px system-ui';
   for(const [p,label,color] of [[[1.6,0,.12],'X','#c73e43'],[[0,1.3,.12],'Y','#07836f'],[[0,0,1.2],'Z','#794ad0']]){const end=project(p);ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(...origin.slice(0,2));ctx.lineTo(...end.slice(0,2));ctx.stroke();ctx.fillStyle=color;ctx.fillText(label,end[0]+5,end[1]);}
-  const angles=imuPose.angles();angles[2]-=imuPose.yawZero;
-  ['imuRoll','imuPitch','imuYaw'].forEach((id,i)=>$(id).textContent=((angles[i]*180/Math.PI+540)%360-180).toFixed(1)+'°');
+  const angles=pose.angles();angles[2]-=pose.yawZero;
+  ['Roll','Pitch','Yaw'].forEach((id,i)=>$(prefix+id).textContent=((angles[i]*180/Math.PI+540)%360-180).toFixed(1)+'°');
 }
 function stopImu(){imuLive=false;++imuGeneration;clearTimeout(imuTimer);$('imuLive').textContent=t('开始实时显示');$('imuLive').setAttribute('aria-pressed','false');}
 async function readImuView(token,live=false){

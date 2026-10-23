@@ -138,5 +138,30 @@ int main() {
   assert(!run("{\"T\":732,\"id\":3}")); assert(speedReads==reads);
   assert(!run("{\"T\":730,\"id\":2,\"pos\":65535}"));
   assert(run("{\"T\":730,\"id\":2,\"pos\":65534}"));assert(devices[2].pos==65534);
+  devices[200].present=true;
+  ttlData[1]=0x38; // quaternion x=0.5, y=z=0
+  ttlData[6]=1;ttlData[7]=0x80; // gyro x=-1, not -32767
+  ttlData[9]=0xff;ttlData[10]=0x7f;
+  ttlData[15]=2;ttlData[16]=0x80;
+  assert(run(R"({"T":751,"id":200,"rid":123})"));
+  assert(output["rid"]==123 && output["gyro_raw"][0]==-1 && output["gyro_raw"][1]==32767);
+  assert(output["accel_raw"][0]==-2);
+  assert(std::abs(output["quaternion_xyzw"][3].as<float>()-std::sqrt(.75f))<.0001f);
+  ttlData[1]=0x7c;assert(!run(R"({"T":751,"id":200})"));
+  assert(output["quaternion_xyzw"].isNull());ttlData[1]=0x38;
+  ttlShort=true;assert(!run(R"({"T":751,"id":200})"));ttlShort=false;
+  assert(output["accel_raw"].isNull());
+  assert(!run(R"({"T":751,"id":199})"));
+  devices[200].status=4;assert(!run(R"({"T":751,"id":200})"));devices[200].status=0;
+  writes=busWrites;
+  assert(!run(R"({"T":750,"id":254,"new_id":201})"));
+  assert(!run(R"({"T":750,"id":200,"new_id":200})"));
+  assert(!run(R"({"T":750,"id":200,"new_id":2})"));
+  assert(!run(R"({"T":750,"id":200,"new_id":1.5})"));
+  assert(busWrites==writes);
+  assert(run(R"({"T":750,"id":200,"new_id":201})"));
+  assert(devices[201].present&&!devices[200].present&&ttlLock==1);
+  ttlLockFail=true;
+  assert(!run(R"({"T":750,"id":201,"new_id":202})"));ttlLockFail=false;
   std::cout<<"PASS: optional IMU absent/read/failure, scan, validation, ID, live mode switches, follower, signed feedback\n";
 }

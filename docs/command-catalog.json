@@ -2330,5 +2330,44 @@
     "sample": {
       "T": 740
     }
+  },
+  {
+    "T": 750,
+    "title": {
+      "zh": "TTL 6DOF IMU 修改 ID",
+      "en": "TTL 6DOF IMU change ID"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "id/new_id 为不同的 0–253 整数。逐个接入，拒绝已占用 ID；解锁、写入、读回并重新锁定。失败后先扫描，不自动重试。",
+      "en": "Distinct id/new_id integers 0–253. Connect individually; occupied IDs rejected. Unlock, write, read back and relock. Scan after failure; no automatic retries."
+    },
+    "sample": {
+      "T": 750,
+      "id": 200,
+      "new_id": 201
+    }
+  },
+  {
+    "T": 751,
+    "title": {
+      "zh": "TTL 6DOF IMU 反馈",
+      "en": "TTL 6DOF IMU feedback"
+    },
+    "group": {
+      "zh": "总线设备",
+      "en": "Bus devices"
+    },
+    "note": {
+      "zh": "id=0–253；返回 accel_raw/gyro_raw（符号幅值解码，原始计数）、quaternion_xyzw（半精度解码，W 取非负根）。SDK 未提供物理单位映射或采样计数。六轴航向会漂移。",
+      "en": "id=0–253; accel_raw/gyro_raw are signed-magnitude decoded raw counts; quaternion_xyzw decodes half floats and reconstructs nonnegative W. SDK supplies no physical-unit mapping or sample counter. Six-axis heading drifts."
+    },
+    "sample": {
+      "T": 751,
+      "id": 200
+    }
   }
 ]

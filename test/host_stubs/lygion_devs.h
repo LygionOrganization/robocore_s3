@@ -45,3 +45,22 @@ class TTLSDClass: public LYS {
   int WritePosEx(int id,int pos,int,int,int){return CalibrationOfs(id,pos);}
   int WriteSpe(int id,int speed,int,int){if(check(id))devices[id].speed=speed;return writeByte(id,46,speed);}
 };
+
+inline std::array<uint8_t,23> ttlData{};
+inline bool ttlShort=false,ttlLockFail=false;
+inline int ttlLock=1;
+class LYSerial: public LYS {
+ public:
+  explicit LYSerial(int){}
+  int Read(int id,int address,uint8_t* data,int count){
+    if(!check(id))return 0;
+    if(address!=56||count!=23){error=4;return 0;}
+    std::copy(ttlData.begin(),ttlData.end(),data);return ttlShort?22:23;
+  }
+  int readByte(int id,int reg){return check(id)?(reg==5?id:ttlLock):-1;}
+  int writeByte(int id,int reg,int value){
+    if(reg==55&&value==1&&ttlLockFail){error=1;return 0;}
+    const int result=LYS::writeByte(id,reg,value);
+    if(result&&reg==55)ttlLock=value;return result;
+  }
+};

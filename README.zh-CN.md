@@ -2,7 +2,7 @@
 
 **用于机器人控制的开源 ESP32-S3 固件与例程。**
 
-[English](README.md) | **简体中文**
+**简体中文** | [English](README.md)
 
 [中文 Wiki](https://wiki.lygion.ai/reference/bus-devices/robocore-s3/) · [English Wiki](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/) · [JSON 指令表](docs/ROBOCORE_API.md) · [Arduino 例程](arduino_example/)
 
@@ -108,7 +108,7 @@ pio run
 | --- | --- |
 | 主控模组 | ESP32-S3-WROOM-1U-MCR8N8；8 MB Flash、8 MB PSRAM |
 | 电源输入 | CAN 2+2 接口的 XT30 电源端输入 5–48V |
-| 舵机与设备总线 | 5264-3P 单线 TTL 与 XH2.54-4P RS485，共用 IO4 TX / IO5 RX |
+| 总线设备接口 | 5264-3P 单线 TTL 与 XH2.54-4P RS485，共用 IO4 TX / IO5 RX |
 | 外部通信 | 开关选择 CAN 2+2 或 GH1.25-5P RS485，共用 IO13 RX / IO14 TX |
 | 板间接口 | GH1.25-3P，用于板间 TTL 通信、供电解耦 |
 | USB | Type-C UART 用于串口下载与调试；Type-C USB 用于原生 USB 通信 |
@@ -118,7 +118,7 @@ pio run
 
 **供电电压必须符合所有共电总线设备的额定要求。** 主控支持 48V，不代表低压舵机可以接入 48V；仅连接 USB 也不代表执行器已经获得动力供电。
 
-IO13/IO14 的外部 RS485 与 IO4/IO5 的舵机总线独立；舵机 RS485 与 TTL 共用一个 UART。CAN/RS485 开关切换硬件通路，程序也需要采用对应协议。接线前请阅读[硬件说明](https://wiki.lygion.ai/reference/bus-devices/robocore-s3/hardware/)。
+IO13/IO14 的外部 RS485 与 IO4/IO5 的总线设备接口独立；总线设备 RS485 与 TTL 共用一个 UART。CAN/RS485 开关切换硬件通路，程序也需要采用对应协议。接线前请阅读[硬件说明](https://wiki.lygion.ai/reference/bus-devices/robocore-s3/hardware/)。
 
 ## 仓库目录
 

@@ -11,13 +11,14 @@ enum DeviceCommand {
   BUS_SCAN = 700, NODE_ID = 710, NODE_PWM = 711, NODE_RGB = 712, NODE_SBUS = 713,
   STEPPER_ID = 720, STEPPER_MODE = 721, STEPPER_ORIGIN = 722, STEPPER_READ = 723,
   STEPPER_POSITION = 724, STEPPER_SPEED = 725, STEPPER_ENABLE = 726,
-  ENCODER_ORIGIN = 730, ENCODER_READ = 732, IMU_READ = 740
+  ENCODER_ORIGIN = 730, ENCODER_READ = 732, IMU_READ = 740,
+  TTL_IMU_ID = 750, TTL_IMU_READ = 751
 };
 
 class BusDevices {
  public:
   OptionalQMI8658 imu;
-  void begin(HardwareSerial& port) { node_.pSerial = &port; stepper_.pSerial = &port; }
+  void begin(HardwareSerial& port) { node_.pSerial = &port; stepper_.pSerial = &port; ttlImu_.pSerial = &port; }
   bool imuPresent();
   void startImuSampling();
   void pollImu();
@@ -40,4 +41,5 @@ class BusDevices {
   uint32_t imuUpdated_ = 0, imuRestarted_ = 0;
   NodeClass node_;
   TTLSDClass stepper_;
+  LYSerial ttlImu_{0};
 };

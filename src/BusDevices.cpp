@@ -1,5 +1,6 @@
 #include "BusDevices.h"
 #include "I2cGuard.h"
+#include "TtlImu.h"
 #include <cstring>
 
 namespace {
@@ -74,7 +75,8 @@ bool BusDevices::handle(const JsonDocument& in, JsonDocument& out) {
   const int type = in["T"] | -1;
   if (type != BUS_SCAN && (type < NODE_ID || type > NODE_SBUS) &&
       (type < STEPPER_ID || type > STEPPER_ENABLE) && type != ENCODER_ORIGIN &&
-      type != ENCODER_READ && type != IMU_READ) return false;
+      type != ENCODER_READ && type != IMU_READ && type != TTL_IMU_ID &&
+      type != TTL_IMU_READ) return false;
   out["T"] = type; out["ok"] = false;
   if (in["rid"].is<uint32_t>()) out["rid"] = in["rid"];
   if (type == IMU_READ) {
@@ -127,6 +129,53 @@ bool BusDevices::handle(const JsonDocument& in, JsonDocument& out) {
   if (!integer(in, "id", 0, 253)) { failure(out, "id must be 0..253 (no broadcast)"); return true; }
   const uint8_t id = in["id"];
   out["id"] = id;
+  if (type == TTL_IMU_READ) {
+    uint8_t data[TtlImu::FeedbackSize] = {};
+    const int count = ttlImu_.Read(id, TtlImu::Feedback, data, sizeof(data));
+    if (!status(ttlImu_, out) || count != sizeof(data)) {
+      failure(out, "ttl_imu_read_failed"); return true;
+    }
+    const float x = TtlImu::halfFloat(data), y = TtlImu::halfFloat(data + 2),
+                z = TtlImu::halfFloat(data + 4);
+    if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z)) {
+      failure(out, "ttl_imu_invalid_quaternion"); return true;
+    }
+    const float remainder = 1.f - x*x - y*y - z*z;
+    auto q = out["quaternion_xyzw"].to<JsonArray>();
+    q.add(x); q.add(y); q.add(z); q.add(remainder > 0 ? std::sqrt(remainder) : 0.f);
+    auto g = out["gyro_raw"].to<JsonArray>();
+    auto a = out["accel_raw"].to<JsonArray>();
+    for (unsigned axis = 0; axis < 3; ++axis) {
+      g.add(TtlImu::signedMagnitude(data + 6 + axis*3));
+      a.add(TtlImu::signedMagnitude(data + 15 + axis*3));
+    }
+    // The SDK exposes no sample counter: this is a fresh bus reply, not proof
+    // that the sensor has advanced its internal sample.
+    out["ok"] = true; return true;
+  }
+  if (type == TTL_IMU_ID) {
+    if (!integer(in, "new_id", 0, 253) || in["new_id"].as<int>() == id) {
+      failure(out, "new_id must be a different ID in 0..253"); return true;
+    }
+    const uint8_t next = in["new_id"];
+    if (ttlImu_.Ping(next) == next) { failure(out, "new_id already responds on this bus"); return true; }
+    if (ttlImu_.Ping(id) != id) { failure(out, "source device not found"); return true; }
+    ttlImu_.writeByte(id, TtlImu::Lock, 0);
+    if (!status(ttlImu_, out)) return true;
+    ttlImu_.writeByte(id, TtlImu::Id, next);
+    // ID writes can acknowledge under the new ID. Read back instead of retrying.
+    if (ttlImu_.readByte(next, TtlImu::Id) != next || !status(ttlImu_, out)) {
+      ttlImu_.writeByte(id, TtlImu::Lock, 1);
+      ttlImu_.writeByte(next, TtlImu::Lock, 1);
+      failure(out, "new ID could not be verified; scan the bus"); return true;
+    }
+    ttlImu_.writeByte(next, TtlImu::Lock, 1);
+    if (!status(ttlImu_, out)) return true;
+    if (ttlImu_.readByte(next, TtlImu::Lock) != 1 || !status(ttlImu_, out)) {
+      failure(out, "ttl_imu_lock_verification_failed"); return true;
+    }
+    out["new_id"] = next; return true;
+  }
   if (type == NODE_ID || type == STEPPER_ID) {
     if (!integer(in, "new_id", 0, 253) || in["new_id"].as<int>() == id) {
       failure(out, "new_id must be a different ID in 0..253"); return true;

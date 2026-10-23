@@ -51,3 +51,5 @@ Tests use simulated devices and never prove electrical behavior or hardware endu
 
 保留必要的错误反馈、设备状态和 `/api/info` 的运行时间、堆内存与重启原因用于维护。
 不要把软件测试通过表述为硬件测试通过；发布构建需独立验收。
+
+TTL 6DOF IMU browser regression: `node test/web_ttl_imu.cjs` (same preview server and Playwright setup). Host tests cover signed-magnitude data, quaternion decoding, short reads, missing devices, invalid IDs, collisions and EEPROM relock failure. Hardware validation remains required for bus wiring, sample coherence, attitude and persistent ID changes.

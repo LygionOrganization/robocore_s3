@@ -20,7 +20,7 @@ RoboCore S3 完整固件使用人类可读的 JSON 指令控制设备。下文�
 
 ## 通用参数与使用顺序
 
-JSON 的字段名区分大小写。表格中的示例是完整对象；按实际设备修改 ID、位置和速度后再发送。除明确标为可选的参数外，请填写示例中的全部字段。旧舵机/机械臂接口保留原协议，不具备总线设备接口的全面参数校验，不能依靠固件替你检查机械行程。同步接口会校验数组长度、ID唯一性、位置范围与数值类型；SCS位置0–1023，其他同步位置0–4095。
+JSON 的字段名区分大小写。表格中的示例是完整对象；按实际设备修改 ID、位置和速度后再发送。除明确标为可选的参数外，请填写示例中的全部字段。舵机与机械臂指令的参数范围因型号和机构而异，发送前应核对目标设备及机械行程。同步接口会校验数组长度、ID唯一性、位置范围与数值类型；SCS位置0–1023，其他同步位置0–4095。
 
 | 字段 | 含义与单位 |
 | --- | --- |
@@ -65,9 +65,9 @@ JSON 的字段名区分大小写。表格中的示例是完整对象；按实际
 
 | 操作 | 发送 | 接收示例 |
 | --- | --- | --- |
-| Scan | `{"T":700,"first":0,"last":20,"rid":1}` | `{"T":700,"rid":1,"ok":true,"ids":[1,5],"first":0,"last":20}` |
-| Encoder | `{"T":732,"id":1,"rid":2}` | `{"T":732,"rid":2,"id":1,"ok":true,"bus_error":0,"device_status":0,"pos":2048,"speed":0}` |
-| IMU unavailable | `{"T":740,"rid":3}` | `{"T":740,"rid":3,"ok":false,"present":false,"error":"imu_not_present"}` |
+| 扫描设备 | `{"T":700,"first":0,"last":20,"rid":1}` | `{"T":700,"rid":1,"ok":true,"ids":[1,5],"first":0,"last":20}` |
+| 读取编码器 | `{"T":732,"id":1,"rid":2}` | `{"T":732,"rid":2,"id":1,"ok":true,"bus_error":0,"reply_status":0,"pos":2048,"speed":0}` |
+| IMU 不可用 | `{"T":740,"rid":3}` | `{"T":740,"rid":3,"ok":false,"present":false,"error":"imu_not_present"}` |
 
 `ok:false` 表示参数或设备通信失败。部分指令返回 `dispatched:true`，只表示处理器已完成分发，不代表电机动作成功。设备 ID 设置 T=13/23/33/710/720 会检查新 ID；编码器与步进驱动共用 T=720。
 
@@ -77,6 +77,7 @@ JSON 的字段名区分大小写。表格中的示例是完整对象；按实际
 | --- | --- |
 | GET /api/info | 固件、总线波特率、IMU、任务状态，以及 sta_state、sta_ip、ap_ip、sta_ssid；无密码 |
 | GET /api/result | 最新一条执行结果，通过 rid 匹配；不保存历史 |
+| GET /api/imu | 板载 IMU 最新有效快照；只读，不进入指令队列，字段见下文 |
 
 ## IMU 反馈（T=740 / GET /api/imu）
 
@@ -97,9 +98,17 @@ JSON 的字段名区分大小写。表格中的示例是完整对象；按实际
 
 实时读取应逐次等待响应，建议每秒约 10 次或更低，不保存请求历史。网页估算横滚、俯仰和相对航向；六轴 IMU 不提供绝对航向。
 
-1.3.8 移除仅供排障的 `sampling_mode`、`samples_acquired`、`sensor_restarts`、`read_state`、`count_before`、`count_after`，客户端不要依赖这些字段。采样锁、新鲜度检查和有限频率的恢复仍保留。
+T=723/732 的 reply_status 表示位置和速度读取回复中的合并状态标志。T=723 的 device_status 来自实际驱动状态寄存器，device_fault、current_limited、limit_active、target_out_of_range 分别表示故障、限流、限位和目标越界；限流不等于故障。
 
-T=723/732 不再返回逐次读取的 position_status、speed_status，保留合并的 reply_status。T=723 的 device_status 来自实际驱动状态寄存器，device_fault、current_limited、limit_active、target_out_of_range 分别表示故障、限流、限位和目标越界；限流不等于故障。
+## TTL 6DOF IMU
+
+在 **TTL 6DOF IMU** 页面可单次读取、实时查看反馈和修改 ID。先用 T=700 扫描（范围须包含 200），选择 ID 后进入面板。上游例程使用 ID 200、1 Mbps；请以实际设备设置为准。修改 ID 时逐个接入目标设备。
+
+读取：`{"T":751,"id":200,"rid":1}`。改 ID：`{"T":750,"id":200,"new_id":201,"rid":2}`。等待匹配的 `rid` 和 `ok:true`；修改后使用新 ID 再读取。超时的配置写入不得自动重试。
+
+反馈包含 `accel_raw`、`gyro_raw`（三个带符号原始计数）和 `quaternion_xyzw`（四个浮点数）。不沿用板载 QMI8658A 的单位或专用接口。SDK 未定义物理量换算映射，也未提供采样计数；总线读取成功不能证明传感器内部数据仍在更新。网页每次等结果后间隔 200 ms 再读，1.5 秒无有效反馈即清空实时数值；离开页面暂停采集。三维模型复用板载 IMU 绘制代码，直接使用设备四元数，显示横滚、俯仰和相对航向，并支持航向归零。等待回复期间保留上一帧，不清空闪烁；反馈过期时冻结模型并清空数值。六轴航向为相对值，会漂移。
+
+协议来源：[上游 Python IMU SDK](https://github.com/ftservo/FTServo_Python/blob/main/scservo_sdk/imu.py)，核对的 blob 为 `2028869faa4bb9e52b688cc8e1089a73bd0c91ef`。读取 56–78 寄存器，ID 位于 5，EEPROM 锁位于 55。加速度/角速度采用符号幅值，四元数 XYZ 为 binary16，W 取非负平方根（XYZ 平方和超过 1 时取 0），与 SDK 一致。
 
 <!-- COMMAND_TABLES -->
 
@@ -243,6 +252,8 @@ T=723/732 不再返回逐次读取的 position_status、speed_status，保留合
 | 726 | 步进驱动输出开关 | `{"T":726,"id":1,"enable":0}` | enable=0 失能，1 使能。 |
 | 730 | 编码器位置基准 | `{"T":730,"id":1,"pos":0}` | pos=0–65534；当前位置基准写入设备，不产生运动。 |
 | 732 | 编码器位置与速度 | `{"T":732,"id":1}` | 返回 pos/speed；每圈 4096 计数，多圈位置 0–65534，掉电不保留累计圈数。 |
+| 750 | TTL 6DOF IMU 修改 ID | `{"T":750,"id":200,"new_id":201}` | id/new_id 为不同的 0–253 整数。逐个接入，拒绝已占用 ID；解锁、写入、读回并重新锁定。失败后先扫描，不自动重试。 |
+| 751 | TTL 6DOF IMU 反馈 | `{"T":751,"id":200}` | id=0–253；返回 accel_raw/gyro_raw（符号幅值解码，原始计数）、quaternion_xyzw（半精度解码，W 取非负根）。SDK 未提供物理单位映射或采样计数。六轴航向会漂移。 |
 
 ## 板载惯性传感器
 

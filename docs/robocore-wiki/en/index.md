@@ -30,3 +30,5 @@ See [power and connectors](hardware.md) before wiring.
 [Example download](../../../assets/files/robocore-s3/examples.zip){ .md-button }
 
 Sources: [firmware](https://github.com/LygionOrganization/robocore_s3), [TTL SDK](https://github.com/LygionOrganization/lygion_devs_cpp), [wiki](https://github.com/LygionOrganization/lygion-wiki).
+
+[TTL 6DOF IMU: live feedback and ID configuration](json-api.md#ttl-6dof-imu)

@@ -108,7 +108,7 @@ Start with the [English Arduino guide](https://wiki.lygion.ai/en/reference/bus-d
 | --- | --- |
 | Controller | ESP32-S3-WROOM-1U-MCR8N8; 8 MB flash, 8 MB PSRAM |
 | Power input | 5–48V through the XT30 power contacts of CAN 2+2 |
-| Servo/device bus | 5264-3P single-wire TTL and XH2.54-4P RS485 share IO4 TX / IO5 RX |
+| Bus-device interface | 5264-3P single-wire TTL and XH2.54-4P RS485 share IO4 TX / IO5 RX |
 | External communication | CAN/RS485 switch selects CAN 2+2 or GH1.25-5P; both use IO13 RX / IO14 TX |
 | Board interconnect | GH1.25-3P for board-to-board TTL communication and power decoupling |
 | USB | Type-C UART for serial download/debugging; Type-C USB for native USB communication |
@@ -118,7 +118,7 @@ Start with the [English Arduino guide](https://wiki.lygion.ai/en/reference/bus-d
 
 **Match the supply voltage to every powered bus device.** A 48V-capable controller does not make a low-voltage servo compatible with 48V. USB alone does not provide actuator power.
 
-External RS485 on IO13/IO14 is independent of the servo bus on IO4/IO5. Bus-device RS485 and TTL share one UART. The CAN/RS485 switch selects the hardware path; your firmware must use the matching protocol. See the [hardware guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/hardware/) before wiring.
+External RS485 on IO13/IO14 is independent of the bus-device interface on IO4/IO5. Bus-device RS485 and TTL share one UART. The CAN/RS485 switch selects the hardware path; your firmware must use the matching protocol. See the [hardware guide](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/hardware/) before wiring.
 
 ## Repository guide
 

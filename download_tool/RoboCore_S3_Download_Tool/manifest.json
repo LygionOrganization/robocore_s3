@@ -1,6 +1,6 @@
 {
   "package": "RoboCore_S3_Download_Tool",
-  "built_at": "2026-10-18T19:13:32+08:00",
+  "built_at": "2026-10-23T16:39:42+08:00",
   "supported_boards": [
     "RoboCore S3",
     "Robot Driver with ESP32S3 Lite"
@@ -8,15 +8,15 @@
   "environment": "esp32-s3-devkitc-1-n8r8",
   "flash_size": "8MB",
   "hardware_validated": false,
-  "source_commit": "50d24f290d13e7aeac4a7becba077a9a54139962",
+  "source_commit": "8b1327d18432b566c70d0f7782f6a93a00fc0920",
   "working_tree_dirty": true,
-  "source_tree_sha256": "33e5f58e035a7255db1000fbced81d26a85e790e0dfa808bc300efe5f56199d2",
+  "source_tree_sha256": "2eba95667da4bb976b7f4a413de76d0f9e8b37dc41be488c683ed6850f83f1a4",
   "source_files": {
     "src/Arm_page.h": "23400a1981a4fe8a18bdfa0586464a7d9475d8cf4975ccaa78cefb4ba345ff2d",
     "src/BodyCtrl.cpp": "3067c5931ef637e4a961be597571bde573dbb191e0588d21c76b2f384e503c54",
     "src/BodyCtrl.h": "32e491e30b709b3952659bfb5193d34f0653dd9ed231bdd4126cf9cf9d1242c1",
-    "src/BusDevices.cpp": "bebb30fba59de412dca0b6f6d676cb73b973d5fdf478db75b2a3d658a69181dc",
-    "src/BusDevices.h": "0f3ff2b9bd48de0beaffd1ad415f746db934db9fe6df1390a146b0079d37d9fd",
+    "src/BusDevices.cpp": "52a91be3f29a518bf7c53621dbad58f2b11ed864630ac3b661ecbd1701c56701",
+    "src/BusDevices.h": "d2924349a52c30dbaa32db13f38246f2a6ec6b32b6bb8982110ce7b8e5914473",
     "src/ButtonUI.h": "831903219a9b832eba68a65068aaa421c96aee4429b8c80ddc04228eb93edf4d",
     "src/Can.h": "b9fcc1055a07413a5b7c95e96d19dcaea01d03137b80f1a57e0442fda0a105a1",
     "src/Config.h": "cd90cc6a35d1518b1d421fa840efd1e5328b4c513f25d5ad550f44dad28a720c",
@@ -24,14 +24,15 @@
     "src/FilesCtrl.h": "321c7d2c736ccb8b39eb8476d1f15dced8b8ea2303f16ec8249dacbe4f95f464",
     "src/jointsCtrl.cpp": "1431269525a2aca31a00f61d7a8f3b4ecf62c9dced5dfcb1bbc736b9cdf41bb2",
     "src/jointsCtrl.h": "c3c8af2bef664b559b0d97dc7d065c619664b925a26ba83f7289bba59aa9ad40",
-    "src/main.cpp": "a4fd81554908081d9fc84bd3be3afe464909ccf4914ce5da0a883246b0fbe75f",
+    "src/main.cpp": "73024ccd57e7e291f091dcd8f3d9bcedeb9006f995b04dee31b024f0d7d96fa2",
     "src/MissionStorage.h": "cc619d09020b516188bedae45d391cd5eba22ed1196b2f90e9f0c0581e0e1f1b",
     "src/RGBLight.cpp": "633ef2038823886615c8d942572a89d44e9fc416a3ceff4d6ae8f3763b6b63be",
     "src/RGBLight.h": "f5cde336e75f5101de4fd900bfbf7ac12b46754d03d74558f7e521e8689b00c0",
     "src/ScreenCtrl.cpp": "9211a320930a12181cebafd879ea288b7d3c8fd60f66cb83d454cf0bc55f7f93",
     "src/ScreenCtrl.h": "c1b4e73da7459558bab3bb65ff411b5468861cd317b6c31eb7f79778081c6793",
     "src/src.ino": "5cef6c5ff273e59d1bcbf0b3352415f3bfe3a597f425614c4ad8e212825019d1",
-    "src/Web_page.h": "33dd43af5da1938e032c6144eac91c820b48ea376b55ccdb0fa30d75202e20f5",
+    "src/TtlImu.h": "1e60377eb1d5ebdebbf12fef3c692c78e01eb643a34656d8b3d025eba0933189",
+    "src/Web_page.h": "244dc96c49ffc3c7b57e19ddcce4643868fd7df8f7bd0260a7d1848e3a9af510",
     "src/Wireless.cpp": "c89c9d0067f9cfa4e2c4529f4b3080269b0c7a5e5ae088b7d29239cd3c295b53",
     "src/Wireless.h": "9f44e68d7487911126b4b829b107126187d0aa94f13de6250b721beb555f6cad",
     "include/BusGuard.h": "de8a874e3309b5e1dac544217810b5404d73e61a9bbcf5aa71929101fc4800a9",
@@ -85,8 +86,8 @@
     "lib/ModbusRtu/src/Rtu.h": "2f82ad8a52843b7efae2aee4bcfe47c211437d5ff41fa8a0bafd0e3232a82799",
     "lib/RoboCoreSupport/library.properties": "7df93b41e191f9955c9063a7da352219304cc46df28ab724cbc76552438aae97",
     "lib/RoboCoreSupport/src/OptionalQMI8658.h": "20327bc0f9f0053c86496e8e45a2d17a11abea2c298bb5b205d9f81a43e4b41d",
-    "web/imu-view.js": "55c4f7464cd47961f75ff03767f85e7771880b4acbbe5bcf24f73e94e84d982e",
-    "web/index.html": "814b8c2d1564dfbdaf4c01cb40c6954771e82045cd1305f7eabe9431576cf060",
+    "web/imu-view.js": "2f984ad9a0e2d790b99a3a860420363ab297fc90f134562e145e9ddb48b0cae7",
+    "web/index.html": "d4fd1221e1e40249195ce0389fd72612be57edc2f9801a774108869d3429242a",
     "web/json-tools.js": "46332f7237aea88acc3447709e8ba1aabd33d54158475564e9d285afb0725689",
     "platformio.ini": "d4765d520cad9921015a9c4035e3c9d1ceeaf7f1cf02b032fbbbcd69e3b84839",
     "tools/embed_web.py": "c82819052eb9f560c69efee898069cf5cfa8ba57d7e506e1c66c487bbb954463",
@@ -151,8 +152,8 @@
       "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
     },
     "bin/firmware.bin": {
-      "bytes": 1405488,
-      "sha256": "b84c5e4c83cd5c32c77a2db7bc648eeb800034d25140e05d871cf6e01389a4b5"
+      "bytes": 1414608,
+      "sha256": "118e45a2e9d5c07ce7415c8a4f623dbed37a4e6e31cbbc0b64fd2b7e98f19190"
     },
     "flash_download_tool_3.9.9_R2.exe": {
       "bytes": 25477017,

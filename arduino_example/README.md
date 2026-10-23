@@ -1,77 +1,78 @@
-# RoboCore S3 Arduino 单元例程
+# RoboCore S3 Arduino Examples
 
-每个目录是独立 Arduino 工程。**上传单元例程会替换出厂完整固件**，不会同时保留网页控制台。恢复完整功能请重新上传本仓库 PlatformIO 工程或使用匹配版本的出厂恢复包。
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-## Arduino IDE 准备
+Each folder is a standalone Arduino project. **Uploading an example replaces the complete factory firmware**; it does not preserve the web console. Restore the complete firmware by uploading this repository's PlatformIO project or the matching factory recovery package.
 
-1. 安装 Arduino IDE 2，在开发板管理器安装 **esp32 by Espressif Systems 3.3.0**。
-2. 开发板选择 **ESP32S3 Dev Module**；Flash Size 8MB、PSRAM OPI PSRAM。除 USB_CDC_JSON 外，USB CDC On Boot 选择 **Disabled**，数据线保持连接 **Type-C UART**，上传与串口反馈使用同一个接口。仅 USB_CDC_JSON 选择 USB Mode **USB-OTG (TinyUSB)**、USB CDC On Boot **Enabled** 并使用 Type-C USB。
-3. 在库管理器安装下表依赖。`lygion_devs` 和 `RoboCoreSupport` 是本仓库 `lib` 下的文件夹，将整个目录复制到 Arduino sketchbook 的 `libraries` 目录，再重启 IDE。SDK 也可从 [LygionOrganization/lygion_devs_cpp](https://github.com/LygionOrganization/lygion_devs_cpp) 获取；例程以本仓库附带版本为准。
-4. 打开目录内同名 `.ino`，编译、上传。串口监视器选择 Type-C UART 对应端口，设为 **115200**。普通例程显式使用 Serial0，不受 Serial 的 USB 映射影响，无需更换接线。USB_CDC_JSON 例程单独使用原生 USB CDC，其波特率为虚拟参数。
-5. 舵机、电机例程启动时不会主动移动。按串口提示输入单个字符触发动作。确认额定供电与机械行程后再执行。
+## Arduino IDE setup
 
-RoboCore S3 输入 5–48V，但总线动力电压等于输入电压。所有共电设备必须支持所用电压。GH1.25-3P 用于板间 TTL 通信、供电解耦。
+1. Install Arduino IDE 2 and **esp32 by Espressif Systems 3.3.0** through Boards Manager.
+2. Select **ESP32S3 Dev Module**, Flash Size **8MB**, and PSRAM **OPI PSRAM**. For all examples except `USB_CDC_JSON`, set USB CDC On Boot to **Disabled**, connect **Type-C UART**, and use that port for upload and serial output. For `USB_CDC_JSON`, select USB Mode **USB-OTG (TinyUSB)**, enable USB CDC On Boot, and use Type-C USB.
+3. Install the dependencies in the table below. `lygion_devs` and `RoboCoreSupport` are folders under this repository's `lib`; copy each whole folder into the Arduino sketchbook's `libraries` directory, then restart the IDE. The SDK is also available from [LygionOrganization/lygion_devs_cpp](https://github.com/LygionOrganization/lygion_devs_cpp); these examples use the version bundled here.
+4. Open the `.ino` file matching the folder name, then compile and upload. Set the Serial Monitor to **115200** on the Type-C UART port. Standard examples explicitly use Serial0 and are not affected by Serial's USB mapping. `USB_CDC_JSON` uses native USB CDC and its baud rate is a virtual parameter.
+5. Servo and motor examples do not move on startup. Enter the character shown in the serial prompt to trigger an action. Check rated supply voltage and mechanical travel first.
 
-## 例程目录与依赖
+RoboCore S3 accepts 5–48V, and bus power equals the board input voltage. Every device sharing that power must support the selected voltage. GH1.25-3P is for board-to-board TTL communication and power decoupling.
 
-| 目录 | 功能 | 额外依赖 |
+## Examples and dependencies
+
+| Folder | Function | Additional dependencies |
 | --- | --- | --- |
-| SCS_Servo | SCS 位置、反馈、失能 | FTServo 2.0.0 |
-| HLS_Servo | HLS 位置、电流限制、反馈 | FTServo 2.0.0 |
-| STS_Servo | STS 位置、反馈、失能 | FTServo 2.0.0 |
-| SMS_Servo | SMS 位置、反馈、失能 | FTServo 2.0.0 |
-| Bus_Scan | 扫描当前波特率下的 ID | lygion_devs |
-| TTL_Node | PWM、RGB、S.BUS、修改 ID | lygion_devs |
-| TTL_Stepper | 位置/连续/从动模式、使能、运动、设置当前位置、反馈 | lygion_devs |
-| TTL_Encoder | E02 位置、速度、基准校准 | lygion_devs |
-| CAN_Communication | CAN 档，CAN 2+2，RX13/TX14，500 kbps | 核心内置 TWAI |
-| RS485_Communication | 485 档，GH1.25-5P，RX13/TX14，115200 8N1 | 核心内置 HardwareSerial |
-| User_Interface_Module_A | 五向按键、蜂鸣器、128×32 OLED 联合演示 | Adafruit SSD1306、GFX Library、BusIO |
-| OLED | 128×32 OLED 显示 | Adafruit SSD1306、Adafruit GFX Library（及其提示的 Adafruit BusIO） |
-| QMI8658A | 板载六轴传感器读取 | RoboCoreSupport，Wire 随核心提供 |
-| HTTP_JSON | HTTP JSON 请求/响应 | ArduinoJson 7.x，WebServer/WiFi 内置 |
-| WebSocket_JSON | WebSocket JSON 请求/响应 | ArduinoJson 7.x、ESP32Async/AsyncTCP、ESP32Async/ESPAsyncWebServer |
-| USB_CDC_JSON | EVENT 接收、定长组包、只保留最新命令 | ArduinoJson 7.x；USB/USBCDC 内置 |
-| ESP_NOW_JSON | 两块板间 JSON 数据包 | ArduinoJson 7.x；esp_now/WiFi 内置 |
-| RGB_Buzzer | 外接 GPIO26 WS2812 灯与 UI Module (A) 蜂鸣器（非板载资源） | Adafruit NeoPixel |
+| SCS_Servo | SCS position, feedback, torque disable | FTServo 2.0.0 |
+| HLS_Servo | HLS position, current limit, feedback | FTServo 2.0.0 |
+| STS_Servo | STS position, feedback, torque disable | FTServo 2.0.0 |
+| SMS_Servo | SMS position, feedback, torque disable | FTServo 2.0.0 |
+| Bus_Scan | Scan IDs at the current baud rate | lygion_devs |
+| TTL_Node | PWM, RGB, S.BUS, change ID | lygion_devs |
+| TTL_Stepper | Position/continuous/follower modes, enable, motion, set current position, feedback | lygion_devs |
+| TTL_Encoder | E02 position, speed, reference calibration | lygion_devs |
+| CAN_Communication | CAN mode, CAN 2+2, RX13/TX14, 500 kbps | Built-in TWAI |
+| RS485_Communication | RS485 mode, GH1.25-5P, RX13/TX14, 115200 8N1 | Built-in HardwareSerial |
+| User_Interface_Module_A | Five-way keys, buzzer, 128×32 OLED demo | Adafruit SSD1306, GFX Library, BusIO |
+| OLED | 128×32 OLED display | Adafruit SSD1306, Adafruit GFX Library (and Adafruit BusIO if prompted) |
+| QMI8658A | Onboard six-axis sensor | RoboCoreSupport; Wire is included with the core |
+| HTTP_JSON | HTTP JSON request/response | ArduinoJson 7.x; built-in WebServer/WiFi |
+| WebSocket_JSON | WebSocket JSON request/response | ArduinoJson 7.x, ESP32Async/AsyncTCP, ESP32Async/ESPAsyncWebServer |
+| USB_CDC_JSON | Event-based receive, fixed-size framing, latest command wins | ArduinoJson 7.x; built-in USB/USBCDC |
+| ESP_NOW_JSON | JSON packets between two boards | ArduinoJson 7.x; built-in esp_now/WiFi |
+| RGB_Buzzer | External GPIO26 WS2812 strip and UI Module (A) buzzer (not onboard hardware) | Adafruit NeoPixel |
 
-配套依赖版本：ArduinoJson 7.4.3、AsyncTCP 3.5.0、ESPAsyncWebServer 3.12.1、Adafruit NeoPixel 1.15.5、GFX 1.12.6、SSD1306 2.5.17。安装依赖同名库时注意作者，避免误装旧的 AsyncWebServer 分支。
+Dependency versions: ArduinoJson 7.4.3, AsyncTCP 3.5.0, ESPAsyncWebServer 3.12.1, Adafruit NeoPixel 1.15.5, GFX 1.12.6, SSD1306 2.5.17. Check library authors when installing similarly named libraries; avoid outdated AsyncWebServer forks.
 
-## 引脚
+## Pins
 
-RoboCore S3 GPIO：Serial1 RX=5 / TX=4，I²C SDA=6 / SCL=7，CAN TX=14 / RX=13；UI Module (A) 蜂鸣器=21。OLED 为 0x3C；QMI8658A 自动尝试 0x6A、0x6B。传感器通信异常时报告错误并继续运行。
+RoboCore S3 GPIO: Serial1 RX=5/TX=4, I²C SDA=6/SCL=7, CAN TX=14/RX=13; UI Module (A) buzzer=21. OLED address is 0x3C; QMI8658A tries 0x6A and 0x6B automatically. Sensor communication errors are reported without stopping the sketch.
 
-## 单元通信协议与完整固件不同
+## Standalone examples use a different protocol from the complete firmware
 
-`HTTP_JSON`、`WebSocket_JSON`、`USB_CDC_JSON` 仅演示一个 RAM 数值：`{"T":1,"value":42}` 写入，`{"T":2}` 读取，不控制电机。HTTP/WS 例程建立热点 `RoboCoreDemo` / `12345678`，分别使用 `http://192.168.4.1/api/cmd` 和 `ws://192.168.4.1/ws`。USB 每条 JSON 后发送换行符，并持续读取回复。
+`HTTP_JSON`, `WebSocket_JSON`, and `USB_CDC_JSON` demonstrate storing one RAM value: `{"T":1,"value":42}` writes it and `{"T":2}` reads it. They do not control motors. HTTP/WS examples create the `RoboCoreDemo` / `12345678` access point and use `http://192.168.4.1/api/cmd` and `ws://192.168.4.1/ws`. For USB, end each JSON line with a newline and keep reading the response.
 
-完整出厂固件使用 `T=700…740` 等指令，不要把单元例程的 `T=1/2` 当作出厂 API。完整 API 见 [RoboCore 接口](../docs/ROBOCORE_API.md)。
+The complete factory firmware uses commands such as `T=700…740`; do not use the standalone examples' `T=1/2` as the factory API. See the [RoboCore API](../docs/ROBOCORE_API.md).
 
-ESP-NOW 例程需两块板同信道，修改 `peerMac` 为对端 STA MAC。发送帧为 250 字节、末尾补零，与本仓库完整固件的 JSON 帧一致；若对接完整固件，还需在完整固件配置相应接收模式/可信 MAC（T=411、414），并保持 Wi-Fi 信道一致。
+The ESP-NOW example requires both boards on the same channel. Set `peerMac` to the other board's STA MAC. Frames are 250 bytes and zero-padded to match the complete firmware's JSON frame. To connect to the complete firmware, configure its receive mode/trusted MAC (T=411, 414) and keep the Wi-Fi channel the same.
 
-## 步进驱动说明
+## Stepper driver notes
 
-`0`/`1` 命令可在一次上电期间切换位置与速度模式，无需重启；只有更改相位配置才需要重启。模式更改会关闭输出，用 `e` 重新使能。`2` 设置从动模式及示例主设备 ID=2，需按产品教程连接 EDS。速度、电流、加速度是寄存器单位，先检查设备参数与电机额定电流。`s` 只用于连续转动模式的速度归零，`x` 为失能。
+Commands `0` and `1` switch between position and speed modes during one power session without a restart; only a phase configuration change requires restart. A mode change disables output; send `e` to enable it again. Command `2` sets follower mode with example primary ID 2; connect the EDS as shown in its product tutorial. Speed, current and acceleration use register units; check device settings and motor rated current first. `s` sets speed to zero only in continuous-rotation mode; `x` disables output.
 
-## 放入 PlatformIO
+## Use an example with PlatformIO
 
-这些例程已包含 `#include <Arduino.h>`。将单个 `.ino` 内容复制为独立 PIO 项目的 `src/main.cpp`，按本仓库 `platformio.ini` 配置 ESP32-S3 和依赖；不要把多个例程放进同一个 `src`，否则 `setup/loop` 会重复定义。也不要把单元例程加入完整固件的 `src`。
+Each example already includes `#include <Arduino.h>`. Copy one `.ino` into `src/main.cpp` in a separate PlatformIO project and configure ESP32-S3 and dependencies as in this repository's `platformio.ini`. Do not put multiple examples in one `src` directory because their `setup`/`loop` functions conflict. Do not add standalone examples to the complete firmware's `src` directory.
 
-如果直接复制完整 `platformio.ini`，也要复制 `tools/pio_python_path.py` 到新项目相同路径；该脚本修正此平台版本在 Windows 下查找 Python 工具的路径。Arduino IDE 不需要该脚本。
+If you copy the complete `platformio.ini`, also copy `tools/pio_python_path.py` to the same relative path in the new project. It fixes the platform's Python tool lookup path on Windows. Arduino IDE does not need this script.
 
+## External communications and bus-device interface
 
-## 外部通信与舵机总线
+The CAN/RS485 switch only selects IO13 (RX)/IO14 (TX): CAN mode uses CAN 2+2, and RS485 mode uses GH1.25-5P. These external protocols cannot use those pins at the same time. Stop communication before switching and run the example for the selected protocol. `RS485_Communication` uses UART2; the onboard circuit controls transmit/receive direction, so no DE GPIO is needed. It demonstrates byte communication and is not a factory JSON gateway.
 
-CAN/RS485 开关仅切换 IO13（RX）/IO14（TX）：CAN 档连接 CAN 2+2，485 档连接 GH1.25-5P。两种外部通信不能同时占用这组引脚；切换前停止通信，按目标协议运行对应例程。RS485_Communication 使用 UART2，板上电路自动控制收发方向，无需额外 DE GPIO；它演示字节收发，不是出厂 JSON 网关。
-
-XH2.54-4P 舵机 RS485 与 5264-3P 单线 TTL 共用 UART1（RX5/TX4），波特率和发送数据相同，不能作为两条独立串口使用。外部 UART2 RS485 与这一路不冲突。CAN 板载 120Ω 终端电阻，多节点接线需核对整条总线的终端配置。
+XH2.54-4P bus-device RS485 and 5264-3P single-wire TTL share UART1 (RX5/TX4), including the baud rate and transmitted data; they are not two independent serial ports. External UART2 RS485 does not conflict with this interface. CAN has an onboard 120Ω termination resistor; check termination across the full bus when connecting multiple nodes.
 
 ## User Interface Module (A)
 
-断电后将模块连接到 PH1.25-10P 扩展口。引脚：上=10、下=11、左=12、右=9、确认=2，低电平有效；蜂鸣器=21；OLED SDA=6、SCL=7，地址 0x3C，128×32。按键去抖后在串口和 OLED 显示按键名称，并短鸣一次；长按不会持续触发。OLED 缺失时按键与蜂鸣器仍可运行。此例程不发送电机指令。OLED 与板载 IMU 共用 I²C。
+With power disconnected, connect the module to the PH1.25-10P expansion port. Pins: Up=10, Down=11, Left=12, Right=9, OK=2 (active low); buzzer=21; OLED SDA=6/SCL=7, address 0x3C, 128×32. After debounce, key names appear on the serial monitor and OLED and trigger one short beep; holding a key does not repeat. Keys and buzzer still work when the OLED is absent. This example sends no motor commands. The OLED shares I²C with the onboard IMU.
 
-OLED、按键和蜂鸣器来自外接 UI Module (A)，不是 RoboCore S3 板载器件。RGB_Buzzer 的 WS2812 功能只用于另行接线的灯带；GPIO26 不在 PH1.25-10P 接口上，不能将该例程当作本产品的板载灯演示。
+The OLED, buttons and buzzer belong to the external UI Module (A), not the RoboCore S3 board. The WS2812 feature in `RGB_Buzzer` is for a separately wired light strip; GPIO26 is not on the PH1.25-10P connector, so this is not an onboard-light demo.
 
-## 每个例程的详细教程
+## Detailed tutorials
 
-每篇包含接线、依赖安装、上传步骤、预期结果和完整代码：[中文教程](https://wiki.lygion.ai/reference/bus-devices/robocore-s3/arduino/) / [English tutorials](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/arduino/)。
+Each tutorial includes wiring, dependency installation, upload steps, expected results and complete code: [English tutorials](https://wiki.lygion.ai/en/reference/bus-devices/robocore-s3/arduino/) / [中文教程](https://wiki.lygion.ai/reference/bus-devices/robocore-s3/arduino/).

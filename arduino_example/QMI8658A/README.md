@@ -1,22 +1,24 @@
-# QMI8658A 独立例程：QMI-FINAL-1
+# QMI8658A Standalone Example: QMI-FINAL-1
 
-## 使用
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-1. 打开本目录的 `QMI8658A.ino`。Arduino 开发板管理器安装 **esp32 by Espressif Systems 3.3.0**，选择 **ESP32S3 Dev Module**。
-2. 设置 **USB CDC On Boot = Disabled**，连接 **Type-C UART** 上传，串口监视器选择 **115200**。上传会替换板上当前程序。
-3. 无需安装额外依赖库，不使用 RoboCoreSupport；依赖说明也已用英语写在 ino 文件顶部。
-4. 启动显示 `QMI-FINAL-1` 和 `IMU ready`。改变姿态时加速度变化，旋转时角速度变化；静止时加速度合量应接近 1 g。
+## Setup
 
-## 采样方式
+1. Open `QMI8658A.ino` in this folder. Install **esp32 by Espressif Systems 3.3.0** in Arduino Boards Manager and select **ESP32S3 Dev Module**.
+2. Set **USB CDC On Boot = Disabled**, upload through **Type-C UART**, and set the Serial Monitor to **115200**. Uploading replaces the program currently on the board.
+3. No extra library is required; this example does not use RoboCoreSupport. Dependency instructions are also provided in English at the top of the `.ino` file.
+4. On startup, the monitor shows `QMI-FINAL-1` and `IMU ready`. Acceleration changes when the board's pose changes, angular velocity changes when it rotates, and the acceleration magnitude should be near 1 g while still.
 
-例程使用、400 kHz I2C、repeated START、14 字节连续读取和 112.1 Hz 传感器输出率。量程为 ±8 g、±512 °/s。SDA=GPIO6，SCL=GPIO7，自动识别 0x6A / 0x6B。
+## Sampling
 
-去掉寄存器转储、串口命令、原始数据长日志及 350 ms 重试循环。每约 2 ms 尝试检查新样本，串口每 200 ms 显示最新结果；打印频率不是采样频率。读取前后比较传感器计数，丢弃读取期间发生更新的结果。I2C 出错或没有新样本时立即结束本次尝试，不覆盖上一份数据；连续 100 ms 没有新数据时显示提示。
+The example uses 400 kHz I²C, repeated START, a 14-byte continuous read, and a sensor output rate of 112.1 Hz. Ranges are ±8 g and ±512 °/s. SDA=GPIO6, SCL=GPIO7; the sensor is detected at 0x6A or 0x6B.
 
-`readImu(sample)` 返回 true 时才处理新数据。示例在此位置留有控制代码入口。数据单位为 g、°/s、°C，`count` 是 24 位传感器样本计数，`receivedUs` 是主控收到数据的时间。可用 `(新count - 旧count) & 0xFFFFFF` 除以 112.1 估算传感器样本间隔；首次数据需单独初始化。
+Register dumps, serial commands, long raw-data logs and the 350 ms retry loop have been removed. The sketch checks for a new sample about every 2 ms and prints the latest result every 200 ms; print rate is not the sample rate. It compares the sensor counter before and after reading and discards data if the sensor updated during the read. An I²C error or no new sample ends the attempt immediately and leaves the previous data untouched. A notice appears after 100 ms without new data.
 
-## 用于后续控制开发
+Process data only when `readImu(sample)` returns true. A control-code entry point is left there. Units are g, °/s and °C; `count` is the 24-bit sensor sample counter and `receivedUs` is the time the controller received the data. Estimate the sensor interval with `(newCount - oldCount) & 0xFFFFFF` divided by 112.1; initialize the first sample separately.
 
-- `PRINT_IMU=false` 可关闭周期显示。串口缓冲不足时跳过打印，避免等待发送；I2C 仍是同步操作，异常时受 20 ms 超时限制，不能视为硬实时接口。
-- 当前默认 ODR 保持实测通过的 112.1 Hz，并不承诺每一帧都能读取。更高 ODR、实际读取频率和控制周期应在板上进一步验证。
-- 控制程序需要自行处理失去新数据的情况，不能继续把缓存数据当作新反馈。平衡车还需做陀螺仪零偏校准和姿态融合，本例不自动校准或控制电机。
+## For further control development
+
+- Set `PRINT_IMU=false` to disable periodic output. Printing is skipped when the serial buffer is too small, avoiding waits. I²C remains synchronous and is limited by a 20 ms timeout on errors; this is not a hard real-time interface.
+- The default ODR remains the measured 112.1 Hz and does not guarantee that every frame will be read. Validate higher ODRs, actual read frequency and the control period on the board.
+- Control software must handle missing fresh data and must not treat cached samples as new feedback. A balancing robot also needs gyroscope bias calibration and sensor fusion; this example does not calibrate automatically or control motors.

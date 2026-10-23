@@ -229,7 +229,7 @@ void setupHttpRoutes() {
     jsonFeedback["min_free_heap"] = ESP.getMinFreeHeap();
     jsonFeedback["reset_reason"] = int(esp_reset_reason());
     jsonFeedback["sdk"]    = ESP.getSdkVersion();
-    jsonFeedback["fw_ver"] = "robocore-1.3.8";
+    jsonFeedback["fw_ver"] = "robocore-1.3.10";
     jsonFeedback["product"] = "RoboCore S3 / RD Lite";
     jsonFeedback["imu_present"] = busDevices.imuPresent();
     jsonFeedback["mission_running"] = missionRunning.load();
